@@ -1,0 +1,816 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+CAUTION: Do not modify this file unless you know what you are doing.
+         Unexpected results may occur if the code is changed deliberately.
+-->
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,0" last-zoom="0.4"
+	 default-schema="av" default-owner="postgres">
+<role name="avanty"
+      login="true"
+      encrypted="true"
+      password="123">
+	<comment><![CDATA[Low-security user for operation of the avanty system.]]></comment>
+</role>
+
+<database name="avanty" encoding="UTF8" lc-collate="es_MX" lc-ctype="es_MX">
+</database>
+
+<schema name="public" fill-color="#e1e1e1" sql-disabled="true">
+</schema>
+
+<schema name="av" fill-color="#e1e1e1">
+	<role name="avanty"/>
+</schema>
+
+<domain name="uid" not-null="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Special type for user id's to be automatically recognized by the rpc system.]]></comment>
+		<type name="smallserial" length="0"/>
+</domain>
+
+<domain name="ts" not-null="false">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[just a short name for " timestamp with time zone"]]></comment>
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+</domain>
+
+<extension name="pgcrypto">
+	<schema name="av"/>
+	<comment><![CDATA[Cryptographic routines.]]></comment>
+</extension>
+
+<function name="gen_random_bytes"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<language name="c" sql-disabled="true"/>
+	<return-type>
+	<type name="bytea" length="0"/>
+	</return-type>
+	<parameter name="num_bytes" in="true">
+		<type name="int4" length="0"/>
+	</parameter>
+	<definition library="pgcrypto" symbol="pg_random_bytes"/>
+</function>
+
+<table name="user_cashier" hide-ext-attribs="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[existence table to report if a user is of type cashier.]]></comment>
+	<position x="640" y="1600"/>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="user_cashier_pk" index="1"/>
+		<object name="user_fk" index="0"/>
+	</customidxs>
+</table>
+
+<table name="user" hide-ext-attribs="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[user accounts]]></comment>
+	<position x="40" y="1520"/>
+	<column name="user_id" not-null="true">
+		<type name="av.uid" length="0"/>
+		<comment><![CDATA[Independent ID for users, to allow for login name changes.]]></comment>
+	</column>
+	<column name="login" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[Handle specified by the user for credentials.]]></comment>
+	</column>
+	<column name="salt" not-null="true" default-value="encode(gen_random_bytes(64), 'hex')">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[Random per-user salt to make password hash cracking difficult.]]></comment>
+	</column>
+	<column name="password" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[Salted sha512 hash of user-provided password.]]></comment>
+	</column>
+	<column name="password_expiration">
+		<type name="av.ts" length="0" with-timezone="true"/>
+		<comment><![CDATA[Forces the user to set a new password upon login if the timestamp has expired.]]></comment>
+	</column>
+	<constraint name="user_pk" type="pk-constr" table="av.&quot;user&quot;">
+		<columns names="user_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="user_supervisor" hide-ext-attribs="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
+	<position x="640" y="1660"/>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="user_fk" index="0"/>
+		<object name="user_supervisor_pk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_supervisor_has_one_user" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.user_supervisor"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<table name="user_maintenance" hide-ext-attribs="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[existence table to report if a user is of type maintenance.]]></comment>
+	<position x="640" y="1720"/>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="user_fk" index="0"/>
+		<object name="user_maintenance_pk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_maintenance_has_one_user" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.user_maintenance"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="user_cashier_has_one_user" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.user_cashier"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<usertype name="user_activity_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[other activities may be added later]]></comment>
+	<enumeration values="login,logout"/>
+</usertype>
+
+<table name="user_activity">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
+	<position x="640" y="1440"/>
+	<column name="timestamp" not-null="true" default-value="NOW()">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[when the activity occurred]]></comment>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.user_activity_type" length="0"/>
+	</column>
+	<column name="signature" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[User activities may be printed as tickets, this is a validation hash for the ticket.]]></comment>
+	</column>
+	<column name="detail">
+		<type name="jsonb" length="0"/>
+		<comment><![CDATA[additional key/values for future flexibility]]></comment>
+	</column>
+	<constraint name="user_activity_pk" type="pk-constr" table="av.user_activity">
+		<columns names="timestamp" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="terminal_id" index="2"/>
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="terminal_fk" index="2"/>
+		<object name="user_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_has_many_user_activity" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.user_activity"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<table name="supervisor_challenge">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[We are keeping a registry of all challenges, for security audits.]]></comment>
+	<position x="980" y="1740"/>
+	<column name="expiration" not-null="true">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="string" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[A random-generated string that the supervisor must give to support.]]></comment>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="supervisor_challenge_pk" index="0"/>
+		<object name="user_supervisor_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_supervisor_has_many_supervisor_challenge" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.user_supervisor"
+	 dst-table="av.supervisor_challenge"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<usertype name="terminal_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="user_pos,boom_entry,boom_exit,tvm"/>
+</usertype>
+
+<table name="terminal">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<position x="60" y="1040"/>
+	<column name="terminal_id" not-null="true">
+		<type name="smallserial" length="0"/>
+	</column>
+	<column name="term_type" not-null="true">
+		<type name="av.terminal_type" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[what to show on the UI]]></comment>
+	</column>
+	<constraint name="terminal_pk" type="pk-constr" table="av.terminal">
+		<columns names="terminal_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<relationship name="terminal_has_many_user_activity" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.terminal"
+	 dst-table="av.user_activity"
+	 src-required="true" dst-required="false"/>
+
+<index name="user_login_uniq" table="av.&quot;user&quot;"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[logins must be unique.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="login"/>
+		</idxelement>
+</index>
+
+<usertype name="ticket_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="entry,exit,rent"/>
+</usertype>
+
+<table name="ticket">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[a printed ticket]]></comment>
+	<position x="820" y="420"/>
+	<column name="ticket_id" not-null="true">
+		<type name="serial" length="0"/>
+		<comment><![CDATA[Only the last digit is used in the printout.]]></comment>
+	</column>
+	<column name="timestamp" not-null="true" default-value="NOW()">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.ticket_type" length="0"/>
+	</column>
+	<column name="expiration_mins" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="signature" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[hash that validates the information contained in the ticket]]></comment>
+	</column>
+	<constraint name="ticket_pk" type="pk-constr" table="av.ticket">
+		<columns names="ticket_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="terminal_id" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="terminal_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="terminal_has_many_ticket" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.terminal"
+	 dst-table="av.ticket"
+	 src-required="true" dst-required="false"/>
+
+<usertype name="rate_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="regular,lost,rent"/>
+</usertype>
+
+<table name="rate">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<position x="820" y="960"/>
+	<column name="rate_id" not-null="true">
+		<type name="smallserial" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.rate_type" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[For UI purposes, for the rate selector.]]></comment>
+	</column>
+	<column name="script" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[a DSL to be executed to itemize the payment and generate a total.]]></comment>
+	</column>
+	<column name="description">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[documentation]]></comment>
+	</column>
+	<constraint name="rate_pk" type="pk-constr" table="av.rate">
+		<columns names="rate_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<table name="payment">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<position x="1240" y="580"/>
+	<column name="timestamp" not-null="true">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="amount" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[in cents]]></comment>
+	</column>
+	<column name="change" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[in cents]]></comment>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="rate_id" index="1"/>
+		<object name="ticket_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="payment_pk" index="0"/>
+		<object name="rate_fk" index="2"/>
+		<object name="ticket_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="payment_has_one_ticket" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.ticket"
+	 dst-table="av.payment"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="rate_has_many_payment" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.rate"
+	 dst-table="av.payment"
+	 src-required="true" dst-required="false"/>
+
+<usertype name="tender_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="coin,bill"/>
+</usertype>
+
+<table name="tender">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[catalog, describes a coin or a bill]]></comment>
+	<position x="1220" y="820"/>
+	<column name="tender_id" not-null="true">
+		<type name="smallserial" length="0"/>
+	</column>
+	<column name="denomination" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[in cents]]></comment>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.tender_type" length="0"/>
+	</column>
+	<constraint name="tender_pk" type="pk-constr" table="av.tender">
+		<columns names="tender_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<usertype name="exchange_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="received,change"/>
+</usertype>
+
+<table name="tender_exchange">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<position x="1680" y="680"/>
+	<column name="type" not-null="true">
+		<type name="av.exchange_type" length="0"/>
+	</column>
+	<column name="count" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[how many of this bill or coin]]></comment>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="tender_id" index="1"/>
+		<object name="ticket_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="payment_fk" index="2"/>
+		<object name="tender_exchange_pk" index="0"/>
+		<object name="tender_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="payment_has_many_tender_exchange" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.payment"
+	 dst-table="av.tender_exchange"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="tender_has_many_tender_exchange" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.tender"
+	 dst-table="av.tender_exchange"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<table name="owner">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[A person or company owning a vehicle]]></comment>
+	<position x="2260" y="1180"/>
+	<column name="owner_id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="name" not-null="true">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="address">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[all of the address, as an open field]]></comment>
+	</column>
+	<column name="fiscal_code">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="fiscal_address">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[open field]]></comment>
+	</column>
+	<column name="phone">
+		<type name="varchar" length="0"/>
+	</column>
+	<constraint name="owner_pk" type="pk-constr" table="av.owner">
+		<columns names="owner_id" ref-type="src-columns"/>
+	</constraint>
+</table>
+
+<usertype name="vehicle_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="motorcycle,compact,regular,light_truck,truck,special"/>
+</usertype>
+
+<table name="vehicle">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<position x="2600" y="980"/>
+	<column name="vehicle_id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="plate" not-null="true">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.vehicle_type" length="0"/>
+	</column>
+	<column name="make" not-null="true">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="model" not-null="true">
+		<type name="varchar" length="0"/>
+	</column>
+	<column name="year" not-null="true">
+		<type name="smallint" length="0"/>
+	</column>
+	<column name="color" not-null="true">
+		<type name="varchar" length="0"/>
+	</column>
+	<constraint name="vehicle_pk" type="pk-constr" table="av.vehicle">
+		<columns names="vehicle_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="owner_id" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="owner_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="owner_has_many_vehicle" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.owner"
+	 dst-table="av.vehicle"
+	 src-required="true" dst-required="false"/>
+
+<table name="rent">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[a car pension]]></comment>
+	<position x="2980" y="740"/>
+	<column name="rent_id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
+	<column name="expiration" not-null="true">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="is_cancelled" not-null="true">
+		<type name="bool" length="0"/>
+	</column>
+	<column name="last_in">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="last_out">
+		<type name="av.ts" length="0"/>
+	</column>
+	<constraint name="rent_pk" type="pk-constr" table="av.rent">
+		<columns names="rent_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="rate_id" index="2"/>
+		<object name="ticket_id" index="1"/>
+		<object name="vehicle_id" index="3"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="rate_fk" index="4"/>
+		<object name="rent_uq" index="2"/>
+		<object name="ticket_fk" index="1"/>
+		<object name="vehicle_fk" index="3"/>
+	</customidxs>
+</table>
+
+<relationship name="rent_has_one_ticket" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.ticket"
+	 dst-table="av.rent"
+	 src-required="true" dst-required="false">
+	<line>
+		<position x="2940" y="460"/>
+	</line>
+</relationship>
+
+<relationship name="vehicle_has_many_rent" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.vehicle"
+	 dst-table="av.rent"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="rate_has_many_rent" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.rate"
+	 dst-table="av.rent"
+	 src-required="true" dst-required="false"/>
+
+<usertype name="rent_operation_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="new,edit,renew,expired,cancelled,reactivated,rate_change"/>
+</usertype>
+
+<table name="rent_operation">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[history of operations regarding a rent account]]></comment>
+	<position x="2540" y="620"/>
+	<column name="timestamp" not-null="true">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.rent_operation_type" length="0"/>
+	</column>
+	<constraint name="rent_operation_pk" type="pk-constr" table="av.rent_operation">
+		<columns names="timestamp" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="rate_id" index="3"/>
+		<object name="rent_id" index="0"/>
+		<object name="ticket_id" index="2"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="payment_fk" index="3"/>
+		<object name="rate_fk" index="2"/>
+		<object name="rent_fk" index="1"/>
+		<object name="rent_operation_uq" index="4"/>
+	</customidxs>
+</table>
+
+<relationship name="rent_has_many_rent_operation" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.rent"
+	 dst-table="av.rent_operation"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="rate_has_many_rent_operation" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.rate"
+	 dst-table="av.rent_operation"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="rent_operation_has_one_payment" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.payment"
+	 dst-table="av.rent_operation"
+	 src-required="false" dst-required="false"/>
+
+<usertype name="rent_activity_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="in,out"/>
+</usertype>
+
+<table name="rent_activity">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[when a vehicle in rented parking left or came into the lot]]></comment>
+	<position x="3440" y="600"/>
+	<column name="timestamp" not-null="true" default-value="NOW()">
+		<type name="av.ts" length="0"/>
+	</column>
+	<column name="type" not-null="true">
+		<type name="av.rent_activity_type" length="0"/>
+	</column>
+	<constraint name="rent_activity_pk" type="pk-constr" table="av.rent_activity">
+		<columns names="timestamp" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="rent_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="rent_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="rent_has_many_rent_activity" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.rent"
+	 dst-table="av.rent_activity"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<table name="terminal_user">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[who is logged in in what terminal]]></comment>
+	<position x="640" y="1360"/>
+
+	<customidxs object-type="column">
+		<object name="terminal_id" index="0"/>
+		<object name="user_id" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="terminal_fk" index="2"/>
+		<object name="terminal_user_pk" index="0"/>
+		<object name="user_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_terminal_has_one_user" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.terminal_user"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="user_terminal_has_one_terminal" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.terminal"
+	 dst-table="av.terminal_user"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<permission>
+	<object name="avanty" type="database"/>
+	<roles names="avanty"/>
+	<privileges connect="true"/>
+</permission>
+</dbmodel>

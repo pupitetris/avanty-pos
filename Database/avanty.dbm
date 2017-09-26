@@ -3,8 +3,8 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,0" last-zoom="0.4"
-	 default-schema="av" default-owner="postgres">
+<dbmodel pgmodeler-ver="0.9.0" last-position="0,0" last-zoom="1"
+	 default-owner="postgres">
 <role name="avanty"
       login="true"
       encrypted="true"
@@ -65,23 +65,33 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type cashier.]]></comment>
-	<position x="640" y="1600"/>
+	<position x="640" y="1320"/>
+</table>
 
-	<customidxs object-type="column">
-		<object name="user_id" index="0"/>
-	</customidxs>
+<usertype name="charp_account_status" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="active,disabled,deleted"/>
+</usertype>
 
-	<customidxs object-type="constraint">
-		<object name="user_cashier_pk" index="1"/>
-		<object name="user_fk" index="0"/>
-	</customidxs>
+<usertype name="charp_error_code" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<enumeration values="USERUNK,PROCUNK,REQUNK,REPFAIL,ASSERT,USERPARMPERM,USERPERM,MAILFAIL,DATADUP,NOTFOUND,EXIT"/>
+</usertype>
+
+<table name="user_supervisor" hide-ext-attribs="true">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
+	<position x="640" y="1380"/>
 </table>
 
 <table name="user" hide-ext-attribs="true">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[user accounts]]></comment>
-	<position x="40" y="1520"/>
+	<position x="20" y="1220"/>
 	<column name="user_id" not-null="true">
 		<type name="av.uid" length="0"/>
 		<comment><![CDATA[Independent ID for users, to allow for login name changes.]]></comment>
@@ -102,43 +112,20 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="av.ts" length="0" with-timezone="true"/>
 		<comment><![CDATA[Forces the user to set a new password upon login if the timestamp has expired.]]></comment>
 	</column>
+	<column name="status" not-null="true">
+		<type name="av.charp_account_status" length="0"/>
+		<comment><![CDATA[only active users may run requests to the server]]></comment>
+	</column>
 	<constraint name="user_pk" type="pk-constr" table="av.&quot;user&quot;">
 		<columns names="user_id" ref-type="src-columns"/>
 	</constraint>
 </table>
 
-<table name="user_supervisor" hide-ext-attribs="true">
-	<schema name="av"/>
-	<role name="postgres"/>
-	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
-	<position x="640" y="1660"/>
-
-	<customidxs object-type="column">
-		<object name="user_id" index="0"/>
-	</customidxs>
-
-	<customidxs object-type="constraint">
-		<object name="user_fk" index="0"/>
-		<object name="user_supervisor_pk" index="1"/>
-	</customidxs>
-</table>
-
-<relationship name="user_supervisor_has_one_user" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
-	 dst-table="av.user_supervisor"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
-
 <table name="user_maintenance" hide-ext-attribs="true">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type maintenance.]]></comment>
-	<position x="640" y="1720"/>
+	<position x="640" y="1440"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -183,7 +170,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
-	<position x="640" y="1440"/>
+	<position x="640" y="1160"/>
 	<column name="timestamp" not-null="true" default-value="NOW()">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[when the activity occurred]]></comment>
@@ -229,7 +216,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[We are keeping a registry of all challenges, for security audits.]]></comment>
-	<position x="980" y="1740"/>
+	<position x="980" y="1460"/>
 	<column name="expiration" not-null="true">
 		<type name="av.ts" length="0"/>
 	</column>
@@ -248,17 +235,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 </table>
 
-<relationship name="user_supervisor_has_many_supervisor_challenge" type="rel1n"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.user_supervisor"
-	 dst-table="av.supervisor_challenge"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
-
 <usertype name="terminal_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
@@ -268,7 +244,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="terminal">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="60" y="1040"/>
+	<position x="60" y="760"/>
 	<column name="terminal_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -293,15 +269,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 dst-table="av.user_activity"
 	 src-required="true" dst-required="false"/>
 
-<index name="user_login_uniq" table="av.&quot;user&quot;"
-	 concurrent="false" unique="true" fast-update="false" buffering="false"
-	 index-type="btree" factor="0">
-	<comment><![CDATA[logins must be unique.]]></comment>
-		<idxelement use-sorting="false">
-			<column name="login"/>
-		</idxelement>
-</index>
-
 <usertype name="ticket_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
@@ -312,7 +279,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[a printed ticket]]></comment>
-	<position x="820" y="420"/>
+	<position x="980" y="120"/>
 	<column name="ticket_id" not-null="true">
 		<type name="serial" length="0"/>
 		<comment><![CDATA[Only the last digit is used in the printout.]]></comment>
@@ -361,7 +328,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="rate">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="820" y="960"/>
+	<position x="1000" y="580"/>
 	<column name="rate_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -385,20 +352,34 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 </table>
 
+<usertype name="payment_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Payment methods]]></comment>
+	<enumeration values="tender,credit_card,debit_card"/>
+</usertype>
+
 <table name="payment">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="1240" y="580"/>
+	<position x="1400" y="280"/>
 	<column name="timestamp" not-null="true">
 		<type name="av.ts" length="0"/>
+	</column>
+	<column name="method" not-null="true">
+		<type name="av.payment_type" length="0"/>
 	</column>
 	<column name="amount" not-null="true">
 		<type name="smallint" length="0"/>
 		<comment><![CDATA[in cents]]></comment>
 	</column>
-	<column name="change" not-null="true">
+	<column name="change">
 		<type name="smallint" length="0"/>
-		<comment><![CDATA[in cents]]></comment>
+		<comment><![CDATA[in cents. May be null if does not apply for payment method.]]></comment>
+	</column>
+	<column name="reference">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[For electrnoic payments, a reference string to conciliate accounting.]]></comment>
 	</column>
 
 	<customidxs object-type="column">
@@ -407,22 +388,11 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="payment_pk" index="0"/>
-		<object name="rate_fk" index="2"/>
-		<object name="ticket_fk" index="1"/>
+		<object name="payment_pk" index="1"/>
+		<object name="rate_fk" index="0"/>
+		<object name="ticket_fk" index="2"/>
 	</customidxs>
 </table>
-
-<relationship name="payment_has_one_ticket" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.ticket"
-	 dst-table="av.payment"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
 
 <relationship name="rate_has_many_payment" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -443,7 +413,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[catalog, describes a coin or a bill]]></comment>
-	<position x="1220" y="820"/>
+	<position x="1400" y="460"/>
 	<column name="tender_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -468,7 +438,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="tender_exchange">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="1680" y="680"/>
+	<position x="1800" y="360"/>
 	<column name="type" not-null="true">
 		<type name="av.exchange_type" length="0"/>
 	</column>
@@ -489,17 +459,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 </table>
 
-<relationship name="payment_has_many_tender_exchange" type="rel1n"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.payment"
-	 dst-table="av.tender_exchange"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
-
 <relationship name="tender_has_many_tender_exchange" type="rel1n"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
@@ -515,7 +474,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[A person or company owning a vehicle]]></comment>
-	<position x="2260" y="1180"/>
+	<position x="2140" y="20"/>
 	<column name="owner_id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -550,7 +509,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="vehicle">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="2600" y="980"/>
+	<position x="2580" y="80"/>
 	<column name="vehicle_id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -598,7 +557,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[a car pension]]></comment>
-	<position x="2980" y="740"/>
+	<position x="3000" y="220"/>
 	<column name="rent_id" not-null="true">
 		<type name="serial" length="0"/>
 	</column>
@@ -607,6 +566,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</column>
 	<column name="is_cancelled" not-null="true">
 		<type name="bool" length="0"/>
+	</column>
+	<column name="card_number">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[ID of the contactless card]]></comment>
 	</column>
 	<column name="last_in">
 		<type name="av.ts" length="0"/>
@@ -619,9 +582,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 
 	<customidxs object-type="column">
-		<object name="rate_id" index="2"/>
-		<object name="ticket_id" index="1"/>
-		<object name="vehicle_id" index="3"/>
+		<object name="rate_id" index="3"/>
+		<object name="ticket_id" index="2"/>
+		<object name="vehicle_id" index="1"/>
 	</customidxs>
 
 	<customidxs object-type="constraint">
@@ -639,11 +602,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 custom-color="#83af1f"
 	 src-table="av.ticket"
 	 dst-table="av.rent"
-	 src-required="true" dst-required="false">
-	<line>
-		<position x="2940" y="460"/>
-	</line>
-</relationship>
+	 src-required="true" dst-required="false"/>
 
 <relationship name="vehicle_has_many_rent" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -673,7 +632,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[history of operations regarding a rent account]]></comment>
-	<position x="2540" y="620"/>
+	<position x="3480" y="460"/>
 	<column name="timestamp" not-null="true">
 		<type name="av.ts" length="0"/>
 	</column>
@@ -685,9 +644,9 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</constraint>
 
 	<customidxs object-type="column">
-		<object name="rate_id" index="3"/>
+		<object name="rate_id" index="2"/>
 		<object name="rent_id" index="0"/>
-		<object name="ticket_id" index="2"/>
+		<object name="ticket_id" index="1"/>
 	</customidxs>
 
 	<customidxs object-type="constraint">
@@ -718,15 +677,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 dst-table="av.rent_operation"
 	 src-required="true" dst-required="false"/>
 
-<relationship name="rent_operation_has_one_payment" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.payment"
-	 dst-table="av.rent_operation"
-	 src-required="false" dst-required="false"/>
-
 <usertype name="rent_activity_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
@@ -737,7 +687,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[when a vehicle in rented parking left or came into the lot]]></comment>
-	<position x="3440" y="600"/>
+	<position x="3480" y="280"/>
 	<column name="timestamp" not-null="true" default-value="NOW()">
 		<type name="av.ts" length="0"/>
 	</column>
@@ -772,7 +722,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
-	<position x="640" y="1360"/>
+	<position x="620" y="860"/>
 
 	<customidxs object-type="column">
 		<object name="terminal_id" index="0"/>
@@ -807,6 +757,229 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
+
+<table name="request">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[RPC requests being currently handled by CHARP (Challenge-Authenticated Remote Procedures)]]></comment>
+	<position x="580" y="1620"/>
+	<column name="request_id" not-null="true">
+		<type name="serial" length="0"/>
+		<comment><![CDATA[id of this request currently being processed. will be copied to request_log as soon as its life has ended.]]></comment>
+	</column>
+	<column name="timestamp" not-null="true" default-value="NOW()">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[Stamp of when the request started. Requests that are too old will be removed by pgAgent.]]></comment>
+	</column>
+	<column name="ip_addr" not-null="true">
+		<type name="inet" length="0"/>
+		<comment><![CDATA[originating public IP Address, as reported by the web server.]]></comment>
+	</column>
+	<column name="proname" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[name of the stored procedure that was requested]]></comment>
+	</column>
+	<column name="params" not-null="true">
+		<type name="jsonb" length="0"/>
+		<comment><![CDATA[parameters to the request stored procedure execution]]></comment>
+	</column>
+	<constraint name="request_pk" type="pk-constr" table="av.request">
+		<columns names="request_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="user_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_has_many_request" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.request"
+	 src-required="false" dst-required="false"/>
+
+<usertype name="charp_request_status" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[CHARP request, logs how a request finished]]></comment>
+	<enumeration values="success,exception,timeout"/>
+</usertype>
+
+<table name="request_log">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[CHARP requests log, for auditing]]></comment>
+	<position x="540" y="1760"/>
+	<column name="request_id" not-null="true">
+		<type name="serial" length="0"/>
+		<comment><![CDATA[this is copied from request table but can't be FK because it will be deleted from request]]></comment>
+	</column>
+	<column name="timestamp" not-null="true" default-value="NOW()">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[Stamp of when the request started. Requests that are too old will be removed by pgAgent.]]></comment>
+	</column>
+	<column name="ip_addr" not-null="true">
+		<type name="inet" length="0"/>
+		<comment><![CDATA[originating public IP Address, as reported by the web server.]]></comment>
+	</column>
+	<column name="proname" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[name of the stored procedure that was requested]]></comment>
+	</column>
+	<column name="params" not-null="true">
+		<type name="jsonb" length="0"/>
+		<comment><![CDATA[parameters to the request stored procedure execution]]></comment>
+	</column>
+	<column name="finished" not-null="true">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[When the request was added to the log (either if it succeeded, was error, or time out)]]></comment>
+	</column>
+	<column name="status" not-null="true">
+		<type name="av.charp_request_status" length="0"/>
+		<comment><![CDATA[under what circumstances the request was logged]]></comment>
+	</column>
+	<constraint name="request_pk_1" type="pk-constr" table="av.request_log">
+		<columns names="request_id" ref-type="src-columns"/>
+	</constraint>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="1"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="user_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="user_has_many_request_log" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.request_log"
+	 src-required="false" dst-required="false"/>
+
+<relationship name="user_supervisor_has_one_user" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.&quot;user&quot;"
+	 dst-table="av.user_supervisor"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="user_supervisor_has_many_supervisor_challenge" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.user_supervisor"
+	 dst-table="av.supervisor_challenge"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<index name="user_login_uniq" table="av.&quot;user&quot;"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[logins must be unique.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="login"/>
+		</idxelement>
+</index>
+
+<table name="error_log">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[additional detail for requests that resulted in logged exceptions (some exceptions are benign and wont be logged when raised).]]></comment>
+	<position x="940" y="1840"/>
+	<column name="error_code" not-null="true">
+		<type name="av.charp_error_code" length="0"/>
+	</column>
+	<column name="login">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[username that the request was made with. needed for auth failures. empty string for anon requests, NULL if request was authenticated but failed later.]]></comment>
+	</column>
+	<column name="msg">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[message elaborating on the error, usually generated by the DBMS.]]></comment>
+	</column>
+
+	<customidxs object-type="column">
+		<object name="request_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="error_log_pk" index="0"/>
+		<object name="request_log_fk" index="1"/>
+	</customidxs>
+</table>
+
+<relationship name="error_log_has_one_request_log" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.request_log"
+	 dst-table="av.error_log"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<usertype name="charp_param_type" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[parameters that can be mapped by the CHARP RPC system.]]></comment>
+	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR"/>
+</usertype>
+
+<usertype name="charp_cmd_code" configuration="enumeration">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[commands that the DB can send to the web gateway through the notification system]]></comment>
+	<enumeration values="FILE_CREATE,FILE_DELETE,FILE_MOVE,FILE_COPY,OTHER"/>
+</usertype>
+
+<relationship name="payment_has_one_ticket" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.ticket"
+	 dst-table="av.payment"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="payment_has_many_tender_exchange" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.payment"
+	 dst-table="av.tender_exchange"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
+
+<relationship name="rent_operation_has_one_payment" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.payment"
+	 dst-table="av.rent_operation"
+	 src-required="false" dst-required="false"/>
 
 <permission>
 	<object name="avanty" type="database"/>

@@ -6,11 +6,11 @@ $CGI::POST_MAX = 1024 * 1024 * 5;
 $CGI::DISABLE_UPLOADS = 1;
 # FIXME: if we enable uploads, we have to use different calls to deal with uploaded files.
 
-$DB_NAME = 'myproject';
+$DB_NAME = 'avanty';
 $DB_HOST = 'localhost';
 $DB_PORT = '5432';
-$DB_USER = 'postgres';
-$DB_PASS = '<<<YOUR DB PASSWORD HERE>>>';
+$DB_USER = 'avanty';
+$DB_PASS = '123';
 
 # This works with both Pg and mysql:
 $DB_STR = "database=$DB_NAME;host=$DB_HOST;port=$DB_PORT";

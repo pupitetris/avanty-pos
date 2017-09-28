@@ -3,13 +3,14 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="1968,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,1078" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
       encrypted="true"
       password="123">
 	<comment><![CDATA[Low-security user for operation of the avanty system.]]></comment>
+	<appended-sql><![CDATA[ALTER USER avanty SET search_path TO av,public;]]></appended-sql>
 </role>
 
 <database name="avanty" encoding="UTF8" template="template0" lc-collate="Spanish_Mexico" lc-ctype="Spanish_Mexico">
@@ -37,8 +38,13 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 </domain>
 
+<schema name="pgcrypto" rect-visible="true" fill-color="#e1e1e1">
+	<role name="postgres"/>
+	<comment><![CDATA[Separate schema for all cryptographic functions to avoid pollution.]]></comment>
+</schema>
+
 <extension name="pgcrypto">
-	<schema name="av"/>
+	<schema name="pgcrypto"/>
 	<comment><![CDATA[Cryptographic routines.]]></comment>
 </extension>
 
@@ -81,7 +87,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[Handle specified by the user for credentials.]]></comment>
 	</column>
-	<column name="salt" not-null="true" default-value="encode(gen_random_bytes(64), 'hex')">
+	<column name="salt" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[Random per-user salt to make password hash cracking difficult.]]></comment>
 	</column>
@@ -974,7 +980,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <function name="charp_log_error"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1003,7 +1009,7 @@ END]]></definition>
 <function name="charp_raise"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1061,7 +1067,7 @@ END;]]></definition>
 <function name="charp_cmd"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1095,7 +1101,7 @@ END;]]></definition>
 <function name="charp_rp_get_function_by_name"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="STABLE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1128,7 +1134,7 @@ END;]]></definition>
 <function name="charp_request_create"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1155,7 +1161,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_random_bytes character varying;
 BEGIN
-	_random_bytes := encode(gen_random_bytes(32), 'hex');
+	_random_bytes := encode(pgcrypto.gen_random_bytes(32), 'hex');
 	INSERT INTO request VALUES(
 		DEFAULT,
 		charp_account_get_id_by_username_status(_username, 'ACTIVE'),
@@ -1172,7 +1178,7 @@ END;]]></definition>
 <function name="charp_get_function_params"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="IMMUTABLE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1215,7 +1221,7 @@ END;]]></definition>
 <function name="charp_function_params"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1244,7 +1250,7 @@ END;]]></definition>
 <function name="charp_request_check"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="VOLATILE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1317,7 +1323,7 @@ END;]]></definition>
 <function name="check_url"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="IMMUTABLE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1357,7 +1363,7 @@ END;]]></definition>
 <function name="sign_url"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="IMMUTABLE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1379,7 +1385,7 @@ END;]]></definition>
 <function name="user_auth"
 		window-func="false"
 		returns-setof="false"
-		behavior-type="STRICT"
+		behavior-type="CALLED ON NULL INPUT"
 		function-type="IMMUTABLE"
 		security-type="SECURITY INVOKER"
 		execution-cost="1"
@@ -1392,6 +1398,44 @@ END;]]></definition>
 	<type name="boolean" length="0"/>
 	</return-type>
 	<definition><![CDATA[SELECT TRUE]]></definition>
+</function>
+
+<function name="user_create"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Create a basic user with no user class. Account is activated by default. Returns the new user_id.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="smallint" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_plain_password">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_password_expiration" default-value="NULL">
+		<type name="av.ts" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_salt user.salt%TYPE;
+	_user_id user.user_id%TYPE;
+BEGIN
+	_salt := pgcrypto.gen_salt('bf', 8);
+	INSERT INTO user 
+		VALUES(DEFAULT, _login, _salt, 
+			pgcrypto.crypt(_plain_password, _salt), 
+			_password_expiration, 'active') 
+		RETURNING user_id INTO _user_id;
+	RETURN _user_id;
+END;]]></definition>
 </function>
 
 <permission>

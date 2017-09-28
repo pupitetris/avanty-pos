@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" last-position="0,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,0" last-zoom="1"
 	 default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -12,7 +12,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<comment><![CDATA[Low-security user for operation of the avanty system.]]></comment>
 </role>
 
-<database name="avanty" encoding="UTF8" lc-collate="es_MX" lc-ctype="es_MX">
+<database name="avanty" encoding="UTF8" template="template0" lc-collate="Spanish_Mexico" lc-ctype="Spanish_Mexico">
 </database>
 
 <schema name="public" fill-color="#e1e1e1" sql-disabled="true">
@@ -22,11 +22,12 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="avanty"/>
 </schema>
 
-<domain name="uid" not-null="true">
+<domain name="uid" not-null="false">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[Special type for user id's to be automatically recognized by the rpc system.]]></comment>
-		<type name="smallserial" length="0"/>
+		<type name="smallint" length="0"/>
+	<expression><![CDATA[VALUE >= 1 AND VALUE < 32768]]></expression>
 </domain>
 
 <domain name="ts" not-null="false">
@@ -93,7 +94,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<comment><![CDATA[user accounts]]></comment>
 	<position x="20" y="1220"/>
 	<column name="user_id" not-null="true">
-		<type name="av.uid" length="0"/>
+		<type name="smallserial" length="0"/>
 		<comment><![CDATA[Independent ID for users, to allow for login name changes.]]></comment>
 	</column>
 	<column name="login" not-null="true">

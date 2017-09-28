@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="2026,0" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="1968,0" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -41,26 +41,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<comment><![CDATA[Cryptographic routines.]]></comment>
 </extension>
-
-<function name="gen_random_bytes"
-		window-func="false"
-		returns-setof="false"
-		behavior-type="STRICT"
-		function-type="VOLATILE"
-		security-type="SECURITY INVOKER"
-		execution-cost="1"
-		row-amount="0">
-	<schema name="av"/>
-	<role name="postgres"/>
-	<language name="c" sql-disabled="true"/>
-	<return-type>
-	<type name="bytea" length="0"/>
-	</return-type>
-	<parameter name="num_bytes" in="true">
-		<type name="int4" length="0"/>
-	</parameter>
-	<definition library="pgcrypto" symbol="pg_random_bytes"/>
-</function>
 
 <table name="user_cashier" hide-ext-attribs="true">
 	<schema name="av"/>

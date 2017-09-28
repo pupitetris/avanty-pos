@@ -3,8 +3,8 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,0" last-zoom="1"
-	 default-owner="postgres">
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="396,1106" last-zoom="1"
+	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
       encrypted="true"
@@ -763,10 +763,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[RPC requests being currently handled by CHARP (Challenge-Authenticated Remote Procedures)]]></comment>
-	<position x="580" y="1620"/>
+	<position x="560" y="1600"/>
 	<column name="request_id" not-null="true">
 		<type name="serial" length="0"/>
 		<comment><![CDATA[id of this request currently being processed. will be copied to request_log as soon as its life has ended.]]></comment>
+	</column>
+	<column name="random_bytes" not-null="true">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[hex representation of random bytes sent to client as a challenge.]]></comment>
 	</column>
 	<column name="timestamp" not-null="true" default-value="NOW()">
 		<type name="av.ts" length="0"/>
@@ -981,6 +985,434 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 src-table="av.payment"
 	 dst-table="av.rent_operation"
 	 src-required="false" dst-required="false"/>
+
+<schema name="rp" rect-visible="true" fill-color="#e1e1e1">
+	<role name="postgres"/>
+	<comment><![CDATA[Stored procedures that can be called from the CHARP gateway.]]></comment>
+</schema>
+
+<function name="charp_log_error"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Send an error report to the error log.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_code">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_msg">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN 
+	  INSERT INTO error_log VALUES(current_setting('charp.request_id'), CURRENT_TIMESTAMP, _code::charp_error_code, _login, _msg);
+END]]></definition>
+</function>
+
+<function name="charp_raise"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Raise and log an exception with the CHARP format for client consumption.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_code">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_args" variadic="true" default-value="ARRAY[]::text[]">
+		<type name="varchar" length="0" dimension="1"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_i integer;
+	_sqlcode text;
+	_code_t charp_error_code;
+BEGIN
+	IF substring(_code FROM 1 FOR 1) = '-' THEN
+	   _code_t := substring(_code FROM 2);
+	ELSE
+	   _code_t := _code;
+	END IF;
+
+	IF array_length(_args, 1) IS NOT NULL THEN
+	   FOR _i IN 1 .. array_length(_args, 1) LOOP
+	       _args[_i] := quote_literal(_args[_i]);
+	   END LOOP;
+	END IF;
+
+	SELECT INTO _sqlcode
+	       CASE _code_t
+		    WHEN 'USERUNK'      THEN 'CH001'
+		    WHEN 'PROCUNK'      THEN 'CH002'
+		    WHEN 'REQUNK'       THEN 'CH003'
+		    WHEN 'REPFAIL'      THEN 'CH004'
+		    WHEN 'ASSERT'       THEN 'CH005'
+		    WHEN 'USERPARMPERM' THEN 'CH006'
+		    WHEN 'USERPERM'     THEN 'CH007'
+		    WHEN 'MAILFAIL'     THEN 'CH008'
+		    WHEN 'DATADUP'      THEN 'CH009'
+		    WHEN 'NOTFOUND'     THEN 'CH010'
+		    WHEN 'EXIT'         THEN 'CH011'
+		    ELSE 'CH000'
+	       END;
+
+	RAISE EXCEPTION '|>%|{%}|', _code, array_to_string(_args, ',') USING ERRCODE = _sqlcode;
+END;]]></definition>
+</function>
+
+<function name="charp_cmd"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Send a command to the CHARP CGI layer.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_cmd">
+		<type name="av.charp_cmd_code" length="0"/>
+	</parameter>
+	<parameter name="_args" variadic="true" default-value="ARRAY[]::text[]">
+		<type name="text" length="0" dimension="1"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_i integer;
+BEGIN
+	IF array_length(_args, 1) IS NOT NULL THEN
+	   FOR _i IN 1 .. array_length(_args, 1) LOOP
+	       _args[_i] := quote_literal(_args[_i]);
+	   END LOOP;
+	END IF;
+
+	RAISE INFO '|>%|{%}|', _cmd::text, array_to_string(_args, ',');
+END;]]></definition>
+</function>
+
+<function name="charp_rp_get_function_by_name"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Find given function within rp schema, raise PROCUNK if not found.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_function_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_name varchar;
+BEGIN
+	SELECT proname INTO _name 
+		FROM pg_proc AS p JOIN pg_namespace AS ns
+		ON (p.pronamespace = ns.oid)
+		WHERE p.proname = _function_name
+			AND ns.nspname = 'rp';
+	IF NOT FOUND THEN
+	   PERFORM charp_raise('PROCUNK', _function_name);
+	END IF;
+	RETURN _name;
+END;]]></definition>
+</function>
+
+<function name="charp_request_create"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Registers a request returning a corresponding challlenge for the client to respond.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_ip_addr">
+		<type name="inet" length="0"/>
+	</parameter>
+	<parameter name="_function_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_params">
+		<type name="jsonb" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_random_bytes character varying;
+BEGIN
+	_random_bytes := encode(gen_random_bytes(32), 'hex');
+	INSERT INTO request VALUES(
+		DEFAULT,
+		charp_account_get_id_by_username_status(_username, 'ACTIVE'),
+		_random_bytes, 
+		CURRENT_TIMESTAMP,
+		_ip_addr,
+		charp_rp_get_function_by_name(_function_name),
+		_params
+	);
+	RETURN _random_bytes;
+END;]]></definition>
+</function>
+
+<function name="charp_get_function_params"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="IMMUTABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Convert the parameter array of a function for given oids to charp_param_type.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="av.charp_param_type" length="0" dimension="1"/>
+	</return-type>
+	<parameter name="_proargtypes">
+		<type name="oidvector" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_fparams charp_param_type ARRAY;
+BEGIN
+	SELECT ARRAY( 
+	       	      SELECT 
+			     CASE format_type (_proargtypes[s.i], NULL)
+				  WHEN 'charp_user_id'	     THEN 'UID'
+				  WHEN 'integer'	     THEN 'INT'
+				  WHEN 'character varying'   THEN 'STR'
+				  WHEN 'text'		     THEN 'STR'
+				  WHEN 'boolean'	     THEN 'BOOL'
+				  WHEN 'date'		     THEN 'DATE'
+				  WHEN 'integer[]'	     THEN 'INTARR'
+				  WHEN 'character varying[]' THEN 'STRARR'
+				  WHEN 'text[]'		     THEN 'STRARR'
+				  WHEN 'boolean[]'	     THEN 'BOOLARR'
+				  ELSE 'STR'
+			     END
+			     FROM generate_series(0, array_upper(_proargtypes, 1)) AS s(i)
+		      ) 
+	       INTO _fparams;
+	RETURN _fparams;
+END;]]></definition>
+</function>
+
+<function name="charp_function_params"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Return the input parameter types that a given stored procedure requires.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="av.charp_param_type" length="0" dimension="1"/>
+	</return-type>
+	<parameter name="_function_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_fparams charp_param_type ARRAY;
+BEGIN
+	SELECT charp_get_function_params (p.proargtypes) INTO _fparams FROM pg_proc AS p WHERE p.proname = 'rp_' || _function_name;
+	IF NOT FOUND THEN
+	   PERFORM charp_raise('PROCUNK', _function_name);
+	END IF;
+	RETURN _fparams;
+END;]]></definition>
+</function>
+
+<function name="charp_request_check"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check that a given request is registered with the given data and compare the hash with one locally computed. Return the necessary data to execute.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="user_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="fname">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="fparams">
+		<type name="av.charp_param_type" length="0" dimension="1"/>
+	</parameter>
+	<parameter name="req_params">
+		<type name="jsonb" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_username">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_ip_addr">
+		<type name="inet" length="0"/>
+	</parameter>
+	<parameter name="_chal">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_hash">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_req RECORD;
+	_our_hash character varying;
+BEGIN
+	SELECT 
+	       a.persona_id AS user_id, 
+	       substring(p.proname FROM 4) AS fname, 
+	       charp_get_function_params (p.proargtypes) AS fparams, 
+	       r.params AS req_params, 
+	       a.passwd 
+	       INTO _req
+	       FROM request AS r NATURAL JOIN account AS a NATURAL JOIN pg_proc AS p
+	       WHERE a.username = _username AND
+		     r.request_id = _chal AND 
+		     r.ip_addr = _ip_addr;
+
+	IF _req IS NULL THEN
+		PERFORM charp_raise('REQUNK', _username, _ip_addr::text, _chal);
+	END IF;
+
+	DELETE FROM request WHERE request_id = _chal;
+
+	_our_hash := encode(digest(_username || _chal || _req.passwd, 'sha256'), 'hex');
+	IF _our_hash <> _hash THEN
+		PERFORM charp_raise('REPFAIL', _username, _ip_addr::text, _chal);
+	END IF;
+
+	user_id := _req.user_id;
+	fname := _req.fname;
+	fparams := _req.fparams;
+	req_params := _req.req_params;
+	RETURN NEXT;
+END;]]></definition>
+</function>
+
+<function name="check_url"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="IMMUTABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check that an entrypoint URL was created by the system.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<parameter name="_url">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_hash_pos integer;
+	_url_part text;
+	_hash_part text;
+	_our_hash text;
+BEGIN
+	_hash_pos := position ('#' IN _url);
+	IF _hash_pos < 1 THEN
+	   PERFORM charp_raise('ASSERT', 'URL has #');
+	END IF;
+	
+	_url_part := substring (_url FROM 1 FOR _hash_pos - 1);
+	_hash_part := substring (_url FROM _hash_pos + 1);
+	_our_hash := rp_sign_url(_url_part);
+
+	IF _our_hash = _hash_part THEN
+	   RETURN TRUE;
+	END IF;
+	RETURN FALSE;
+END;]]></definition>
+</function>
+
+<function name="sign_url"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="IMMUTABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Generate a signature for a given URL. FIXME: define url_check_hash1 and hash2]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_url">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[SELECT encode(digest('M4_DEFN(url_check_hash1)' || _url
+	|| 'M4_DEFN(url_check_hash2)', 'sha256'), 'hex')]]></definition>
+</function>
+
+<function name="user_auth"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="STRICT"
+		function-type="IMMUTABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Trivially return TRUE. If the user was authenticated, everything went OK with challenge-request sequence and there is nothing left to do: success.]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<definition><![CDATA[SELECT TRUE]]></definition>
+</function>
 
 <permission>
 	<object name="avanty" type="database"/>

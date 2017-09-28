@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="396,1106" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="2026,0" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -566,7 +566,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="av.ts" length="0"/>
 	</column>
 	<column name="is_cancelled" not-null="true">
-		<type name="bool" length="0"/>
+		<type name="boolean" length="0"/>
 	</column>
 	<column name="card_number">
 		<type name="varchar" length="0"/>

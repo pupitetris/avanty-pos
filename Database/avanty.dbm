@@ -152,7 +152,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
 	<position x="640" y="1160"/>
-	<column name="timestamp" not-null="true" default-value="NOW()">
+	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[when the activity occurred]]></comment>
 	</column>
@@ -265,7 +265,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="serial" length="0"/>
 		<comment><![CDATA[Only the last digit is used in the printout.]]></comment>
 	</column>
-	<column name="timestamp" not-null="true" default-value="NOW()">
+	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 	</column>
 	<column name="type" not-null="true">
@@ -669,7 +669,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[when a vehicle in rented parking left or came into the lot]]></comment>
 	<position x="3480" y="280"/>
-	<column name="timestamp" not-null="true" default-value="NOW()">
+	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 	</column>
 	<column name="type" not-null="true">
@@ -752,7 +752,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[hex representation of random bytes sent to client as a challenge.]]></comment>
 	</column>
-	<column name="timestamp" not-null="true" default-value="NOW()">
+	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[Stamp of when the request started. Requests that are too old will be removed by pgAgent.]]></comment>
 	</column>
@@ -806,7 +806,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="serial" length="0"/>
 		<comment><![CDATA[this is copied from request table but can't be FK because it will be deleted from request]]></comment>
 	</column>
-	<column name="timestamp" not-null="true" default-value="NOW()">
+	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[Stamp of when the request started. Requests that are too old will be removed by pgAgent.]]></comment>
 	</column>

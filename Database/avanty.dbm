@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,1078" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="427,110" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -23,7 +23,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="avanty"/>
 </schema>
 
-<domain name="uid" not-null="false">
+<domain name="uid" constraint="uid_check" not-null="false">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[Special type for user id's to be automatically recognized by the rpc system.]]></comment>
@@ -53,6 +53,15 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type cashier.]]></comment>
 	<position x="640" y="1320"/>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="account_fk" index="1"/>
+		<object name="user_cashier_pk" index="0"/>
+	</customidxs>
 </table>
 
 <usertype name="charp_account_status" configuration="enumeration">
@@ -72,9 +81,18 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
 	<position x="640" y="1380"/>
+
+	<customidxs object-type="column">
+		<object name="user_id" index="0"/>
+	</customidxs>
+
+	<customidxs object-type="constraint">
+		<object name="account_fk" index="1"/>
+		<object name="user_supervisor_pk" index="0"/>
+	</customidxs>
 </table>
 
-<table name="user" hide-ext-attribs="true">
+<table name="account" hide-ext-attribs="true">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[user accounts]]></comment>
@@ -103,7 +121,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="av.charp_account_status" length="0"/>
 		<comment><![CDATA[only active users may run requests to the server]]></comment>
 	</column>
-	<constraint name="user_pk" type="pk-constr" table="av.&quot;user&quot;">
+	<constraint name="account_pk" type="pk-constr" table="av.account">
 		<columns names="user_id" ref-type="src-columns"/>
 	</constraint>
 </table>
@@ -119,28 +137,28 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="user_fk" index="0"/>
+		<object name="account_fk" index="0"/>
 		<object name="user_maintenance_pk" index="1"/>
 	</customidxs>
 </table>
 
-<relationship name="user_maintenance_has_one_user" type="rel11"
+<relationship name="user_maintenance_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.user_maintenance"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
 
-<relationship name="user_cashier_has_one_user" type="rel11"
+<relationship name="user_cashier_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.user_cashier"
 	 src-required="true" dst-required="false"
 	 identifier="true"
@@ -183,17 +201,17 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
+		<object name="account_fk" index="1"/>
 		<object name="terminal_fk" index="2"/>
-		<object name="user_fk" index="1"/>
 	</customidxs>
 </table>
 
-<relationship name="user_has_many_user_activity" type="rel1n"
+<relationship name="account_has_many_user_activity" type="rel1n"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.user_activity"
 	 src-required="true" dst-required="false"
 	 identifier="true"
@@ -705,7 +723,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 identifier="true"
 />
 
-<table name="terminal_user">
+<table name="terminal_account">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
@@ -717,30 +735,30 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
+		<object name="account_fk" index="1"/>
+		<object name="terminal_account_pk" index="0"/>
 		<object name="terminal_fk" index="2"/>
-		<object name="terminal_user_pk" index="0"/>
-		<object name="user_fk" index="1"/>
 	</customidxs>
 </table>
 
-<relationship name="user_terminal_has_one_user" type="rel11"
+<relationship name="terminal_account_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
-	 dst-table="av.terminal_user"
+	 src-table="av.account"
+	 dst-table="av.terminal_account"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
 
-<relationship name="user_terminal_has_one_terminal" type="rel11"
+<relationship name="terminal_account_has_one_terminal" type="rel11"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#aa0000"
 	 src-table="av.terminal"
-	 dst-table="av.terminal_user"
+	 dst-table="av.terminal_account"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
@@ -783,16 +801,16 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="user_fk" index="1"/>
+		<object name="account_fk" index="1"/>
 	</customidxs>
 </table>
 
-<relationship name="user_has_many_request" type="rel1n"
+<relationship name="account_has_many_request" type="rel1n"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.request"
 	 src-required="false" dst-required="false"/>
 
@@ -845,25 +863,25 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="user_fk" index="1"/>
+		<object name="account_fk" index="1"/>
 	</customidxs>
 </table>
 
-<relationship name="user_has_many_request_log" type="rel1n"
+<relationship name="account_has_many_request_log" type="rel1n"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.request_log"
 	 src-required="false" dst-required="false"/>
 
-<relationship name="user_supervisor_has_one_user" type="rel11"
+<relationship name="user_supervisor_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.&quot;user&quot;"
+	 src-table="av.account"
 	 dst-table="av.user_supervisor"
 	 src-required="true" dst-required="false"
 	 identifier="true"
@@ -880,7 +898,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 identifier="true"
 />
 
-<index name="user_login_uniq" table="av.&quot;user&quot;"
+<index name="user_login_uniq" table="av.account"
 	 concurrent="false" unique="true" fast-update="false" buffering="false"
 	 index-type="btree" factor="0">
 	<comment><![CDATA[logins must be unique.]]></comment>
@@ -1120,10 +1138,10 @@ END;]]></definition>
 	_name varchar;
 BEGIN
 	SELECT proname INTO _name 
-		FROM pg_proc AS p JOIN pg_namespace AS ns
-		ON (p.pronamespace = ns.oid)
-		WHERE p.proname = _function_name
-			AND ns.nspname = 'rp';
+		FROM pg_proc AS p 
+			JOIN pg_namespace AS ns
+				ON (p.pronamespace = ns.oid)
+		WHERE p.proname = _function_name AND ns.nspname = 'rp';
 	IF NOT FOUND THEN
 	   PERFORM charp_raise('PROCUNK', _function_name);
 	END IF;
@@ -1239,7 +1257,11 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_fparams charp_param_type ARRAY;
 BEGIN
-	SELECT charp_get_function_params (p.proargtypes) INTO _fparams FROM pg_proc AS p WHERE p.proname = 'rp_' || _function_name;
+	SELECT charp_get_function_params (p.proargtypes) INTO _fparams 
+		FROM pg_proc AS p 
+			JOIN pg_namespace AS ns
+				ON (p.pronamespace = ns.oid)
+		WHERE p.proname = _function_name AND ns.nspname = 'rp';
 	IF NOT FOUND THEN
 	   PERFORM charp_raise('PROCUNK', _function_name);
 	END IF;
@@ -1291,7 +1313,7 @@ END;]]></definition>
 BEGIN
 	SELECT 
 	       a.persona_id AS user_id, 
-	       substring(p.proname FROM 4) AS fname, 
+	       p.proname AS fname, 
 	       charp_get_function_params (p.proargtypes) AS fparams, 
 	       r.params AS req_params, 
 	       a.passwd 
@@ -1307,7 +1329,7 @@ BEGIN
 
 	DELETE FROM request WHERE request_id = _chal;
 
-	_our_hash := encode(digest(_username || _chal || _req.passwd, 'sha256'), 'hex');
+	_our_hash := encode(pgcrypto.digest(_username || _chal || _req.passwd, 'sha256'), 'hex');
 	IF _our_hash <> _hash THEN
 		PERFORM charp_raise('REPFAIL', _username, _ip_addr::text, _chal);
 	END IF;
@@ -1425,11 +1447,11 @@ END;]]></definition>
 		<type name="av.ts" length="0"/>
 	</parameter>
 	<definition><![CDATA[DECLARE
-	_salt user.salt%TYPE;
-	_user_id user.user_id%TYPE;
+	_salt account.salt%TYPE;
+	_user_id account.user_id%TYPE;
 BEGIN
 	_salt := pgcrypto.gen_salt('bf', 8);
-	INSERT INTO user 
+	INSERT INTO account
 		VALUES(DEFAULT, _login, _salt, 
 			pgcrypto.crypt(_plain_password, _salt), 
 			_password_expiration, 'active') 

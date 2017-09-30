@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="427,110" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,887" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1457,6 +1457,36 @@ BEGIN
 			_password_expiration, 'active') 
 		RETURNING user_id INTO _user_id;
 	RETURN _user_id;
+END;]]></definition>
+</function>
+
+<function name="anon_salt_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get the salt for the given user so it can be used as a base to generate the encrypted hash of the password client-side, and challenges can be signed using the exact same secrets on both sides.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_salt account.salt%TYPE;
+BEGIN
+	SELECT salt INTO _salt FROM account WHERE login = _login;
+	IF NOT FOUND THEN
+		PERFORM charp_raise ('USERUNK');
+	END IF;
+
+	RETURN _salt;
 END;]]></definition>
 </function>
 

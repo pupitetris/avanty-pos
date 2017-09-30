@@ -1,4 +1,5 @@
-#!/usr/bin/perl
+#!C:/opt/perl/bin/perl.exe
+# -*- tab-width: 8; -*-
 #
 # This file is part of the CHARP project.
 #
@@ -8,6 +9,7 @@
 #
 # Licensed under the EUPL V.1.1. See the file LICENSE.txt for copying conditions.
 
+use lib '.';
 use CHARP;
 
 sub request_challenge {

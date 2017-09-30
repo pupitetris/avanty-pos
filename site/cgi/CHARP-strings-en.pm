@@ -1,3 +1,4 @@
+# -*- tab-width: 8; -*-
 package CHARP;
 
 use utf8;

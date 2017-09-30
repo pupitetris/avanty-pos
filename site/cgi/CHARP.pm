@@ -1,4 +1,4 @@
-# This file is part of the CHARP project.
+# This file is part of the CHARP project.  -*- tab-width: 8; -*-
 #
 # Copyright © 2011 - 2014
 #   Free Software Foundation Europe, e.V.,
@@ -73,7 +73,7 @@ foreach my $key (keys %ERRORS) {
 sub init {
     my $dbh = shift;
 
-    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?, ?, ?, ?)'), prepare_attrs ());
+    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?)'), prepare_attrs ());
     if (!defined $err_sth) {
 	dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 	return;
@@ -81,10 +81,7 @@ sub init {
 
     $err_sth->bind_param (1, undef, SQL_VARCHAR); # type
     $err_sth->bind_param (2, undef, SQL_VARCHAR); # login
-    $err_sth->bind_param (3, undef, inet_type ()); # ip_addr
-    $err_sth->bind_param (4, undef, SQL_VARCHAR); # resource
     $err_sth->bind_param (5, undef, SQL_VARCHAR); # msg
-    $err_sth->bind_param (6, undef, params_type ()); # params
 
     my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
     if (!defined $chal_sth) {

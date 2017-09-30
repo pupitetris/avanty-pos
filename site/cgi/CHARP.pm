@@ -73,7 +73,7 @@ foreach my $key (keys %ERRORS) {
 sub init {
     my $dbh = shift;
 
-    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?)'), prepare_attrs ());
+    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (NULL, ?, ?, ?, ?, ?, ?, \'exception\')'), prepare_attrs ());
     if (!defined $err_sth) {
 	dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 	return;
@@ -81,7 +81,10 @@ sub init {
 
     $err_sth->bind_param (1, undef, SQL_VARCHAR); # type
     $err_sth->bind_param (2, undef, SQL_VARCHAR); # login
+    $err_sth->bind_param (3, undef, inet_type ()); # ip_addr
+    $err_sth->bind_param (4, undef, SQL_VARCHAR); # resource
     $err_sth->bind_param (5, undef, SQL_VARCHAR); # msg
+    $err_sth->bind_param (6, undef, SQL_VARCHAR); # params
 
     my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
     if (!defined $chal_sth) {
@@ -209,7 +212,7 @@ sub raise_parse {
 
     my $raise = {};
 
-    my @fields = split ('\|', $raisestr, 3);
+    my @fields = split ('\|', $raisestr);
 
     if (substr ($fields[1], 1, 1) eq '-') {
 	$raise->{'type'} = substr ($fields[1], 2);
@@ -218,12 +221,19 @@ sub raise_parse {
 	$raise->{'type'} = substr ($fields[1], 1);
     }
 
-    $fields[2] =~ /^({('.*[^\\]\')})\|/;
-    $raise->{'parms_str'} = $1;
-    $raise->{'parms_str'} = "''" if $raise->{'parms_str'} eq '';
+    my $parms_str = $fields[2];
+    if ($parms_str eq '') {
+	$raise->{'parms_str'} = '[]';
+	$raise->{'parms'} = [];
+    } else {
+	# Postgresql is using invalid single-quotes for string; transform to double-quotes:
+	$parms_str =~ s/^\['/["/; 
+	$parms_str =~ s/','/","/g; 
+	$parms_str =~ s/'\]$/"]/;
 
-    my @parms = parse_csv (substr ($raise->{'parms_str'}, 1, -1));
-    $raise->{'parms'} = \@parms;
+	$raise->{'parms_str'} = $parms_str;
+	$raise->{'parms'} = JSON->decode ($parms_str);
+    }
 
     $raise->{'code'} = 'SQL:' . $raise->{'type'};
     $raise->{'msg'} = substr ($fields[2], length ($raise->{'parms_str'}) + 2);

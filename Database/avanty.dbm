@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="378,1107" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,663" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -13,7 +13,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<appended-sql><![CDATA[ALTER USER avanty SET search_path TO av,public;]]></appended-sql>
 </role>
 
-<database name="avanty" encoding="UTF8" template="template0" lc-collate="Spanish_Mexico" lc-ctype="Spanish_Mexico">
+<database name="avanty" encoding="UTF8" template="template0" lc-collate="Spanish_Mexico" lc-ctype="Spanish_Mexico" append-at-eod="true">
 	<appended-sql><![CDATA[ALTER DATABASE avanty SET search_path TO av,public;]]></appended-sql>
 </database>
 
@@ -126,7 +126,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<columns names="user_id" ref-type="src-columns"/>
 	</constraint>
 	<constraint name="check_account_login" type="ck-constr" table="av.account">
-			<expression><![CDATA[VALUE ~ '^[a-zA-Z0-9_.]+$']]></expression>
+			<expression><![CDATA[login ~ '^[a-zA-Z0-9_.]+$']]></expression>
 		<comment><![CDATA[Restrictions to the login string.]]></comment>
 	</constraint>
 	<constraint name="check_account_login_unique" type="uq-constr" table="av.account">

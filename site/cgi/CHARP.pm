@@ -279,16 +279,16 @@ sub dispatch_error {
     dispatch (sub { error_send (@_); return 1; }, $ctx);
 }
 
-use Data::Dumper;
+#use Data::Dumper;
 
-sub fcgi_bail {
-    my $data = shift;
-    my $inside_dispatch = shift;
+#sub fcgi_bail {
+#    my $data = shift;
+#    my $inside_dispatch = shift;
 
-    CGI::Fast->new if !$inside_dispatch;
-    print "\n" . Dumper ($data) . "\n";
-    exit;
-}
+#    CGI::Fast->new if !$inside_dispatch;
+#    print "\n" . Dumper ($data) . "\n";
+#    exit;
+#}
 
 sub dispatch {
     my $callback = shift;

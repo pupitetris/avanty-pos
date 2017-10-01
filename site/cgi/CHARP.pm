@@ -84,7 +84,7 @@ sub init {
     $err_sth->bind_param (3, undef, inet_type ()); # ip_addr
     $err_sth->bind_param (4, undef, SQL_VARCHAR); # resource
     $err_sth->bind_param (5, undef, SQL_VARCHAR); # msg
-    $err_sth->bind_param (6, undef, SQL_VARCHAR); # params
+    $err_sth->bind_param (6, undef, params_type ()); # params
 
     my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
     if (!defined $chal_sth) {
@@ -95,7 +95,7 @@ sub init {
     $chal_sth->bind_param (1, undef, SQL_VARCHAR); # login
     $chal_sth->bind_param (2, undef, inet_type ()); # ip_addr
     $chal_sth->bind_param (3, undef, SQL_VARCHAR); # resource
-    $chal_sth->bind_param (4, undef, SQL_VARCHAR); # params
+    $chal_sth->bind_param (4, undef, params_type ()); # params
 
     my $chk_sth = $dbh->prepare (call_procedure_query ('charp_request_check (?, ?, ?, ?)'), prepare_attrs ());
     if (!defined $chk_sth) {
@@ -280,11 +280,11 @@ sub dispatch_error {
 }
 
 #use Data::Dumper;
-
+#
 #sub fcgi_bail {
 #    my $data = shift;
 #    my $inside_dispatch = shift;
-
+#
 #    CGI::Fast->new if !$inside_dispatch;
 #    print "\n" . Dumper ($data) . "\n";
 #    exit;

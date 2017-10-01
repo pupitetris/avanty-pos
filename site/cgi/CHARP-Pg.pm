@@ -36,7 +36,7 @@ sub inet_type {
 }
 
 sub params_type {
-    return { 'pg_type' => PG_VARCHARARRAY };
+    return { 'pg_type' => PG_JSONB };
 }
 
 sub intarr_type {

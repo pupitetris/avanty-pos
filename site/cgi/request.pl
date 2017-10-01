@@ -26,6 +26,8 @@ sub request_challenge {
     my $req_res = $fcgi->param ('res');
     my $req_params = $fcgi->param ('params');
 
+    $req_params = '[]' if $req_params eq '';
+
     if (defined $req_anon) {
 	$req_login = '!anonymous';
     } 

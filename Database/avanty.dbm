@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,663" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,662" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1193,7 +1193,7 @@ BEGIN
 	_random_bytes := encode(pgcrypto.gen_random_bytes(32), 'hex');
 	INSERT INTO request VALUES(
 		DEFAULT,
-		charp_account_get_id_by_username_status(_username, 'ACTIVE'),
+		charp_account_get_id_by_login_status(_login, 'active'),
 		_random_bytes, 
 		CURRENT_TIMESTAMP,
 		_ip_addr,
@@ -1498,6 +1498,39 @@ BEGIN
 	END IF;
 
 	RETURN _salt;
+END;]]></definition>
+</function>
+
+<function name="charp_account_get_id_by_login_status"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get the user id for a given user name, raise USERUNK if not found.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="integer" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_status">
+		<type name="av.charp_account_status" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_id integer;
+BEGIN
+	SELECT a.user_id INTO _id FROM account AS a
+	       WHERE a.login = _login AND a.status = _status;
+	IF NOT FOUND THEN
+	   PERFORM charp_raise('USERUNK', _login::text, _status::text);
+	END IF;
+	RETURN _id;
 END;]]></definition>
 </function>
 

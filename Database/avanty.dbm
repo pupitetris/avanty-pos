@@ -1506,4 +1506,9 @@ END;]]></definition>
 	<roles names="avanty"/>
 	<privileges connect="true"/>
 </permission>
+<permission>
+	<object name="pgcrypto" type="schema"/>
+	<roles names="avanty"/>
+	<privileges usage="true"/>
+</permission>
 </dbmodel>

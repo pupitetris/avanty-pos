@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,662" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="409,1417" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -776,6 +776,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[RPC requests being currently handled by CHARP (Challenge-Authenticated Remote Procedures)]]></comment>
+	<appended-sql><![CDATA[GRANT USAGE ON SEQUENCE request_request_id_seq TO avanty;]]></appended-sql>
 	<position x="560" y="1600"/>
 	<column name="request_id" not-null="true">
 		<type name="serial" length="0"/>
@@ -1543,5 +1544,15 @@ END;]]></definition>
 	<object name="pgcrypto" type="schema"/>
 	<roles names="avanty"/>
 	<privileges usage="true"/>
+</permission>
+<permission>
+	<object name="av.request" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" delete="true" insert="true"/>
+</permission>
+<permission>
+	<object name="av.account" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" insert="true" update="true"/>
 </permission>
 </dbmodel>

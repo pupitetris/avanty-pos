@@ -1555,4 +1555,9 @@ END;]]></definition>
 	<roles names="avanty"/>
 	<privileges select="true" insert="true" update="true"/>
 </permission>
+<permission>
+	<object name="rp" type="schema"/>
+	<roles names="avanty"/>
+	<privileges usage="true"/>
+</permission>
 </dbmodel>

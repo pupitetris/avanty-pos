@@ -1,4 +1,4 @@
-#!C:/opt/perl/bin/perl.exe
+#!C:/opt/perl/perl/bin/perl.exe
 # -*- tab-width: 8; -*-
 #
 # This file is part of the CHARP project.

@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="409,1417" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="480,1417" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1307,7 +1307,7 @@ END;]]></definition>
 		<type name="jsonb" length="0"/>
 	</parameter>
 	</return-type>
-	<parameter name="_username">
+	<parameter name="_login">
 		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="_ip_addr">
@@ -1324,26 +1324,27 @@ END;]]></definition>
 	_our_hash character varying;
 BEGIN
 	SELECT 
-	       a.persona_id AS user_id, 
+	       a.user_id AS user_id, 
 	       p.proname AS fname, 
 	       charp_get_function_params (p.proargtypes) AS fparams, 
 	       r.params AS req_params, 
-	       a.passwd 
+	       a.password AS password,
+	       r.request_id AS request_id
 	       INTO _req
 	       FROM request AS r NATURAL JOIN account AS a NATURAL JOIN pg_proc AS p
-	       WHERE a.username = _username AND
-		     r.request_id = _chal AND 
+	       WHERE a.login = _login AND
+		     r.random_bytes = _chal AND 
 		     r.ip_addr = _ip_addr;
 
 	IF _req IS NULL THEN
 		PERFORM charp_raise('REQUNK', _username, _ip_addr::text, _chal);
 	END IF;
 
-	DELETE FROM request WHERE request_id = _chal;
+	DELETE FROM request WHERE request_id = _req.request_id;
 
-	_our_hash := encode(pgcrypto.digest(_username || _chal || _req.passwd, 'sha256'), 'hex');
+	_our_hash := encode(pgcrypto.digest(_login || _chal || _req.password, 'sha256'), 'hex');
 	IF _our_hash <> _hash THEN
-		PERFORM charp_raise('REPFAIL', _username, _ip_addr::text, _chal);
+		PERFORM charp_raise('REPFAIL', _login, _ip_addr::text, _chal);
 	END IF;
 
 	user_id := _req.user_id;

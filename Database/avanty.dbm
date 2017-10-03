@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="480,1417" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="320,1107" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -860,13 +860,17 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[name of the stored procedure that was requested]]></comment>
 	</column>
-	<column name="params" not-null="true">
+	<column name="params">
 		<type name="jsonb" length="0"/>
 		<comment><![CDATA[parameters to the request stored procedure execution]]></comment>
 	</column>
 	<column name="msg">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[Error message with further information, if applies.]]></comment>
+	</column>
+	<column name="err_params">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[The parameters that came from the raised exception.]]></comment>
 	</column>
 	<column name="finished" not-null="true">
 		<type name="av.ts" length="0"/>
@@ -989,7 +993,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		row-amount="0">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Send an error report to the error log.]]></comment>
+	<comment><![CDATA[Send an error report to the request log, optionally (based on request_id) moving data from av.request to log the lifecycle of a given request.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<type name="void" length="0"/>
@@ -1012,7 +1016,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<parameter name="_msg">
 		<type name="varchar" length="0"/>
 	</parameter>
-	<parameter name="_params">
+	<parameter name="_err_params">
 		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="_status">
@@ -1021,18 +1025,24 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<definition><![CDATA[DECLARE
 	_user_id account.user_id%TYPE;
 BEGIN
-	IF _request_id IS NULL THEN
-		_request_id := nextval('request_request_id_seq');
-	END IF;
-
-	_user_id := NULL;
 	IF _login IS NOT NULL THEN
 		SELECT user_id INTO _user_id FROM account WHERE login = _login;
 	END IF;
 
-	INSERT INTO error_log 
-		VALUES(_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
-			_login, _ip_addr, _proname, _params::jsonb, _msg, CURRENT_TIMESTAMP, _status::charp_request_status);
+	IF _request_id IS NULL THEN
+		_request_id := nextval('request_request_id_seq');
+		INSERT INTO request_log
+			VALUES(_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
+				_login, _ip_addr, _proname, NULL, _msg, _err_params,
+				NULL, _status::charp_request_status);
+	ELSE
+		INSERT INTO request_log
+			SELECT r.request_id, r.user_id, r.timestamp, _code::charp_error_code, 
+				_login, r.ip_addr, r.proname, r.params, _msg, _err_params, 
+				CURRENT_TIMESTAMP, _status::charp_request_status
+				FROM request AS r WHERE r.request_id = _request_id;
+		DELETE FROM request WHERE request_id = _request_id;
+	END IF;
 END]]></definition>
 </function>
 
@@ -1294,6 +1304,9 @@ END;]]></definition>
 	<comment><![CDATA[Check that a given request is registered with the given data and compare the hash with one locally computed. Return the necessary data to execute.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
+	<parameter name="request_id">
+		<type name="integer" length="0"/>
+	</parameter>
 	<parameter name="user_id">
 		<type name="smallint" length="0"/>
 	</parameter>
@@ -1321,36 +1334,36 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[DECLARE
 	_req RECORD;
-	_our_hash character varying;
+	_our_hash varchar;
+	_status av.charp_request_status;
 BEGIN
 	SELECT 
-	       a.user_id AS user_id, 
-	       p.proname AS fname, 
+	       r.request_id AS request_id,
+	       a.user_id AS user_id,
+	       p.proname AS proname, 
+	       r.params AS params, 
 	       charp_get_function_params (p.proargtypes) AS fparams, 
-	       r.params AS req_params, 
-	       a.password AS password,
-	       r.request_id AS request_id
+	       a.password AS password
 	       INTO _req
 	       FROM request AS r NATURAL JOIN account AS a NATURAL JOIN pg_proc AS p
-	       WHERE a.login = _login AND
-		     r.random_bytes = _chal AND 
-		     r.ip_addr = _ip_addr;
+	       WHERE a.login = _login 
+			 AND r.random_bytes = _chal
+			 AND r.ip_addr = _ip_addr;
 
 	IF _req IS NULL THEN
 		PERFORM charp_raise('REQUNK', _username, _ip_addr::text, _chal);
 	END IF;
 
-	DELETE FROM request WHERE request_id = _req.request_id;
-
 	_our_hash := encode(pgcrypto.digest(_login || _chal || _req.password, 'sha256'), 'hex');
 	IF _our_hash <> _hash THEN
-		PERFORM charp_raise('REPFAIL', _login, _ip_addr::text, _chal);
+		PERFORM charp_raise('REPFAIL', _login, _ip_addr::text, _chal, _req.request_id::text);
 	END IF;
 
+	request_id := _req.request_id;
 	user_id := _req.user_id;
-	fname := _req.fname;
+	fname := _req.proname;
+	req_params := _req.params;
 	fparams := _req.fparams;
-	req_params := _req.req_params;
 	RETURN NEXT;
 END;]]></definition>
 </function>

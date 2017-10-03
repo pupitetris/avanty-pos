@@ -73,18 +73,20 @@ foreach my $key (keys %ERRORS) {
 sub init {
     my $dbh = shift;
 
-    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (NULL, ?, ?, ?, ?, ?, ?, \'exception\')'), prepare_attrs ());
+    my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?, ?, ?, ?, ?, ?, ?)'), prepare_attrs ());
     if (!defined $err_sth) {
 	dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 	return;
     }
 
-    $err_sth->bind_param (1, undef, SQL_VARCHAR); # type
-    $err_sth->bind_param (2, undef, SQL_VARCHAR); # login
-    $err_sth->bind_param (3, undef, inet_type ()); # ip_addr
-    $err_sth->bind_param (4, undef, SQL_VARCHAR); # resource
-    $err_sth->bind_param (5, undef, SQL_VARCHAR); # msg
-    $err_sth->bind_param (6, undef, params_type ()); # params
+    $err_sth->bind_param (1, undef, SQL_INTEGER); # request_id
+    $err_sth->bind_param (2, undef, SQL_VARCHAR); # type
+    $err_sth->bind_param (3, undef, SQL_VARCHAR); # login
+    $err_sth->bind_param (4, undef, inet_type ()); # ip_addr
+    $err_sth->bind_param (5, undef, SQL_VARCHAR); # resource
+    $err_sth->bind_param (6, undef, SQL_VARCHAR); # msg
+    $err_sth->bind_param (7, undef, params_type ()); # params
+    $err_sth->bind_param (6, undef, SQL_VARCHAR); # status
 
     my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
     if (!defined $chal_sth) {
@@ -242,13 +244,13 @@ sub raise_parse {
     return $raise;
 }
 
-sub error_execute_send {
-    my ($fcgi, $sth, $login, $ip_addr, $res) = @_;
+sub error_get {
+    my ($sth) = @_;
 
     my $err;
-    if (substr ($sth->errstr, 0, 2) eq '|>') { # Probablemente una excepción levantada por nosotros (charp_raise).
+    if (substr ($sth->errstr, 0, 2) eq '|>') { # Probably an exception raised by us (charp_raise).
 	$err = raise_parse ($sth->errstr);
-    } else { # Error en el execute, no es una excepción nuestra.
+    } else { # Execute error, not raised by us.
 	$err = {
 	    'type' => 'EXECUTE',
 	    'code' => 'DBI:EXECUTE',
@@ -261,16 +263,26 @@ sub error_execute_send {
 	$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
     }
 
+    return $err;
+}
+
+sub error_execute_send {
+    my ($fcgi, $sth, $login, $ip_addr, $res, $request_id, $err) = @_;
+
+    $err = error_get ($sth) if !$err;
+
     if (err->{'dolog'}) {
-	$CHARP::ctx->{'err_sth'}->execute ($err->{'type'}, $login, $ip_addr, $res, $err->{'msg'}, $err->{'parms_str'});
+	$CHARP::ctx->{'err_sth'}->execute ($request_id, $err->{'type'}, $login, $ip_addr, $res, $err->{'msg'}, $err->{'parms_str'}, 'exception');
     }
 
-    error_send ($fcgi, { 'err' => $err->{'code'}, 
-			 'msg' => $err->{'msg'}, 
-			 'parms' => $err->{'parms'}, 
-			 'state' => state_num ($sth, $dbh), 
-			 'statestr' => state_str ($sth, $dbh),
-			 'objs' => $err->{'objs'}
+    error_send ($fcgi,
+		{
+		    'err' => $err->{'code'}, 
+		    'msg' => $err->{'msg'}, 
+		    'parms' => $err->{'parms'}, 
+		    'state' => state_num ($sth, $dbh), 
+		    'statestr' => state_str ($sth, $dbh),
+		    'objs' => $err->{'objs'}
 		});
 }
 

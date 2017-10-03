@@ -141,7 +141,10 @@ sub request_reply {
     my $rv = $chk_sth->execute ($req_login, $ip_addr, $req_chal, $req_hash);
 
     if (!defined $rv) {
-	CHARP::error_execute_send ($fcgi, $chk_sth, $req_login, $ip_addr, 'REQUEST_CHECK');
+	my $err = CHARP::error_get ($chk_sth);
+	my $request_id;
+	$request_id = $err->{'parms'}->[3] if $err->{'type'} eq 'REPFAIL';
+	CHARP::error_execute_send ($fcgi, $chk_sth, $req_login, $ip_addr, 'REQUEST_CHECK', $request_id, $err);
 	return;
     }
 
@@ -161,6 +164,7 @@ sub request_reply_do {
     my $func_params = $req->{'fparams'};
     my $req_params = $req->{'req_params'};
     my $req_user_id = $req->{'user_id'};
+    my $req_request_id = $req->{'request_id'};
 
     my $ip_addr = $fcgi->remote_addr ();
 
@@ -228,7 +232,7 @@ sub request_reply_do {
     }
     
     if (!defined $rv) {
-	CHARP::error_execute_send ($fcgi, $sth, $req_login, $ip_addr, $func_name);
+	CHARP::error_execute_send ($fcgi, $sth, $req_login, $ip_addr, $func_name, $req_request_id);
 	return;
     }
 

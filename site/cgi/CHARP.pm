@@ -302,6 +302,7 @@ sub dispatch_error {
 #    exit;
 #}
 
+# Wait for requests, call dispatcher callback and loop.
 sub dispatch {
     my $callback = shift;
     my $ctx = shift;

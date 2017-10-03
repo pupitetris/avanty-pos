@@ -279,7 +279,7 @@ sub main {
 
     my $ctx = CHARP::init ($dbh);
 
-    # Loop mientras lleguen peticiones
+    # Wait for requests, call dispatcher callback and loop.
     CHARP::dispatch (\&request_main, $ctx);
     $dbh->disconnect ();
 }

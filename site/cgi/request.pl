@@ -257,6 +257,7 @@ sub request_reply_do {
     return;
 }
 
+# Request dispatcher. If it returns any value but undefined, dispatching loop ends.
 sub request_main {
     my $fcgi = shift;
     my $ctx = shift;

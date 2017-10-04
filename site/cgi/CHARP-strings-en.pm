@@ -27,7 +27,8 @@ use utf8;
     'SQL:MAILFAIL'	=> 'An error ocurred while sending an email to <%s>. Please check that the address is correct.',
     'SQL:DATADUP'	=> 'The data could not be inserted due to duplicity errors.',
     'SQL:NOTFOUND'	=> 'Information not found.',
-    'SQL:EXIT'		=> '%s'
+    'SQL:EXIT'		=> '%s',
+    'SQL:SUCCESS'	=> 'Request successful.'
 );
 
 %STRS = (

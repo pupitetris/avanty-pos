@@ -1,6 +1,7 @@
 # -*- tab-width: 8; -*-
 package CHARP;
 
+use strict;
 use DBD::Pg qw(:pg_types);
 
 %CHARP::pg_errcodes = ();
@@ -31,23 +32,43 @@ sub prepare_attrs {
     return { 'pg_server_prepare' => 1 };
 }
 
-sub inet_type {
+sub sql_uid_type {
+    return SQL_INTEGER;
+}
+
+sub sql_int_type {
+    return SQL_INTEGER;
+}
+
+sub sql_str_type {
+    return SQL_VARCHAR;
+}
+
+sub sql_bool_type {
+    return SQL_BOOLEAN;
+}
+
+sub sql_date_type {
+    return SQL_DATE;
+}
+
+sub sql_inet_type {
     return { 'pg_type' => PG_INET };
 }
 
-sub params_type {
+sub sql_params_type {
     return { 'pg_type' => PG_JSONB };
 }
 
-sub intarr_type {
+sub sql_intarr_type {
     return { 'pg_type' => PG_INT4ARRAY };
 }
 
-sub strarr_type {
+sub sql_strarr_type {
     return { 'pg_type' => PG_VARCHARARRAY };
 }
 
-sub boolarr_type {
+sub sql_boolarr_type {
     return { 'pg_type' => PG_BOOLARRAY };
 }
 

@@ -8,8 +8,11 @@
 
 package CHARP;
 
+use strict;
+
 use DBI qw(:sql_types);
 
+use Data::Dumper;
 use Encode qw(encode decode);
 use CGI::Fast qw(:cgi);
 use JSON::XS;
@@ -17,10 +20,10 @@ use utf8;
 
 require "CHARP-cmd.pm";
 require "CHARP-config.pm";
-require "CHARP-strings-$CHARP_LANG.pm";
-require "CHARP-$DB_DRIVER.pm";
+require "CHARP-strings-$CHARP::CHARP_LANG.pm";
+require "CHARP-$CHARP::DB_DRIVER.pm";
 
-%ERROR_LEVELS = (
+%CHARP::ERROR_LEVELS = (
 	'DATA' => 1,
 	'SQL'  => 2,
 	'DBI'  => 3,
@@ -28,46 +31,46 @@ require "CHARP-$DB_DRIVER.pm";
 	'HTTP' => 5
 );
 
-$ERROR_SEV_INTERNAL = 1;
-$ERROR_SEV_PERM		= 2;
-$ERROR_SEV_RETRY	= 3;
-$ERROR_SEV_USER		= 4;
-$ERROR_SEV_EXIT		= 5;
+$CHARP::ERROR_SEV_INTERNAL = 1;
+$CHARP::ERROR_SEV_PERM		= 2;
+$CHARP::ERROR_SEV_RETRY	= 3;
+$CHARP::ERROR_SEV_USER		= 4;
+$CHARP::ERROR_SEV_EXIT		= 5;
 
 # Last error code is 25.
-%ERRORS = (
-	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $ERROR_SEV_RETRY	},
-	'DBI:PREPARE'		=> { 'code' =>  2, 'sev' => $ERROR_SEV_INTERNAL },
-	'DBI:EXECUTE'		=> { 'code' =>  3, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:REQPARM'		=> { 'code' =>  4, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:NOTPOST'		=> { 'code' =>  7, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:PATHUNK'		=> { 'code' =>  8, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:BADPARAM'	    => { 'code' => 11, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:NUMPARAM'	    => { 'code' => 12, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:BINDPARAM'	    => { 'code' => 16, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:FILESEND'	    => { 'code' => 19, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:CMDUNK'		=> { 'code' => 22, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $ERROR_SEV_INTERNAL },
-	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $ERROR_SEV_INTERNAL },
-	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $ERROR_SEV_USER	    },
-	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $ERROR_SEV_INTERNAL },
-	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $ERROR_SEV_INTERNAL },
-	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $ERROR_SEV_USER	    },
-	'SQL:ASSERT'		=> { 'code' => 13, 'sev' => $ERROR_SEV_INTERNAL },
-	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $ERROR_SEV_PERM	    },
-	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $ERROR_SEV_PERM	    },
-	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $ERROR_SEV_USER	    },
-	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $ERROR_SEV_USER	    },
-	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $ERROR_SEV_USER	    },
-	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $ERROR_SEV_EXIT	    },
-	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $ERROR_SEV_EXIT	    }
+%CHARP::ERRORS = (
+	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $CHARP::ERROR_SEV_RETRY	},
+	'DBI:PREPARE'		=> { 'code' =>  2, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'DBI:EXECUTE'		=> { 'code' =>  3, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:REQPARM'		=> { 'code' =>  4, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:NOTPOST'		=> { 'code' =>  7, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:PATHUNK'		=> { 'code' =>  8, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:BADPARAM'	    => { 'code' => 11, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:NUMPARAM'	    => { 'code' => 12, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:BINDPARAM'	    => { 'code' => 16, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:FILESEND'	    => { 'code' => 19, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:CMDUNK'		=> { 'code' => 22, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:ASSERT'		=> { 'code' => 13, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
+	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $CHARP::ERROR_SEV_PERM	    },
+	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $CHARP::ERROR_SEV_PERM	    },
+	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $CHARP::ERROR_SEV_EXIT	    },
+	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $CHARP::ERROR_SEV_EXIT	    }
 );
 
-foreach my $key (keys %ERRORS) {
+foreach my $key (keys %CHARP::ERRORS) {
 	my $lvl = (split (':', $key))[0];
-	my $err = $ERRORS{$key};
-	$err->{'desc'} = $ERROR_DESCS{$key};
-	$err->{'level'} = $ERROR_LEVELS{$lvl};
+	my $err = $CHARP::ERRORS{$key};
+	$err->{'desc'} = $CHARP::ERROR_DESCS{$key};
+	$err->{'level'} = $CHARP::ERROR_LEVELS{$lvl};
 	$err->{'key'} = $key;
 }
 
@@ -83,9 +86,9 @@ sub init {
 	$err_sth->bind_param (1, undef, SQL_INTEGER); # request_id
 	$err_sth->bind_param (2, undef, SQL_VARCHAR); # type
 	$err_sth->bind_param (3, undef, SQL_VARCHAR); # login
-	$err_sth->bind_param (4, undef, inet_type ()); # ip_addr
+	$err_sth->bind_param (4, undef, sql_inet_type ()); # ip_addr
 	$err_sth->bind_param (5, undef, SQL_VARCHAR); # resource
-	$err_sth->bind_param (6, undef, params_type ()); # params
+	$err_sth->bind_param (6, undef, sql_params_type ()); # params
 	$err_sth->bind_param (7, undef, SQL_VARCHAR); # status
 
 	my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
@@ -95,9 +98,9 @@ sub init {
 	}
 
 	$chal_sth->bind_param (1, undef, SQL_VARCHAR); # login
-	$chal_sth->bind_param (2, undef, inet_type ()); # ip_addr
+	$chal_sth->bind_param (2, undef, sql_inet_type ()); # ip_addr
 	$chal_sth->bind_param (3, undef, SQL_VARCHAR); # resource
-	$chal_sth->bind_param (4, undef, params_type ()); # params
+	$chal_sth->bind_param (4, undef, sql_params_type ()); # params
 
 	my $chk_sth = $dbh->prepare (call_procedure_query ('charp_request_check (?, ?, ?, ?)'), prepare_attrs ());
 	if (!defined $chk_sth) {
@@ -106,7 +109,7 @@ sub init {
 	}
 
 	$chk_sth->bind_param (1, undef, SQL_VARCHAR); # login
-	$chk_sth->bind_param (2, undef, inet_type ()); # ip_addr
+	$chk_sth->bind_param (2, undef, sql_inet_type ()); # ip_addr
 	$chk_sth->bind_param (3, undef, SQL_VARCHAR); # chal
 	$chk_sth->bind_param (4, undef, SQL_VARCHAR); # hash
 
@@ -131,7 +134,7 @@ sub init {
 }
 
 # For testing, add ->pretty.
-$JSON = JSON::XS->new;
+$CHARP::JSON = JSON::XS->new;
 
 sub json_print_headers {
 	my $fcgi = shift;
@@ -143,11 +146,11 @@ sub json_print_headers {
 }
 
 sub json_encode {
-	return encode ('UTF-8', $JSON->encode (shift));
+	return encode ('UTF-8', $CHARP::JSON->encode (shift));
 }
 
 sub json_decode {
-	return $JSON->decode (shift);
+	return $CHARP::JSON->decode (shift);
 }
 
 sub json_send {
@@ -171,7 +174,7 @@ sub error_send {
 
 	$parms = undef if defined $parms && scalar (@$parms) < 0;
 
-	my %err = %{$ERRORS{$err_key}};
+	my %err = %{$CHARP::ERRORS{$err_key}};
 	if (defined $parms) {
 		$err{'desc'} = sprintf ($err{'desc'}, @$parms);
 	}
@@ -258,6 +261,8 @@ sub error_get {
 		$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
 	}
 
+	print STDERR "error: " . Dumper ($err) . "\n";
+
 	return $err;
 }
 
@@ -266,7 +271,11 @@ sub execute {
 
 	print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
 
-	return $sth->execute (@_);
+	my $rv = $sth->execute (@_);
+
+	print STDERR "return: " . $rv . "\n";
+
+	return $rv;
 }
 
 sub error_log {
@@ -277,11 +286,11 @@ sub error_log {
 }
 
 sub error_execute_send {
-	my ($fcgi, $sth, $login, $ip_addr, $res, $request_id, $err) = @_;
+	my ($dbh, $fcgi, $sth, $login, $ip_addr, $res, $request_id, $err) = @_;
 
 	$err = error_get ($sth) if !$err;
 
-	if (err->{'dolog'}) {
+	if ($err->{'dolog'}) {
 		error_log ($request_id, $err, $login, $ip_addr, $res, 'exception');
 	}
 
@@ -301,7 +310,6 @@ sub dispatch_error {
 	dispatch (sub { error_send (@_); return 1; }, $ctx);
 }
 
-#use Data::Dumper;
 #
 #sub fcgi_bail {
 #	my $data = shift;
@@ -329,11 +337,12 @@ sub connect {
 	$attr_hash = {} if (!defined $attr_hash);
 	connect_attrs_add ($attr_hash);
 
-	my $dbh = DBI->connect_cached ("dbi:$DB_DRIVER:$DB_STR" . dsn_add (), $DB_USER, $DB_PASS, $attr_hash);
-	undef $DB_STR;
-	undef $DB_USER;
-	undef $DB_PASS;
-	undef $DB_DRIVER;
+	my $dbh = DBI->connect_cached ("dbi:$CHARP::DB_DRIVER:$CHARP::DB_STR" . dsn_add (), 
+								   $CHARP::DB_USER, $CHARP::DB_PASS, $attr_hash);
+	undef $CHARP::DB_STR;
+	undef $CHARP::DB_USER;
+	undef $CHARP::DB_PASS;
+	undef $CHARP::DB_DRIVER;
 
 	if (!defined $dbh) {
 		dispatch_error ({'err' => 'DBI:CONNECT', 'msg' => $DBI::errstr });

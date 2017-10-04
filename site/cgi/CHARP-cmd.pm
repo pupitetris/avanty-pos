@@ -9,7 +9,7 @@ use File::Basename;
 use File::Copy;
 
 # Only way to catch INFO/NOTICES raised by stored procedures is through SIG{__WARN__}.
-$INFO_HANDLER = undef;
+$CHARP::INFO_HANDLER = undef;
 sub warn_handler {
     my $msg = shift;
     if ($msg =~ /^INFO: +(\|>.*)/ && $INFO_HANDLER) {
@@ -20,7 +20,7 @@ sub warn_handler {
 }
 
 # Catch warnings to process INFO messages raised from stored procedures (for charp_cmd).
-$SIG{'__WARN__'} = \&warn_handler;
+$::SIG{'__WARN__'} = \&warn_handler;
 
 sub cmderr {
     my $cmd = shift;

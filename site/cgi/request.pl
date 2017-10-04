@@ -9,6 +9,7 @@
 #
 # Licensed under the EUPL V.1.1. See the file LICENSE.txt for copying conditions.
 
+use strict;
 use lib '.';
 use CHARP;
 
@@ -40,7 +41,8 @@ sub request_challenge {
 	my $func_sth = $ctx->{'func_sth'};
 	my $rv = CHARP::execute ($func_sth, $req_res);
 	if (!defined $rv) {
-	    CHARP::error_execute_send ($fcgi, $func_sth, $req_login, $ip_addr, $req_res);
+	    CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $func_sth, $req_login, 
+				       $ip_addr, $req_res);
 	    return;
 	}
 	my $rh = ${$func_sth->fetchall_arrayref ({})}[0];
@@ -58,7 +60,8 @@ sub request_challenge {
     my $rv = CHARP::execute ($chal_sth, $req_login, $ip_addr, $req_res, $req_params);
 
     if (!defined $rv) {
-	CHARP::error_execute_send ($fcgi, $chal_sth, $req_login, $ip_addr, $req_res);
+	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chal_sth, $req_login, 
+				   $ip_addr, $req_res);
 	return;
     }
 
@@ -69,15 +72,15 @@ sub request_challenge {
     return;
 }
 
-%SQL_TYPES = (
-    'UID' => SQL_INTEGER,
-    'INT' => SQL_INTEGER,
-    'STR' => SQL_VARCHAR,
-    'BOOL' => SQL_BOOLEAN,
-    'DATE' => SQL_DATE,
-    'INTARR'  => CHARP::intarr_type,
-    'STRARR'  => CHARP::strarr_type,
-    'BOOLARR' => CHARP::boolarr_type
+%::SQL_TYPES = (
+    'UID' => CHARP::sql_uid_type,
+    'INT' => CHARP::sql_int_type,
+    'STR' => CHARP::sql_str_type,
+    'BOOL' => CHARP::sql_bool_type,
+    'DATE' => CHARP::sql_date_type,
+    'INTARR'  => CHARP::sql_intarr_type,
+    'STRARR'  => CHARP::sql_strarr_type,
+    'BOOLARR' => CHARP::sql_boolarr_type
 );
 
 sub request_reply_file {
@@ -86,8 +89,8 @@ sub request_reply_file {
     my $sth = shift;
     my $fd;
 
-    my $res = $sth->fetchrow_hashref (NAME_lc);
-    $sth->fetchrow_hashref (NAME_lc); # Avoid 'still Active' warning, exhaust response buffer.
+    my $res = $sth->fetchrow_hashref ('NAME_lc');
+    $sth->fetchrow_hashref ('NAME_lc'); # Avoid 'still Active' warning, exhaust response buffer.
 
     if (! exists $res->{'filename'}) {
 	CHARP::error_send ($fcgi, { 'err' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:MISSING:MSG'}, $func_name) });
@@ -144,7 +147,8 @@ sub request_reply {
 	my $err = CHARP::error_get ($chk_sth);
 	my $request_id;
 	$request_id = $err->{'parms'}->[3] if $err->{'type'} eq 'REPFAIL';
-	CHARP::error_execute_send ($fcgi, $chk_sth, $req_login, $ip_addr, 'REQUEST_CHECK', $request_id, $err);
+	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chk_sth, $req_login, 
+				   $ip_addr, 'REQUEST_CHECK', $request_id, $err);
 	return;
     }
 
@@ -210,7 +214,7 @@ sub request_reply_do {
 	    $count ++;
 	}
 
-	eval { $sth->bind_param ($i, $val, $TYPES{$type}); };
+	eval { $sth->bind_param ($i, $val, $::SQL_TYPES{$type}); };
 	if ($@ ne '') {
 	    CHARP::error_send ($fcgi, { 'err' => 'CGI:BINDPARAM', 
 					'msg' => $@, 
@@ -235,7 +239,8 @@ sub request_reply_do {
     }
     
     if (!defined $rv) {
-	CHARP::error_execute_send ($fcgi, $sth, $req_login, $ip_addr, $func_name, $req_request_id);
+	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $sth, $req_login, 
+				   $ip_addr, $func_name, $req_request_id);
 	return;
     }
 

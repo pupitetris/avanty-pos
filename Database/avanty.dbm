@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="320,1107" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="319,1106" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1071,12 +1071,6 @@ BEGIN
 	   _code_t := _code;
 	END IF;
 
-	IF array_length(_args, 1) IS NOT NULL THEN
-	   FOR _i IN 1 .. array_length(_args, 1) LOOP
-	       _args[_i] := quote_literal(_args[_i]);
-	   END LOOP;
-	END IF;
-
 	SELECT INTO _sqlcode
 	       CASE _code_t
 		    WHEN 'USERUNK'      THEN 'CH001'
@@ -1121,13 +1115,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_i integer;
 BEGIN
-	IF array_length(_args, 1) IS NOT NULL THEN
-	   FOR _i IN 1 .. array_length(_args, 1) LOOP
-	       _args[_i] := quote_literal(_args[_i]);
-	   END LOOP;
-	END IF;
-
-	RAISE INFO '|>%|{%}|', _cmd::text, array_to_string(_args, ',');
+	RAISE INFO '|>%|{%}|', _cmd::text, array_to_json(_args);
 END;]]></definition>
 </function>
 

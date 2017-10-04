@@ -12,7 +12,7 @@ use strict;
 
 use DBI qw(:sql_types);
 
-use Data::Dumper;
+#use Data::Dumper;
 use Encode qw(encode decode);
 use CGI::Fast qw(:cgi);
 use JSON::XS;
@@ -232,7 +232,7 @@ sub raise_parse {
 		$raise->{'parms'} = [];
 	} else {
 		$raise->{'parms_str'} = $parms_str;
-		$raise->{'parms'} = JSON->decode ($parms_str);
+		$raise->{'parms'} = $CHARP::JSON->decode ($parms_str);
 	}
 
 	$raise->{'code'} = 'SQL:' . $raise->{'type'};
@@ -246,7 +246,10 @@ sub error_get {
 	my ($sth) = @_;
 
 	my $err;
-	if (substr ($sth->errstr, 0, 2) eq '|>') { # Probably an exception raised by us (charp_raise).
+
+	my $errstr = $sth->errstr;
+	$errstr =~ s/^ERROR:\s+//; # PostgreSQL 9.6 prepends the error string with this.
+	if (substr ($errstr, 0, 2) eq '|>') { # Probably an exception raised by us (charp_raise).
 		$err = raise_parse ($sth->errstr);
 	} else { # Execute error, not raised by us.
 		$err = {
@@ -260,8 +263,6 @@ sub error_get {
 		my $objstr = $1;
 		$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
 	}
-
-	print STDERR "error: " . Dumper ($err) . "\n";
 
 	return $err;
 }

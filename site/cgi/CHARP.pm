@@ -270,11 +270,11 @@ sub error_get {
 sub execute {
 	my $sth = shift;
 
-	print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
+	#print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
 
 	my $rv = $sth->execute (@_);
 
-	print STDERR "return: " . $rv . "\n";
+	#print STDERR "return: " . $rv . "\n";
 
 	return $rv;
 }

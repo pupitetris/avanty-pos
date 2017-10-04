@@ -864,10 +864,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="jsonb" length="0"/>
 		<comment><![CDATA[parameters to the request stored procedure execution]]></comment>
 	</column>
-	<column name="msg">
-		<type name="varchar" length="0"/>
-		<comment><![CDATA[Error message with further information, if applies.]]></comment>
-	</column>
 	<column name="err_params">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[The parameters that came from the raised exception.]]></comment>
@@ -1013,9 +1009,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<parameter name="_proname">
 		<type name="varchar" length="0"/>
 	</parameter>
-	<parameter name="_msg">
-		<type name="varchar" length="0"/>
-	</parameter>
 	<parameter name="_err_params">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -1033,12 +1026,12 @@ BEGIN
 		_request_id := nextval('request_request_id_seq');
 		INSERT INTO request_log
 			VALUES(_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
-				_login, _ip_addr, _proname, NULL, _msg, _err_params,
+				_login, _ip_addr, _proname, NULL, _err_params,
 				NULL, _status::charp_request_status);
 	ELSE
 		INSERT INTO request_log
 			SELECT r.request_id, r.user_id, r.timestamp, _code::charp_error_code, 
-				_login, r.ip_addr, r.proname, r.params, _msg, _err_params, 
+				_login, r.ip_addr, r.proname, r.params, _err_params, 
 				CURRENT_TIMESTAMP, _status::charp_request_status
 				FROM request AS r WHERE r.request_id = _request_id;
 		DELETE FROM request WHERE request_id = _request_id;
@@ -1056,7 +1049,7 @@ END]]></definition>
 		row-amount="0">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Raise and log an exception with the CHARP format for client consumption.]]></comment>
+	<comment><![CDATA[Raise and log an exception with the CHARP format for client consumption. WARNING: exceptions cause all data changes to be rolled back! Use charp_cmd to avoid rollbacks.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<type name="void" length="0"/>
@@ -1114,7 +1107,7 @@ END;]]></definition>
 		row-amount="0">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Send a command to the CHARP CGI layer.]]></comment>
+	<comment><![CDATA[Send a command to the CHARP CGI layer. Unlike charp_raise, this won't create an exception that will rollback the current transaction.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<type name="void" length="0"/>

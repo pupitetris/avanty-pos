@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="319,1106" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="319,1417" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -865,7 +865,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<comment><![CDATA[parameters to the request stored procedure execution]]></comment>
 	</column>
 	<column name="err_params">
-		<type name="varchar" length="0"/>
+		<type name="jsonb" length="0"/>
 		<comment><![CDATA[The parameters that came from the raised exception.]]></comment>
 	</column>
 	<column name="finished" not-null="true">
@@ -1010,7 +1010,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="_err_params">
-		<type name="varchar" length="0"/>
+		<type name="jsonb" length="0"/>
 	</parameter>
 	<parameter name="_status">
 		<type name="varchar" length="0"/>

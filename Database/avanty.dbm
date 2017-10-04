@@ -1555,4 +1555,9 @@ END;]]></definition>
 	<roles names="avanty"/>
 	<privileges usage="true"/>
 </permission>
+<permission>
+	<object name="av.request_log" type="table"/>
+	<roles names="avanty"/>
+	<privileges insert="true"/>
+</permission>
 </dbmodel>

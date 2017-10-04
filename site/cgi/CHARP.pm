@@ -74,7 +74,7 @@ foreach my $key (keys %ERRORS) {
 sub init {
 	my $dbh = shift;
 
-	my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?, ?, ?, ?, ?, ?)'), prepare_attrs ());
+	my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?, ?, ?, ?, ?)'), prepare_attrs ());
 	if (!defined $err_sth) {
 		dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;

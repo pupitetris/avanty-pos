@@ -38,7 +38,7 @@ sub request_challenge {
 	$req_res = 'anon_' . $req_res;
 
 	my $func_sth = $ctx->{'func_sth'};
-	my $rv = $func_sth->execute ($req_res);
+	my $rv = CHARP::execute ($func_sth, $req_res);
 	if (!defined $rv) {
 	    CHARP::error_execute_send ($fcgi, $func_sth, $req_login, $ip_addr, $req_res);
 	    return;
@@ -55,7 +55,7 @@ sub request_challenge {
     }
     
     my $chal_sth = $ctx->{'chal_sth'};
-    my $rv = $chal_sth->execute ($req_login, $ip_addr, $req_res, $req_params);
+    my $rv = CHARP::execute ($chal_sth, $req_login, $ip_addr, $req_res, $req_params);
 
     if (!defined $rv) {
 	CHARP::error_execute_send ($fcgi, $chal_sth, $req_login, $ip_addr, $req_res);
@@ -138,7 +138,7 @@ sub request_reply {
 
     my $ip_addr = $fcgi->remote_addr ();
     my $chk_sth = $ctx->{'chk_sth'};
-    my $rv = $chk_sth->execute ($req_login, $ip_addr, $req_chal, $req_hash);
+    my $rv = CHARP::execute ($chk_sth, $req_login, $ip_addr, $req_chal, $req_hash);
 
     if (!defined $rv) {
 	my $err = CHARP::error_get ($chk_sth);
@@ -186,7 +186,8 @@ sub request_reply_do {
 	return;
     }
 
-    my $sth = $ctx->{'dbh'}->prepare_cached (CHARP::call_procedure_query ("rp.$func_name ($placeholders)"), CHARP::prepare_attrs ());
+    my $sth = $ctx->{'dbh'}->prepare_cached (CHARP::call_procedure_query ("rp.$func_name ($placeholders)"), 
+					     CHARP::prepare_attrs ());
     if (!defined $sth) {
 	CHARP::dispatch_error ({ 'err' => 'ERROR_DBI:PREPARE', 'msg' => $DBI::errstr });
 	return;
@@ -211,7 +212,9 @@ sub request_reply_do {
 
 	eval { $sth->bind_param ($i, $val, $TYPES{$type}); };
 	if ($@ ne '') {
-	    CHARP::error_send ($fcgi, { 'err' => 'CGI:BINDPARAM', 'msg' => $@, 'parms' => [ $func_name, $count, $val, $req_params ]});
+	    CHARP::error_send ($fcgi, { 'err' => 'CGI:BINDPARAM', 
+					'msg' => $@, 
+					'parms' => [ $func_name, $count, $val, $req_params ]});
 	    return;
 	}
 	$i++;
@@ -223,7 +226,7 @@ sub request_reply_do {
 	$info_error = CHARP::info_handler ($fcgi, $raise);
     };
 
-    my $rv = $sth->execute ();
+    my $rv = CHARP::execute ($sth);
 
     $CHARP::INFO_HANDLER = undef;
     if ($info_error) {
@@ -257,6 +260,8 @@ sub request_reply_do {
 	'"],"data":' .
 	CHARP::json_encode ($sth->fetchall_arrayref ()) .
 	'}';
+
+    $sth->finish ();
 
     return;
 }

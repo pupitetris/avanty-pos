@@ -201,6 +201,7 @@
 		$('#del-button')
 			.bind ('click', function () {
 				APP.charp.credentialsDelete ();
+				APP.charp.credentialsSet (null, null, null);
 				$('#login-username,#login-passwd')
 					.val ('');
 			});

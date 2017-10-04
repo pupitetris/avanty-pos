@@ -940,7 +940,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[commands that the DB can send to the web gateway through the notification system]]></comment>
-	<enumeration values="FILE_CREATE,FILE_DELETE,FILE_MOVE,FILE_COPY,OTHER"/>
+	<enumeration values="FILE_CREATE,FILE_DELETE,FILE_MOVE,FILE_COPY,EXIT,OTHER"/>
 </usertype>
 
 <relationship name="payment_has_one_ticket" type="rel11"

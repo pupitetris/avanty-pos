@@ -12,7 +12,7 @@ use File::Copy;
 $CHARP::INFO_HANDLER = undef;
 sub warn_handler {
     my $msg = shift;
-    if ($msg =~ /^INFO: +(\|>.*)/ && $INFO_HANDLER) {
+    if ($msg =~ /^INFO:\s+(\|>.*)/ && $INFO_HANDLER) {
 	&$INFO_HANDLER (CHARP::raise_parse ($1));
 	return;
     }

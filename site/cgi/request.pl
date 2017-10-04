@@ -236,6 +236,10 @@ sub request_reply_do {
 	return;
     }
 
+    # Log that the execution of the RP was successful:
+    CHARP::error_log ($req_request_id, $CHARP::ERRORS{'SQL:SUCCESS'}, 
+		      $req_login, $ip_addr, $func_name, 'success');
+
     if ($func_name =~ /^file_/ || $func_name =~ /^anon_file_/) {
 	return request_reply_file ($fcgi, $func_name, $sth);
     }

@@ -228,11 +228,6 @@ sub raise_parse {
 		$raise->{'parms_str'} = '[]';
 		$raise->{'parms'} = [];
 	} else {
-		# Postgresql is using invalid single-quotes for string; transform to double-quotes:
-		$parms_str =~ s/^\['/["/; 
-		$parms_str =~ s/','/","/g; 
-		$parms_str =~ s/'\]$/"]/;
-
 		$raise->{'parms_str'} = $parms_str;
 		$raise->{'parms'} = JSON->decode ($parms_str);
 	}
@@ -266,11 +261,19 @@ sub error_get {
 	return $err;
 }
 
+sub execute {
+	my $sth = shift;
+
+	print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
+
+	return $sth->execute (@_);
+}
+
 sub error_log {
 	my ($request_id, $err, $login, $ip_addr, $res, $status) = @_;
 
-	$CHARP::ctx->{'err_sth'}->execute ($request_id, $err->{'type'}, $login, $ip_addr, 
-									   $res, $err->{'parms_str'}, $status);
+	execute ($CHARP::ctx->{'err_sth'}, 
+			 $request_id, $err->{'type'}, $login, $ip_addr, $res, $err->{'parms_str'}, $status);
 }
 
 sub error_execute_send {

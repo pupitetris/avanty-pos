@@ -1,0 +1,68 @@
+.avanty *:focus {
+	outline: 5px dotted lightgray;
+	outline-offset: 5px;
+}
+
+.avanty .ui-dialog {
+	padding: 0;
+}
+
+.avanty .ui-dialog-titlebar {
+	border-width: 0;
+	-moz-border-radius-bottomleft: 0;
+	-webkit-border-bottom-left-radius: 0;
+	-moz-border-radius-bottomright: 0;
+	-webkit-border-bottom-right-radius: 0;	
+}
+
+.avanty .ui-dialog .ui-dialog-buttonpane {
+	margin-bottom: 8px;
+}
+
+.ui-dialog-content .icon {
+    float: left;
+    margin-bottom: 1em;
+}
+
+.ui-dialog-content .icon img {
+    width: 64px;
+    height: 64px;
+}
+
+.ui-dialog-content p {
+    text-align: left;
+    margin-top: 1em;
+    margin-bottom: 0;
+}
+
+.ui-dialog-content .desc {
+    margin-left: 72px;
+    margin-top: 2em;
+}
+
+.ui-dialog-content .msg {
+    font-style: italic;
+    clear: both;
+    white-space: pre;
+    overflow-x: auto;
+}
+
+.ui-dialog-content .msg.msg-mono {
+/*    font-style: normal;
+    font-family: monospace;*/
+}
+
+.ui-dialog-content .error-sev {
+    clear: both;
+}
+
+.ui-button {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
+.ui-datepicker-trigger {
+    padding-left: 4px;
+    vertical-align: top;
+}

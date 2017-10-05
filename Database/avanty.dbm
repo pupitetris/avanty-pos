@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="319,1417" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="317,1097" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1027,7 +1027,7 @@ BEGIN
 		INSERT INTO request_log
 			VALUES(_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
 				_login, _ip_addr, _proname, NULL, _err_params,
-				NULL, _status::charp_request_status);
+				CURRENT_TIMESTAMP, _status::charp_request_status);
 	ELSE
 		INSERT INTO request_log
 			SELECT r.request_id, r.user_id, r.timestamp, _code::charp_error_code, 

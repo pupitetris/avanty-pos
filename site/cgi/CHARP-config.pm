@@ -32,6 +32,6 @@ undef $DB_PORT;
 $DB_DRIVER = 'Pg';
 
 # Language for the localized strings.
-$CHARP_LANG = 'en';
+$CHARP_LANG = 'es';
 
 1;

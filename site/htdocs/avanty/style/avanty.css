@@ -10,6 +10,12 @@ body.avanty {
 	height: 100vh;
 }
 
+.avanty .label {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
 .activate-quadrant {
 	position: absolute;
 	width: 50%;
@@ -17,14 +23,10 @@ body.avanty {
 	background-color: white;
 }
 
-.activate-quadrant:hover {
-	background-color: #eee;
-}
-
 #quadrant-1 { top: 0; left: 0; }
 #quadrant-2 { top: 0; left: 50vw; }
-#quadrant-3 { top: 50vh; left: 0; }
-#quadrant-4 { top: 50vh; left: 50vw; }
+#quadrant-3 { top: 50vh; left: 50vw; }
+#quadrant-4 { top: 50vh; left: 0; }
 #quadrant-5 { top: 25vh; left: 25vw; display: table; }
 
 #quadrant-5 {
@@ -37,4 +39,8 @@ body.avanty {
 	font-size: 150%;
 }
 
-	
+#activate-greeting-continue {
+	width: 100%;
+	position: absolute;
+	margin-top: 1em;
+}

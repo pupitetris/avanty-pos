@@ -204,18 +204,9 @@
 	};
 
 	$(document).ready (function () {
-		// IE no tiene esta función.
-		if (!Array.indexOf) {
-			Array.prototype.indexOf = function (obj) {
-				for (var i = 0; i < this.length; i++)
-					if (this[i] == obj)
-						return i;
-				return -1;
-			}
-		}
-
-		if (!APP.DEVEL)
+		if (!APP.DEVEL) {
 			window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
+		}
 
 		// This should be defined by you, it's your entry point.
 		if (APP.main)

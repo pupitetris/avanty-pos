@@ -19,50 +19,50 @@
 	margin-bottom: 8px;
 }
 
-.ui-dialog-content .icon {
+.avanty .ui-dialog-content .icon {
     float: left;
     margin-bottom: 1em;
 }
 
-.ui-dialog-content .icon img {
+.avanty .ui-dialog-content .icon img {
     width: 64px;
     height: 64px;
 }
 
-.ui-dialog-content p {
+.avanty .ui-dialog-content p {
     text-align: left;
     margin-top: 1em;
     margin-bottom: 0;
 }
 
-.ui-dialog-content .desc {
+.avanty .ui-dialog-content .desc {
     margin-left: 72px;
     margin-top: 2em;
 }
 
-.ui-dialog-content .msg {
+.avanty .ui-dialog-content .msg {
     font-style: italic;
     clear: both;
     white-space: pre;
     overflow-x: auto;
 }
 
-.ui-dialog-content .msg.msg-mono {
+.avanty .ui-dialog-content .msg.msg-mono {
 /*    font-style: normal;
     font-family: monospace;*/
 }
 
-.ui-dialog-content .error-sev {
+.avanty .ui-dialog-content .error-sev {
     clear: both;
 }
 
-.ui-button {
+.avanty .ui-button {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
 }
 
-.ui-datepicker-trigger {
+.avanty .ui-datepicker-trigger {
     padding-left: 4px;
     vertical-align: top;
 }

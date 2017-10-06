@@ -1,4 +1,4 @@
-// This file is part of the CHARP project.
+// This file is part of the CHARP project. -*- tab-width: 4; -*-
 //
 // Copyright © 2011 - 2014
 //   Free Software Foundation Europe, e.V.,
@@ -20,3 +20,26 @@ CHARP.ERROR_SEV_MSG = [
     /* USER */     'La información que proporcionó es errónea, por favor corrija sus datos y vuelva a intentar.',
     /* EXIT */     'Este es un mensaje enviado para proceso por parte de la aplicación y no debe ser visible al usuario.'
 ];
+
+if ($.validator) {
+	// Validating messages in Spanish.
+	$.validator.messages = {
+		required: 'Este campo es obligatorio.',
+		remote: 'Por favor corrija este campo.',
+		email: 'Por favor ingrese una dirección e-mail válida.',
+		url: 'Por favor ingrese un URL válido.',
+		date: 'Por favor ingrese una fecha válida.',
+		dateISO: 'Por favor ingrese una fecha ISO válida.',
+		number: 'Por favor ingrese un número.',
+		digits: 'Por favor introduzca sólo números.',
+		creditcard: 'Por favor ingrese un número de tarjeta válido.',
+		equalTo: 'Por favor ingrese el mismo valor de nuevo.',
+		accept: 'Por favor ingrese un valor con una extensión válida.',
+		maxlength: $.validator.format ('Por favor ingrese no más de {0} caracteres.'),
+		minlength: $.validator.format ('Por favor ingrese por lo menos {0} caracteres.'),
+		range: $.validator.format ('Por favor ingrese un valor entre {0} y {1}.'),
+		rangelength: $.validator.format ('Por favor ingrese un valor entre {0} y {1} caracteres.'),
+		max: $.validator.format ('Por favor ingrese un valor menor o igual a {0}.'),
+		min: $.validator.format ('Por favor ingrese un valor mayor o igual a {0}.')
+	};
+}

@@ -23,17 +23,12 @@
 		APP.charp.credentialsSet (login, pass, salt);
 	}
 
+	var MOD_NAME = 'login';
+
 	var mod = {
 		init: function () {
 			mod.initialized = true;
-
-			var div = document.createElement ('div');
-			div.id = 'login';
-			div.className = 'page';
-			$('body').append (div);
-			APP.loadLayout ($(div), 'login.html', layoutInit);
-
-			APP.charp = new CHARP ().init ();
+			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layoutInit);
 		},
 
 		onLoad: function () {
@@ -210,5 +205,5 @@
 		mod.onLoad ();
 	}
 
-	APP.login = mod;
+	APP.addModule (MOD_NAME, mod);
 }) ();

@@ -35,6 +35,9 @@
 			if (!mod.loaded)
 				return;
 
+			APP.switchPage ($('#login'));
+			APP.switchSection ($('#login-dialog'), $('#login-sections'));
+
 			mod.reset ();
 			loadCredentials ();
 			$('#login-username').focus ();

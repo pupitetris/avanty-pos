@@ -40,10 +40,9 @@
 
 		loadModule: function (name, cb, errCb) {
 			if (APP.mod[name]) {
-				if (!APP.mod[name].initialized && APP[name].init) {
-					APP.mod[name].MOD_NAME = name;
+				if (!APP.mod[name].initialized && APP.mod[name].init)
 					APP.mod[name].init ();
-				}
+
 				if (APP.mod[name].onLoad)
 					APP.mod[name].onLoad ();
 				if (cb) cb (APP.mod[name]);

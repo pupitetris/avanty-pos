@@ -1,3 +1,11 @@
+.avanty .ui-widget {
+	font-family: 'Roboto';
+}
+
+.avanty .ui-widget button {
+	font-family: 'Roboto';
+}
+
 .avanty *:focus {
 	outline: 5px dotted lightgray;
 	outline-offset: 5px;

@@ -32,19 +32,24 @@
 	}
 
 	window.APP = APP = {
+		// This is where modules are registered:
+		mod: {},
+		
+		charp: new CHARP ().init (),
+
 		extendClass: function (childClass, superClass) {
 			childClass.prototype.__proto__ = superClass.prototype;
 		},
 
 		loadModule: function (name, cb, errCb) {
-			if (APP[name]) {
-				if (!APP[name].initialized && APP[name].init) {
-					APP[name].MOD_NAME = name;
-					APP[name].init ();
+			if (APP.mod[name]) {
+				if (!APP.mod[name].initialized && APP[name].init) {
+					APP.mod[name].MOD_NAME = name;
+					APP.mod[name].init ();
 				}
-				if (APP[name].onLoad)
-					APP[name].onLoad ();
-				if (cb) cb (APP[name]);
+				if (APP.mod[name].onLoad)
+					APP.mod[name].onLoad ();
+				if (cb) cb (APP.mod[name]);
 			} else {
 				var add = '';
 				if (APP.DEVEL)
@@ -52,24 +57,27 @@
 				else
 					add = '?' + APP.VERSION;
 				$.ajax ({ dataType: 'script',
-							 url: 'script/' + name + '.js' + add, 
-							 success: function () {
-								 if (APP[name] && APP[name].init) {
-									 APP[name].MOD_NAME = name;
-									 APP[name].init ();
-								 }
-								 if (cb) cb (APP[name]);
-							 },
-							 error: (errCb)? errCb:
-							 function () {
-								 APP.msgDialog ({ icon: 'error',
-												  title: 'Error al cargar módulo.',
-												  desc: 'El módulo `' + name + '` tuvo problemas al cargar.',
-												  sev: 'Contacte a soporte para reportar el problema.'
-												});
-							 }
+						  url: 'script/' + name + '.js' + add, 
+						  success: function () {
+							  if (APP.mod[name] && APP.mod[name].init)
+								  APP.mod[name].init ();
+							  if (cb)
+								  cb (APP.mod[name]);
+						  },
+						  error: (errCb)? errCb:
+						  function () {
+							  APP.msgDialog ({ icon: 'error',
+											   title: 'Error al cargar módulo.',
+											   desc: 'El módulo `' + name + '` tuvo problemas al cargar.',
+											   sev: 'Contacte a soporte para reportar el problema.'
+											 });
+						  }
 						});
 			}
+		},
+
+		addModule: function (name, obj) {
+			APP.mod[name] = obj;
 		},
 
 		loadLayout: function (jq_div, html_file, cb) {
@@ -80,6 +88,14 @@
 				add = '?' + APP.VERSION;
 
 			jq_div.load ('pages/' + html_file + add, cb);
+		},
+
+		appendPageAndLoadLayout: function (page_id, html_file, load_cb) {
+			var div = document.createElement ('div');
+			div.id = page_id;
+			div.className = 'page';
+			$('body').append (div);
+			APP.loadLayout ($(div), html_file, load_cb);
 		},
 
 		setTitle: function (text) {
@@ -200,7 +216,12 @@
 
 		title: "",
 		DEVEL: true,
-		VERSION: '0.5' // or whatever
+		VERSION: '0.5',
+
+		main: function () {
+			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
+			APP.loadModule ('login'); // Start here with something like this.
+		}
 	};
 
 	$(document).ready (function () {

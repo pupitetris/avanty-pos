@@ -1,0 +1,15 @@
+@import url('fonts.css');
+@import url('theme/jquery-ui.min.css');
+
+.avanty {
+	font-family: 'Open Sans';
+	font-size: 1em;
+}
+
+.avanty .ui-widget {
+	font-family: 'Roboto';
+}
+
+.avanty .ui-widget button {
+	font-family: 'Roboto';
+}

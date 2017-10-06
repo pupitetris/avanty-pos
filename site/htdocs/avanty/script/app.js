@@ -80,14 +80,14 @@
 			APP.mod[name] = obj;
 		},
 
-		loadLayout: function (jq_div, html_file, cb) {
+		loadLayout: function (div, html_file, cb) {
 			var add = '';
 			if (APP.DEVEL)
 				add = '?' + Math.random ().toString ().substr (2);
 			else
 				add = '?' + APP.VERSION;
 
-			jq_div.load ('pages/' + html_file + add, cb);
+			div.load ('pages/' + html_file + add, cb);
 		},
 
 		appendPageAndLoadLayout: function (page_id, html_file, load_cb) {
@@ -103,6 +103,18 @@
 			if (text && text != '')
 				str = ' - ' + text.toString ();
 			$('title').text (APP.title + str);
+		},
+
+		switchPage: function (div) {
+			$('body > .page').hide ()
+			div.show ();
+		},
+
+		switchSection: function (div, parent) {
+			if (!parent)
+				parent = $('#main-sections');
+			parent.find ('> .section').hide ();
+			div.show ();
 		},
 
 		eleBusy: function (ele, setBusy, append) {

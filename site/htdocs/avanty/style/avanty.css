@@ -2,7 +2,39 @@
 @import url('theme/jquery-ui.min.css');
 @import url('theme/custom.css');
 
-.avanty {
+body.avanty {
 	font-family: 'Open Sans';
 	font-size: 1em;
+	margin: 0;
+	width: 100%;
+	height: 100vh;
 }
+
+.activate-quadrant {
+	position: absolute;
+	width: 50%;
+	height: 50%;
+	background-color: white;
+}
+
+.activate-quadrant:hover {
+	background-color: #eee;
+}
+
+#quadrant-1 { top: 0; left: 0; }
+#quadrant-2 { top: 0; left: 50vw; }
+#quadrant-3 { top: 50vh; left: 0; }
+#quadrant-4 { top: 50vh; left: 50vw; }
+#quadrant-5 { top: 25vh; left: 25vw; display: table; }
+
+#quadrant-5 {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	font-family: 'Roboto';
+	font-weight: bolder;
+	font-size: 150%;
+}
+
+	

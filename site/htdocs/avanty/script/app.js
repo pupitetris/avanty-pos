@@ -1,10 +1,7 @@
-// This file is part of the CHARP project. -*- tab-width: 4; -*-
+// This file is part of Microsafe AVANTY. -*- tab-width: 4; -*-
 //
-// Copyright © 2011 - 2014
-//   Free Software Foundation Europe, e.V.,
-//   Talstrasse 110, 40217 Dsseldorf, Germany
-//
-// Licensed under the EUPL V.1.1. See the file LICENSE.txt for copying conditions.
+// Copyright © 2017 Microsafe, S.A. de C.V.
+// Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
 (function () {
 	function msgDialogAppendP (parent, contents, className) {
@@ -98,14 +95,8 @@
 			APP.loadLayout ($(div), html_file, load_cb);
 		},
 
-		setTitle: function (text) {
-			var str = '';
-			if (text && text != '')
-				str = ' - ' + text.toString ();
-			$('title').text (APP.title + str);
-		},
-
-		switchPage: function (div) {
+		switchPage: function (div_or_id) {
+			var div = (typeof div_or_id == 'string')? $('#' + div_or_id): div_or_id;
 			$('body > .page').hide ()
 			div.show ();
 		},
@@ -115,6 +106,13 @@
 				parent = $('#main-sections');
 			parent.find ('> .section').hide ();
 			div.show ();
+		},
+
+		setTitle: function (text) {
+			var str = '';
+			if (text && text != '')
+				str = ' - ' + text.toString ();
+			$('title').text (APP.title + str);
 		},
 
 		eleBusy: function (ele, setBusy, append) {
@@ -232,7 +230,7 @@
 
 		main: function () {
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
-			APP.loadModule ('login'); // Start here with something like this.
+			APP.loadModule ('activate'); // Start here with something like this.
 		}
 	};
 

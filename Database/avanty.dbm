@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="895,1097" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="894,1096" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1564,12 +1564,12 @@ END;]]></definition>
 	PERFORM 1 FROM supervisor_challenge 
 		WHERE user_id = _uid 
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
-			AND activation_compute_challenge (string) = solution;
+			AND activation_solve_challenge (string) = solution;
 	RETURN FOUND;
 END;]]></definition>
 </function>
 
-<function name="activation_compute_challenge"
+<function name="activation_solve_challenge"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1595,7 +1595,7 @@ END;]]></definition>
 					regexp_split_to_array (
 						substring (
 							pgcrypto.crypt (_challenge, '$2a$08$PqR7X.YexgDCsypnT0dFM.'),
-							'.{10}$'
+							'.{8}$'
                         ), 
 					'')
 				) AS ch
@@ -1622,7 +1622,24 @@ END;]]></definition>
 	<parameter name="_uid">
 		<type name="av.uid" length="0"/>
 	</parameter>
-	<definition><![CDATA[a]]></definition>
+	<definition><![CDATA[DECLARE
+	_string av.supervisor_challenge.string%TYPE;
+BEGIN
+	SELECT string INTO _string
+		FROM supervisor_challenge 
+		WHERE user_id = _uid 
+			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP);
+
+	IF NOT FOUND THEN
+		INSERT INTO supervisor_challenge 
+			VALUES (_uid, CURRENT_TIMESTAMP + '15 minutes',
+				SUBSTRING (regexp_replace (encode (pgcrypto.gen_random_bytes(64), 'hex'), '[a-f]', '', 'g')
+					FROM 1 FOR 8), NULL) 
+			RETURNING string INTO _string;
+	END IF;
+
+	RETURN _string;
+END;]]></definition>
 </function>
 
 <permission>

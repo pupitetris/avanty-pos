@@ -1,0 +1,36 @@
+#activate-load {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100vh;
+}
+
+.activate-quadrant {
+	position: absolute;
+	width: 50%;
+	height: 50%;
+	background-color: white;
+}
+
+#quadrant-1 { top: 0; left: 0; }
+#quadrant-2 { top: 0; left: 50vw; }
+#quadrant-3 { top: 50vh; left: 50vw; }
+#quadrant-4 { top: 50vh; left: 0; }
+#quadrant-5 { top: 25vh; left: 25vw; display: table; }
+
+#quadrant-5 {
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	text-align: center;
+	font-family: 'Roboto';
+	font-weight: bolder;
+	font-size: 150%;
+}
+
+#activate-greeting-continue {
+	width: 100%;
+	position: absolute;
+	margin-top: 1em;
+}

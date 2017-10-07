@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="317,1097" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,1097" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -68,7 +68,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <usertype name="charp_account_status" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="active,disabled,deleted"/>
+	<enumeration values="active,disabled,deleted,first"/>
 </usertype>
 
 <usertype name="charp_error_code" configuration="enumeration">
@@ -237,6 +237,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="string" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[A random-generated string that the supervisor must give to support.]]></comment>
+	</column>
+	<column name="solution">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[The solution that was provided by support. A correct solution will activate the system.]]></comment>
 	</column>
 
 	<customidxs object-type="column">

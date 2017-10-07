@@ -13,6 +13,7 @@
 
 	var activate_load_icon;
 	var greeting_cont;
+	var chal_cont;
 	var sections_parent;
 
 	function activate_load_error () {
@@ -49,7 +50,8 @@
 		var id = evt.currentTarget.id;
 		var num = parseInt (id.split ('-')[1], 10);
 		if (activate_sequence[activate_current] != num) {
-			activate_current = 0;
+			// If user fails the sequence, we are back to the beginning.
+			activate_current = (activate_sequence[0] == num)? 1: 0;
 			return;
 		}
 
@@ -62,6 +64,9 @@
 
 	function greeting_click (evt) {
 		APP.switchSection ($('#activate-chal'), sections_parent);
+	}
+
+	function challenge_click () {
 	}
 
 	var mod = {
@@ -84,6 +89,15 @@
 
 			sections_parent = $('#activate-sections');
 			activate_load_icon = $('#activate-load img');
+
+			chal_cont = $('#activate-chal table');
+
+			var chal_button = chal_cont.find ('button');
+			chal_button.button ();
+			chal_button.bind ('click', challenge_click);
+
+			var chal_input = chal_cont.find ('input');
+			chal_input.addClass("ui-widget ui-widget-content ui-corner-all");
 
 			APP.switchPage (MOD_NAME);
 

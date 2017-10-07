@@ -5,7 +5,7 @@
 
 body.avanty {
 	font-family: 'Open Sans';
-	font-size: 1em;
+	font-size: 1.5em;
 	margin: 0;
 	width: 100%;
 	height: 100vh;
@@ -18,3 +18,6 @@ body.avanty {
     -moz-user-select: none;
 }
 
+.numbers {
+	font-family: monospace !important;
+}

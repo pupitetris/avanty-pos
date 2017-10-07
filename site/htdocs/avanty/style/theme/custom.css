@@ -4,7 +4,11 @@
 
 .avanty .ui-widget button {
 	font-family: 'Roboto';
+}
+
+.avanty input.ui-widget {
 	font-size: 1.5em;
+	padding-left: 0.55em;
 }
 
 .avanty *:focus {

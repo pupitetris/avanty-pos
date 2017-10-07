@@ -1,4 +1,3 @@
-//$2a$08$dcVj2sdh6IU5ixUg5m5i2eD1NHClUqXMcvEIFED1dTlQaXI/uztmy
 // This file is part of Microsafe AVANTY. -*- tab-width: 4; -*-
 //
 // Copyright © 2017 Microsafe, S.A. de C.V.
@@ -31,17 +30,20 @@
 	}
 
 	function activate_load_start () {
+		APP.charp.credentialsSet ('supervisor',
+								  '$2a$08$dcVj2sdh6IU5ixUg5m5i2eD1NHClUqXMcvEIFED1dTlQaXI/uztmy',
+								  '$2a$08$dcVj2sdh6IU5ixUg5m5i2e');
+
 		APP.charp.request ('system_is_activated', [],
 						   {
 							   success: activate_load_is_activated,
-							   error: activate_load_error,
-							   asAnon: true
+							   error: activate_load_error
 						   });
 	}
 
 	function quadrant_click (evt) {
 		if (activate_current == activate_sequence.length)
-			// Sequence has been entered. Continue.
+			// Sequence has already been entered. Ignore event.
 			return;
 		
 		var id = evt.currentTarget.id;

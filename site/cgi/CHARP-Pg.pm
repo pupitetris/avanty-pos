@@ -33,7 +33,7 @@ sub prepare_attrs {
 }
 
 sub sql_uid_type {
-    return SQL_INTEGER;
+    return SQL_SMALLINT;
 }
 
 sub sql_int_type {

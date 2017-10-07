@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="824,1097" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="895,1097" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -68,7 +68,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <usertype name="charp_account_status" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="active,disabled,deleted,first"/>
+	<enumeration values="active,disabled,deleted"/>
 </usertype>
 
 <usertype name="charp_error_code" configuration="enumeration">
@@ -121,6 +121,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<column name="status" not-null="true">
 		<type name="av.charp_account_status" length="0"/>
 		<comment><![CDATA[only active users may run requests to the server]]></comment>
+	</column>
+	<column name="is_first" not-null="true" default-value="TRUE">
+		<type name="boolean" length="0"/>
+		<comment><![CDATA[true if the user has never opened session.]]></comment>
 	</column>
 	<constraint name="account_pk" type="pk-constr" table="av.account">
 		<columns names="user_id" ref-type="src-columns"/>
@@ -1224,16 +1228,16 @@ BEGIN
 	SELECT ARRAY( 
 	       	      SELECT 
 			     CASE format_type (_proargtypes[s.i], NULL)
-				  WHEN 'charp_user_id'	     THEN 'UID'
-				  WHEN 'integer'	     THEN 'INT'
+				  WHEN 'uid'	   		 	 THEN 'UID'
+				  WHEN 'integer'		     THEN 'INT'
 				  WHEN 'character varying'   THEN 'STR'
-				  WHEN 'text'		     THEN 'STR'
-				  WHEN 'boolean'	     THEN 'BOOL'
-				  WHEN 'date'		     THEN 'DATE'
-				  WHEN 'integer[]'	     THEN 'INTARR'
+				  WHEN 'text'			     THEN 'STR'
+				  WHEN 'boolean'		     THEN 'BOOL'
+				  WHEN 'date'			     THEN 'DATE'
+				  WHEN 'integer[]'		     THEN 'INTARR'
 				  WHEN 'character varying[]' THEN 'STRARR'
-				  WHEN 'text[]'		     THEN 'STRARR'
-				  WHEN 'boolean[]'	     THEN 'BOOLARR'
+				  WHEN 'text[]'			     THEN 'STRARR'
+				  WHEN 'boolean[]'			 THEN 'BOOLARR'
 				  ELSE 'STR'
 			     END
 			     FROM generate_series(0, array_upper(_proargtypes, 1)) AS s(i)
@@ -1534,7 +1538,7 @@ BEGIN
 END;]]></definition>
 </function>
 
-<function name="anon_system_is_activated"
+<function name="system_is_activated"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1549,12 +1553,16 @@ END;]]></definition>
 	<return-type>
 	<type name="boolean" length="0"/>
 	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
 	<definition><![CDATA[BEGIN
-	PERFORM 1 FROM account WHERE user_id = 1 AND status = 'first';
+	PERFORM 1 FROM user_supervisor NATURAL JOIN account 
+		WHERE user_id = _uid AND is_first = TRUE;
 	IF FOUND THEN RETURN FALSE; END IF;
 
 	PERFORM 1 FROM supervisor_challenge 
-		WHERE user_id = 1 
+		WHERE user_id = _uid 
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
 			AND activation_compute_challenge (string) = solution;
 	RETURN FOUND;
@@ -1596,6 +1604,27 @@ END;]]></definition>
 	'')]]></definition>
 </function>
 
+<function name="activation_challenge_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[get the activation challenge, which may be generated if none is available.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[a]]></definition>
+</function>
+
 <permission>
 	<object name="avanty" type="database"/>
 	<roles names="avanty"/>
@@ -1625,5 +1654,25 @@ END;]]></definition>
 	<object name="av.request_log" type="table"/>
 	<roles names="avanty"/>
 	<privileges insert="true"/>
+</permission>
+<permission>
+	<object name="av.user_supervisor" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true"/>
+</permission>
+<permission>
+	<object name="av.user_cashier" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" delete="true" insert="true"/>
+</permission>
+<permission>
+	<object name="av.user_maintenance" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true"/>
+</permission>
+<permission>
+	<object name="av.supervisor_challenge" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" insert="true" update="true"/>
 </permission>
 </dbmodel>

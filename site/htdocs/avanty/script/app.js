@@ -157,7 +157,8 @@
 			if (opts.msg)
 				msgDialogAppendP (div, opts.msg, 'msg');
 			if (opts.sev)
-				msgDialogAppendP (div, opts.sev, 'error-sev');
+				msgDialogAppendP (div, (typeof opts.sev == "number")?
+								  CHARP.ERROR_SEV_MSG[opts.sev]: opts.sev.toString (), 'error-sev');
 
 			if (div.parent ().length == 0)
 				$('body').append (div);

@@ -14,10 +14,12 @@
 	var activate_load_icon;
 	var greeting_cont;
 	var chal_cont;
+	var chal_input;
+	var chal_value;
 	var sections_parent;
 
 	function activate_load_error () {
-		activate_load_icon.hide ();
+		APP.switchSection ($('#activate-blank'), sections_parent);
 		return true; // Call default handler to show the error dialog.
 	}
 
@@ -64,9 +66,28 @@
 
 	function greeting_click (evt) {
 		APP.switchSection ($('#activate-chal'), sections_parent);
+		APP.charp.request ('activation_challenge_get', [],
+						   {
+							   success: activate_challenge_get_success,
+							   error: activate_load_error
+						   });
+	}
+
+	function activate_challenge_get_success (data) {
+		chal_value = data;
+		$('#activate-chal-value').text (chal_value);
 	}
 
 	function challenge_click () {
+		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
+						   {
+							   success: activate_challenge_check_success,
+							   error: activate_load_error
+						   });
+	}
+
+	function activate_challenge_check_success (data) {
+		alert ('success');
 	}
 
 	var mod = {
@@ -96,7 +117,7 @@
 			chal_button.button ();
 			chal_button.bind ('click', challenge_click);
 
-			var chal_input = chal_cont.find ('input');
+			chal_input = chal_cont.find ('input');
 			chal_input.addClass("ui-widget ui-widget-content ui-corner-all");
 
 			APP.switchPage (MOD_NAME);

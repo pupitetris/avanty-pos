@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="894,1096" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="639,1096" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -235,24 +235,26 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[We are keeping a registry of all challenges, for security audits.]]></comment>
 	<position x="980" y="1460"/>
-	<column name="expiration" not-null="true">
-		<type name="av.ts" length="0"/>
-	</column>
 	<column name="string" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[A random-generated string that the supervisor must give to support.]]></comment>
+	</column>
+	<column name="expiration">
+		<type name="av.ts" length="0"/>
 	</column>
 	<column name="solution">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[The solution that was provided by support. A correct solution will activate the system.]]></comment>
 	</column>
+	<constraint name="supervisor_challenge_pk" type="pk-constr" table="av.supervisor_challenge">
+		<columns names="string" ref-type="src-columns"/>
+	</constraint>
 
 	<customidxs object-type="column">
-		<object name="user_id" index="0"/>
+		<object name="user_id" index="1"/>
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="supervisor_challenge_pk" index="0"/>
 		<object name="user_supervisor_fk" index="1"/>
 	</customidxs>
 </table>
@@ -913,17 +915,6 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	 custom-color="#83af1f"
 	 src-table="av.account"
 	 dst-table="av.user_supervisor"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
-
-<relationship name="user_supervisor_has_many_supervisor_challenge" type="rel1n"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.user_supervisor"
-	 dst-table="av.supervisor_challenge"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
@@ -1632,13 +1623,86 @@ BEGIN
 
 	IF NOT FOUND THEN
 		INSERT INTO supervisor_challenge 
-			VALUES (_uid, CURRENT_TIMESTAMP + '15 minutes',
-				SUBSTRING (regexp_replace (encode (pgcrypto.gen_random_bytes(64), 'hex'), '[a-f]', '', 'g')
-					FROM 1 FOR 8), NULL) 
+			VALUES (activation_challenge_gen (), _uid, CURRENT_TIMESTAMP + '15 minutes', NULL)
 			RETURNING string INTO _string;
 	END IF;
 
 	RETURN _string;
+END;]]></definition>
+</function>
+
+<function name="activation_challenge_gen"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Generate a random string of digits to be solved by the provider's support]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<definition><![CDATA[SELECT 
+	SUBSTRING (
+		regexp_replace (encode (pgcrypto.gen_random_bytes(64), 'hex'), '[a-f]', '', 'g')
+	FROM 1 FOR 8)]]></definition>
+</function>
+
+<relationship name="user_supervisor_has_many_supervisor_challenge" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.user_supervisor"
+	 dst-table="av.supervisor_challenge"
+	 src-required="false" dst-required="false"/>
+
+<function name="activation_challenge_check"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Now check if the given challenge/solution pair is correct.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_chal">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_solution">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_old_chal av.supervisor_challenge.string%TYPE;
+BEGIN
+	_old_chal := rp.activation_challenge_get(_uid);
+
+	IF _old_chal <> _chal THEN
+		PERFORM charp_raise ('NOTFOUND');
+	END IF;
+
+	IF _solution <> activation_solve_challenge (_chal) THEN
+		PERFORM charp_raise ('EXIT', 'BAD_SOLUTION');
+	END IF;
+
+	UPDATE supervisor_challenge 
+		SET solution = _solution, expiration = NULL
+		WHERE string = _chal AND user_id = _uid;
+
+	RETURN TRUE;
 END;]]></definition>
 </function>
 

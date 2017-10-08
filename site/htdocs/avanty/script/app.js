@@ -65,7 +65,7 @@
 							  APP.msgDialog ({ icon: 'error',
 											   title: 'Error al cargar módulo.',
 											   desc: 'El módulo `' + name + '` tuvo problemas al cargar.',
-											   sev: 'Contacte a soporte para reportar el problema.'
+											   sev: 'Contacta a soporte para reportar el problema.'
 											 });
 						  }
 						});
@@ -168,6 +168,7 @@
 				draggable: false,
 				modal: true,
 				resizable: false,
+				minWidth: 632,
 				zIndex: 2000
 			}, opts.opts);
 

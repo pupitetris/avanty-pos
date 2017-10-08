@@ -1548,10 +1548,6 @@ END;]]></definition>
 		<type name="av.uid" length="0"/>
 	</parameter>
 	<definition><![CDATA[BEGIN
-	PERFORM 1 FROM user_supervisor NATURAL JOIN account 
-		WHERE user_id = _uid AND is_first = TRUE;
-	IF FOUND THEN RETURN FALSE; END IF;
-
 	PERFORM 1 FROM supervisor_challenge 
 		WHERE user_id = _uid 
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
@@ -1703,6 +1699,30 @@ BEGIN
 		WHERE string = _chal AND user_id = _uid;
 
 	RETURN TRUE;
+END;]]></definition>
+</function>
+
+<function name="this_user_is_first"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check if the authenticated user has never begun a session.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM 1 FROM account WHERE user_id = _uid AND is_first = TRUE;
+	RETURN FOUND;
 END;]]></definition>
 </function>
 

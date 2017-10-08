@@ -71,16 +71,16 @@ CHARP.prototype = {
 									 ((err.state)? ' (' + err.state + ')' : '') + 
 									 ((err.msg)? '<br />' + err.msg : '') +
 									 '</pre>',
-								sev: CHARP.ERROR_SEV_MSG[err.sev],
+								sev: err.sev,
 								title: 'Error ' + err.key + '(' + err.code + ')',
 								opts: {
 									resizable: true,
 									height: 'auto',
-									minHeight: 250,
-									maxHeight: 400,
+									minHeight: 400,
+									maxHeight: 700,
 									width: 500,
 									minWidth: 500,
-									maxWidth: 800
+									maxWidth: 1000
 								} });
 	},
 

@@ -49,8 +49,8 @@
 }
 
 .avanty .ui-dialog-content .desc {
-    margin-left: 72px;
-    margin-top: 2em;
+    margin-left: 88px; /* 64 of the icon + 24 equal to padding to the border. */
+    margin-top: 0.75em;
 }
 
 .avanty .ui-dialog-content .msg {

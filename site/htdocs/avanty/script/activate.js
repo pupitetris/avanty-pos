@@ -18,18 +18,10 @@
 	var chal_value;
 	var sections_parent;
 
-	function activate_load_error () {
+	// In case of an unhandled error, blank the screen.
+	function activate_blank_error () {
 		APP.switchSection ($('#activate-blank'), sections_parent);
 		return true; // Call default handler to show the error dialog.
-	}
-
-	function activate_load_is_activated (data) {
-		if (!data) { // System is not activated. Proceed with activation.
-			APP.switchSection ($('#activate-greeting'), sections_parent);
-			return;
-		}
-
-		activate_proceed ();
 	}
 
 	function activate_load_start () {
@@ -40,8 +32,17 @@
 		APP.charp.request ('system_is_activated', [],
 						   {
 							   success: activate_load_is_activated,
-							   error: activate_load_error
+							   error: activate_blank_error
 						   });
+	}
+
+	function activate_load_is_activated (data) {
+		if (!data) { // System is not activated. Proceed with activation.
+			APP.switchSection ($('#activate-greeting'), sections_parent);
+			return;
+		}
+
+		activate_finish ();
 	}
 
 	function quadrant_click (evt) {
@@ -61,33 +62,73 @@
 		if (activate_current < activate_sequence.length)
 			return;
 
-		greeting_cont.fadeIn (FADE_DELAY);
+		greeting_cont.show ();
 	}
 
 	function greeting_click (evt) {
 		APP.switchSection ($('#activate-chal'), sections_parent);
+		activate_challenge_get ();
+	}
+
+	function activate_challenge_get () {
+		chal_input.val ('');
 		APP.charp.request ('activation_challenge_get', [],
 						   {
 							   success: activate_challenge_get_success,
-							   error: activate_load_error
+							   error: activate_blank_error
 						   });
 	}
 
 	function activate_challenge_get_success (data) {
 		chal_value = data;
+		chal_input.focus ();
 		$('#activate-chal-value').text (chal_value);
 	}
 
 	function challenge_click () {
+		chal_input.focus ();
 		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
 						   {
 							   success: activate_challenge_check_success,
-							   error: activate_load_error
+							   error: function (err) {
+								   switch (err.key) {
+								   case 'SQL:EXIT':
+									   if (err.desc == 'BAD_SOLUTION') {
+										   APP.msgDialog ({
+											   icon: 'no',
+											   desc: 'La solución proporcionada no es correcta.',
+											   sev: CHARP.ERROR_SEV['USER'],
+											   title: 'Solución incorrecta',
+											   opts: {
+												   width: '75%',
+											   }
+										   });
+										   return;
+									   }
+								   case 'SQL:NOTFOUND':
+									   APP.msgDialog ({
+										   icon: 'timeout',
+										   desc: 'El reto ha expirado.',
+										   sev: 'El reto debe de ser contestado antes de cierto tiempo. Se proporcionará otro reto para ser contestado antes de que expire nuevamente.',
+										   title: 'Reto expirado',
+										   opts: {
+											   width: '75%',
+											   buttons: { 'Cerrar': activate_challenge_get }
+										   }
+									   });
+									   return;
+								   }
+								   return activate_blank_error ();
+							   }
 						   });
 	}
 
 	function activate_challenge_check_success (data) {
-		alert ('success');
+		activate_finish ();
+	}
+
+	function activate_finish () {
+		APP.loadModule ('super');
 	}
 
 	var mod = {

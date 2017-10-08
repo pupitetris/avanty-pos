@@ -17,7 +17,7 @@ CHARP.ERROR_SEV_MSG = [
     /* INTERNAL */ 'Este es un error interno en el sistema. Por favor anote la información proporcionada en este mensaje y llame a soporte para que se trabaje en una solución.',
     /* PERM */     'Está tratando de acceder a datos a los que no tiene autorización. Si requiere mayor acceso, llame a soporte.',
     /* RETRY */    'Este es un error temporal, por favor vuelva a intentar inmediatamente o en unos minutos. Si el error persiste, llame a soporte.',
-    /* USER */     'La información que proporcionó es errónea, por favor corrija sus datos y vuelva a intentar.',
+    /* USER */     'La información que proporcionó es errónea. Por favor corrija sus datos y vuelva a intentar.',
     /* EXIT */     'Este es un mensaje enviado para proceso por parte de la aplicación y no debe ser visible al usuario.'
 ];
 

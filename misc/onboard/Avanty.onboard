@@ -1,18 +1,11 @@
 <?xml version="1.0" ?>
 <!--
-Copyright © 2009, 2011-2014 marmuta <marmvta@gmail.com>This file is part of Onboard.
-Onboard is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation; either version 3 of the License, or
-(at your option) any later version.
-Onboard is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-You should have received a copy of the GNU General Public License
-along with this program. If not, see <http://www.gnu.org/licenses/>.
+	This file is part of Microsafe AVANTY.
+
+	Copyright © 2017 Microsafe, S.A. de C.V.
+	Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 -->
-<keyboard format="3.2" id="Avanty" section="system" summary="Desktop keyboard with edit and function keys">
+<keyboard format="3.2" id="Avanty" section="system" summary="POS keyboard">
   <include file="key_defs.xml"/>
   <box border="0.5" orientation="vertical" spacing="3">
     <!--- word suggestions -->

@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=xbindkeys
+GenericName=xbindkeys
+Comment=Hot key manager
+Exec=xbindkeys
+Icon=
+Type=Application
+NoDisplay=true
+X-Ubuntu-Gettext-Domain=
+AutostartCondition=GSettings org.gnome.desktop.a11y.applications screen-keyboard-enabled
+X-GNOME-AutoRestart=true
+OnlyShowIn=GNOME;Unity;MATE;LXDE;

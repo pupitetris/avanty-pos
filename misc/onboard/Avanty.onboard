@@ -1,16 +1,8 @@
 <?xml version="1.0" ?>
-<!--
-	This file is part of Microsafe AVANTY.
-
-	Copyright © 2017 Microsafe, S.A. de C.V.
-	Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
--->
 <keyboard format="3.2" id="Avanty" section="system" summary="POS keyboard">
   <include file="key_defs.xml"/>
   <box border="0.5" orientation="vertical" spacing="3">
-    <!--- word suggestions -->
     <box spacing="3">
-      <!--- keyboard, multiple layers -->
       <panel>
         <panel filename="Avanty.svg" layer="alpha">
           <key group="alphanumeric" id="AB01"/>
@@ -70,24 +62,26 @@
           <key group="keypadnumber" id="KP8" scan_priority="1"/>
           <key group="keypadnumber" id="KP9" scan_priority="1"/>
           <key group="keypadmisc" id="KPDL" scan_priority="1"/>
-          <key group="keypadmisc" id="KPEN" scan_priority="1" label="Intro" />
+          <key group="keypadmisc" id="KPEN" scan_priority="1" label="Intro"/>
 
           <key group="misc" id="CAPS"/>
           <key group="shifts" id="LFSH"/>
           <key group="shifts" id="RTSH"/>
           <key group="misc" id="TAB"/>
-          <key group="backspace" id="BKSP" />
-          <key group="misc" id="RTRN" />
+          <key group="backspace" id="BKSP"/>
+          <key group="misc" id="RTRN"/>
           <key group="bottomrow" id="SPCE"/>
           <key group="editing" id="DELE" image="" label="Supr" scan_priority="3"/>
 
           <key group="directions" id="LEFT" scan_priority="3"/>
           <key group="directions" id="RGHT" scan_priority="3"/>
-          <key group="editing" id="HOME" scan_priority="3" label="Inicio" />
-          <key group="editing" id="END" scan_priority="3" label="Fin" />
+          <key group="editing" id="HOME" scan_priority="3" label="Inicio"/>
+          <key group="editing" id="END" scan_priority="3" label="Fin"/>
 
-          <key group="bottomrow" id="hide"/>
-          <key expand="false" group="bottomrow" id="move"/>
+          <key group="bottomrow" id="briup" image="brightness-up.svg" button="true" tooltip="Brillo +" keysym="0x1008ff02"/>
+          <key group="bottomrow" id="bridwn" image="brightness-down.svg" button="true" tooltip="Brillo -" keysym="0x1008ff03"/>
+		  <key group="bottomrow" id="hide"/>
+          <key group="misc" id="BKSP2" keycode="22" label="" image="erase-left.svg" action="single-stroke"/>
         </panel>
       </panel>
     </box>

@@ -4,6 +4,14 @@
 // Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
 (function () {
+
+	// Extend jQuery so we can theme inputs.
+	(function ($) {
+		$.fn.input = function () {
+			return this.addClass("ui-widget ui-widget-content ui-corner-all");
+		};
+	} (jQuery));
+	
 	function msgDialogAppendP (parent, contents, className) {
 		if (contents && typeof contents.selector != 'undefined') {
 			contents.addClass (className);

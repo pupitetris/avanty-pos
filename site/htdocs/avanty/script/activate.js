@@ -159,7 +159,7 @@
 			chal_cont.find ('form').bind ('submit', challenge_submit);
 
 			chal_input = chal_cont.find ('input');
-			chal_input.addClass("ui-widget ui-widget-content ui-corner-all");
+			chal_input.input ();
 
 			APP.switchPage (MOD_NAME);
 

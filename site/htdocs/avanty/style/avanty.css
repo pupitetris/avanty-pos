@@ -12,12 +12,12 @@ body.avanty {
 	background-color: white;
 }
 
-.avanty .label {
+.avanty .label, h1, h2, h3, h4, h5 {
     user-select: none;
     -webkit-user-select: none;
     -moz-user-select: none;
 }
 
 .numbers {
-	font-family: monospace !important;
+	font-family: 'Ubuntu Mono Regular' !important;
 }

@@ -8,7 +8,7 @@
 
 .avanty input.ui-widget {
 	font-size: 1.5em;
-	padding-left: 0.55em;
+	padding: 0 0.25em;
 }
 
 .avanty *:focus {
@@ -72,8 +72,8 @@
 }
 
 .avanty .ui-dialog-content .msg.msg-mono {
-/*    font-style: normal;
-    font-family: monospace;*/
+    font-style: normal;
+    font-family: 'Ubuntu Mono Regular';
 }
 
 .avanty .ui-dialog-content .error-sev {

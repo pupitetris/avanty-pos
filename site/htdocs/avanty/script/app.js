@@ -236,6 +236,10 @@
 	};
 
 	$(document).ready (function () {
+		if (document.documentElement.requestFullscreen) {
+			document.documentElement.requestFullscreen ();
+		}
+
 		if (!APP.DEVEL) {
 			window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
 		}

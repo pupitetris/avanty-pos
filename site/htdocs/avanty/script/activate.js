@@ -13,7 +13,7 @@
 
 	var activate_load_icon;
 	var greeting_cont;
-	var chal_cont;
+	var greeting_button;
 	var chal_input;
 	var chal_value;
 	var sections_parent;
@@ -63,6 +63,7 @@
 			return;
 
 		greeting_cont.show ();
+		greeting_button.focus ();
 	}
 
 	function greeting_click (evt) {
@@ -85,7 +86,8 @@
 		$('#activate-chal-value').text (chal_value);
 	}
 
-	function challenge_click () {
+	function challenge_submit (evt) {
+		evt.preventDefault ();
 		chal_input.focus ();
 		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
 						   {
@@ -145,18 +147,16 @@
 
 			greeting_cont = $('#activate-greeting-continue');
 			
-			var greeting_button = greeting_cont.find ('button');
+			greeting_button = greeting_cont.find ('button');
 			greeting_button.button ();
 			greeting_button.bind ('click', greeting_click);
 
 			sections_parent = $('#activate-sections');
 			activate_load_icon = $('#activate-load img');
 
-			chal_cont = $('#activate-chal table');
-
-			var chal_button = chal_cont.find ('button');
-			chal_button.button ();
-			chal_button.bind ('click', challenge_click);
+			var chal_cont = $('#activate-chal');
+			chal_cont.find ('button').button ();
+			chal_cont.find ('form').bind ('submit', challenge_submit);
 
 			chal_input = chal_cont.find ('input');
 			chal_input.addClass("ui-widget ui-widget-content ui-corner-all");

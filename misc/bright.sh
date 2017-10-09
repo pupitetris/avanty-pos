@@ -9,12 +9,12 @@ inc=$1
 
 curr=$(cat $statefile)
 
-if ((curr==10&&inc>0)); then let inc*=3; fi
-if ((curr>10)); then let inc*=3; fi
+if ((curr==20&&inc>0)); then let inc*=3; fi
+if ((curr>20)); then let inc*=3; fi
 let curr=curr+inc
 
 if ((curr<=3)); then curr=3; fi
-if ((curr>=40)); then curr=40; fi
+if ((curr>=50)); then curr=50; fi
 
 echo $curr > $statefile
 

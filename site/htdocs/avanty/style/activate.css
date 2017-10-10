@@ -33,29 +33,6 @@
 	margin-top: 1em;
 }
 
-#activate-chal h1 {
-	margin-top: 0;
-	margin-bottom: 0.5em;
-}
-
-#activate-chal table {
-	margin: auto;
-	border-spacing: 0.25em;
-}
-
-#activate-chal tbody th {
-	text-align: right;
-}
-
-#activate-chal tbody td {
-	text-align: left;
-}
-
-#activate-chal tfoot td {
-	text-align: center;
-	padding-top: 1em;
-}
-
 #activate-chal-value {
 	text-align: center !important;
 	font-size: 1.5em;

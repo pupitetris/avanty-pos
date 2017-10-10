@@ -22,20 +22,3 @@
 	height: calc(100vh - 200px);
 }
 
-#super-newsuper table {
-	border-spacing: 0.25em;
-}
-
-#super-newsuper tbody th {
-	text-align: right;
-}
-
-#super-newsuper tbody td {
-	text-align: left;
-}
-
-#super-newsuper tfoot td {
-	text-align: center;
-	padding-top: 1em;
-}
-

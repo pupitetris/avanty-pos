@@ -17,6 +17,10 @@ h1, h2, h3, h4, h5 {
 	margin-top: 0;
 }
 
+h1 {
+	margin-bottom: 0.5em;
+}
+
 .avanty .label, h1, h2, h3, h4, h5 {
     user-select: none;
     -webkit-user-select: none;
@@ -37,4 +41,24 @@ h1, h2, h3, h4, h5 {
 	background-color: rgba(0,0,0,0.125);
 	display: block;
 	z-index: 10000;
+}
+
+form table {
+	border-spacing: 0.25em;
+	margin: auto;
+}
+
+form tbody th {
+	text-align: right;
+	vertical-align: baseline;
+}
+
+form tbody td {
+	text-align: left;
+	vertical-align: baseline;
+}
+
+form tfoot td {
+	text-align: center;
+	padding-top: 1em;
 }

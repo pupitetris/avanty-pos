@@ -5,8 +5,9 @@
 
 (function () {
 
-	// Extend jQuery so we can theme inputs.
+	// jQuery extensions.
 	(function ($) {
+		// Extend jQuery so we can theme inputs.
 		$.fn.input = function () {
 			return this.addClass("ui-widget ui-widget-content ui-corner-all");
 		};
@@ -158,8 +159,12 @@
 		msgDialog: function (opts) {
 			var div = (opts.div)? opts.div: $('<div/>');
 
-			if (opts.icon)
-				div.append ('<div class="icon"><img src="img/icons/' + opts.icon + '.png" alt="" /></div>');
+			if (opts.icon) {
+				var img_file = opts.icon.toString ();
+				if (img_file.indexOf ('.') < 0)
+					img_file += '.svg';
+				div.append ('<div class="icon"><img src="img/icons/' + img_file + '" alt="" /></div>');
+			}
 			if (opts.desc)
 				msgDialogAppendP (div, opts.desc, 'desc');
 			if (opts.msg)

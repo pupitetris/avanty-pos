@@ -23,16 +23,6 @@
 
 		newsuper_shell = section_newsuper.find ('.shell');
 
-		newsuper_form = section_newsuper.find ('form');
-		newsuper_form.validate ({
-			submitHandler: super_create_super_submit,
-			rules: {
-				'newsuper-login': { required: true },
-				'newsuper-pass': { required: true },
-				'newsuper-pass2': { required: true }
-			}
-		});
-
 		newsuper_login = section_newsuper.find ('input[name="newsuper-login"]');
 		newsuper_login.input ();
 
@@ -44,6 +34,39 @@
 
 		newsuper_submit = section_newsuper.find ('button');
 		newsuper_submit.button ();
+
+		$.validator.addMethod ('validate-login', function (val, ele) { 
+			var re = new RegExp ('^[a-zA-Z0-9_áéíóúñÁÉÚÍÓÚÑüÜ.]+$');
+			return re.exec (val);
+		}, 'La clave tiene caracteres no válidos.');
+
+		$.validator.addMethod ('validate-pass2', function (val, ele) {
+			var pass = newsuper_pass.val ();
+			return pass == val;
+		}, 'Las contraseñas deben de coincidir.');
+
+		newsuper_form = section_newsuper.find ('form');
+		newsuper_form.validate ({
+			submitHandler: super_create_super_submit,
+			rules: {
+				'newsuper-login': {
+					required: true,
+					maxlength: 255,
+					'validate-login': true
+				},
+				'newsuper-pass': {
+					required: true,
+					minlength: 8,
+					maxlength: 255
+				},
+				'newsuper-pass2': {
+					'validate-pass2': true
+				}
+			}
+		});
+
+		// Custom validations:
+		newsuper_pass2.addClass ('validate-pass2');
 
 		mod.loaded = true;
 		mod.onLoad ();

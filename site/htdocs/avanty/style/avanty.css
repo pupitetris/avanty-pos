@@ -70,10 +70,19 @@ form tfoot td {
 form label.error {
 	display: block;
 	position: absolute;
-	top: 29px;
+	top: 3em;
 	left: -8px;
 	width: 100%;
 	text-align: right;
 	font-size: 50%;
 	color: red;
+}
+
+.avanty input.ui-widget {
+	margin: 1px;
+}
+
+.avanty input.ui-widget.error {
+	border: 2px solid red;
+	margin: 0;
 }

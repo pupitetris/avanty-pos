@@ -1,0 +1,41 @@
+#super-sections .section {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+	height: 100vh;
+}
+
+#super-sections .shell {
+}
+
+#super-sections .cont {
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+	width: 100%;
+}
+
+#super-newsuper.section {
+	height: calc(100vh - 200px);
+}
+
+#super-newsuper table {
+	border-spacing: 0.25em;
+}
+
+#super-newsuper tbody th {
+	text-align: right;
+}
+
+#super-newsuper tbody td {
+	text-align: left;
+}
+
+#super-newsuper tfoot td {
+	text-align: center;
+	padding-top: 1em;
+}
+

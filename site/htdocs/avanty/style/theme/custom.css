@@ -7,13 +7,15 @@
 }*/
 
 .avanty button.ui-widget.button-icon {
-	padding-left: 76px;
+	padding-left: 64px;
 }
 
 .avanty button.ui-widget img {
 	position: absolute;
 	left: 16px;
-	top: 0;
+	top: 8px;
+	width: 32px;
+	height: 32px;
 }
 
 .avanty input.ui-widget {

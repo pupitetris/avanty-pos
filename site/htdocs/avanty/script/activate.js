@@ -121,6 +121,7 @@
 
 	function activate_challenge_get_success (data) {
 		chal_value = data;
+		chal_button.button ("enable");
 		chal_input.focus ();
 		$('#activate-chal-value').text (chal_value);
 	}
@@ -136,18 +137,18 @@
 								   switch (err.key) {
 								   case 'SQL:EXIT':
 									   if (err.desc == 'BAD_SOLUTION') {
+										   chal_button.button ("enable");
 										   APP.msgDialog ({
 											   icon: 'no',
 											   desc: 'La solución proporcionada no es correcta.',
 											   sev: CHARP.ERROR_SEV['USER'],
 											   title: 'Solución incorrecta',
-											   opts: {
-												   width: '75%',
-											   }
+											   opts: { width: '75%' }
 										   });
 										   return;
 									   }
 								   case 'SQL:NOTFOUND':
+									   chal_button.button ("enable");
 									   APP.msgDialog ({
 										   icon: 'timeout.png',
 										   desc: 'El reto ha expirado.',
@@ -187,8 +188,10 @@
 		},
 
 		reset: function () {
+			$('#activate-chal-value').text ('--------');
+
 			greeting_button.button ("enable");
-			chal_button.button ("enable");
+			chal_button.button ("disable");
 			
 			APP.switchPage (MOD_NAME);
 			APP.switchSection ($('#activate-load'), sections_parent);

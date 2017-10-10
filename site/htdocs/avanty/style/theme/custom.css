@@ -1,9 +1,9 @@
 .avanty .ui-widget {
-	font-family: 'Roboto';
+	font-family: 'Roboto', sans-serif;
 }
 
 /*.avanty .ui-widget button {
-	font-family: 'Roboto';
+	font-family: 'Roboto', sans-serif;
 }*/
 
 .avanty button.ui-widget.button-icon {
@@ -28,6 +28,10 @@
 
 .avanty .ui-dialog {
 	padding: 0;
+}
+
+.avanty .ui-dialog .ui-dialog-title {
+	line-height: 1.2em;
 }
 
 .avanty .ui-dialog-titlebar {
@@ -83,7 +87,7 @@
 
 .avanty .ui-dialog-content .msg.msg-mono {
     font-style: normal;
-    font-family: 'Ubuntu Mono Regular';
+    font-family: 'Ubuntu Mono Regular', monospace;
 }
 
 .avanty .ui-dialog-content .error-sev {

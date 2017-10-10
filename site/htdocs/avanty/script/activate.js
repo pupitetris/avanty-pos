@@ -127,8 +127,8 @@
 	}
 
 	function challenge_submit (evt) {
-		chal_button.button ("disable");
 		evt.preventDefault ();
+		chal_button.button ("disable");
 		chal_input.focus ();
 		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
 						   {

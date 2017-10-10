@@ -18,6 +18,29 @@
 	var chal_value;
 	var sections_parent;
 
+	function layout_init () {
+		$('.activate-quadrant').bind ('click', quadrant_click);
+
+		greeting_cont = $('#activate-greeting-continue');
+		
+		greeting_button = greeting_cont.find ('button');
+		greeting_button.button ();
+		greeting_button.bind ('click', greeting_click);
+
+		sections_parent = $('#activate-sections');
+		activate_load_icon = $('#activate-load img');
+
+		var chal_cont = $('#activate-chal');
+		chal_cont.find ('button').button ();
+		chal_cont.find ('form').bind ('submit', challenge_submit);
+
+		chal_input = chal_cont.find ('input');
+		chal_input.input ();
+
+		mod.loaded = true;
+		mod.onLoad ();
+	}
+
 	// In case of an unhandled error, blank the screen.
 	function activate_blank_error () {
 		APP.switchSection ($('#activate-blank'), sections_parent);
@@ -109,7 +132,7 @@
 									   }
 								   case 'SQL:NOTFOUND':
 									   APP.msgDialog ({
-										   icon: 'timeout',
+										   icon: 'timeout.png',
 										   desc: 'El reto ha expirado.',
 										   sev: 'El reto debe de ser contestado antes de cierto tiempo. Se proporcionará otro reto para ser contestado antes de que expire nuevamente.',
 										   title: 'Reto expirado',
@@ -136,51 +159,27 @@
 	var mod = {
 		init: function () {
 			mod.initialized = true;
-			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layoutInit);
+			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);
 		},
 
 		onLoad: function () {
 			if (!mod.loaded)
 				return;
 
-			$('.activate-quadrant').bind ('click', quadrant_click);
-
-			greeting_cont = $('#activate-greeting-continue');
-			
-			greeting_button = greeting_cont.find ('button');
-			greeting_button.button ();
-			greeting_button.bind ('click', greeting_click);
-
-			sections_parent = $('#activate-sections');
-			activate_load_icon = $('#activate-load img');
-
-			var chal_cont = $('#activate-chal');
-			chal_cont.find ('button').button ();
-			chal_cont.find ('form').bind ('submit', challenge_submit);
-
-			chal_input = chal_cont.find ('input');
-			chal_input.input ();
-
-			APP.switchPage (MOD_NAME);
-
 			mod.reset ();
 		},
 
 		reset: function () {
+			APP.switchPage (MOD_NAME);
+			APP.switchSection ($('#activate-load'), sections_parent);
+
 			activate_current = 0;
 			greeting_cont.hide ();
-
-			APP.switchSection ($('#activate-load'), sections_parent);
 
 			activate_load_icon.hide ();
 			activate_load_icon.fadeIn (FADE_DELAY, activate_load_start);
 		}
 	};
-
-	function layoutInit () {
-		mod.loaded = true;
-		mod.onLoad ();
-	}
 
 	APP.addModule (MOD_NAME, mod);
 }) ();

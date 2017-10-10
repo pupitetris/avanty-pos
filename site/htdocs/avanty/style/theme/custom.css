@@ -2,8 +2,18 @@
 	font-family: 'Roboto';
 }
 
-.avanty .ui-widget button {
+/*.avanty .ui-widget button {
 	font-family: 'Roboto';
+}*/
+
+.avanty button.ui-widget.button-icon {
+	padding-left: 76px;
+}
+
+.avanty button.ui-widget img {
+	position: absolute;
+	left: 16px;
+	top: 0;
 }
 
 .avanty input.ui-widget {

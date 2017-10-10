@@ -14,11 +14,23 @@
 	var activate_load_icon;
 	var greeting_cont;
 	var greeting_button;
+	var chal_button;
 	var chal_input;
 	var chal_value;
 	var sections_parent;
 
 	function layout_init () {
+		sections_parent = $('#activate-sections');
+
+		// "Blank" screen, where we go when things fail.
+
+		var blank_button = $('#activate-blank button');
+		blank_button.button ();
+		// Give the user the option of starting again the process, even if a fatal error occurred.
+		blank_button.bind ('click', function () { mod.reset (); });
+		
+		// Greeting screen.
+
 		$('.activate-quadrant').bind ('click', quadrant_click);
 
 		greeting_cont = $('#activate-greeting-continue');
@@ -27,12 +39,15 @@
 		greeting_button.button ();
 		greeting_button.bind ('click', greeting_click);
 
-		sections_parent = $('#activate-sections');
 		activate_load_icon = $('#activate-load img');
 
+		// Challenge screen.
+
 		var chal_cont = $('#activate-chal');
-		chal_cont.find ('button').button ();
 		chal_cont.find ('form').bind ('submit', challenge_submit);
+
+		chal_button = chal_cont.find ('button');
+		chal_button.button ();
 
 		chal_input = chal_cont.find ('input');
 		chal_input.input ();
@@ -90,6 +105,7 @@
 	}
 
 	function greeting_click (evt) {
+		greeting_button.button ("disable");
 		APP.switchSection ($('#activate-chal'), sections_parent);
 		activate_challenge_get ();
 	}
@@ -110,6 +126,7 @@
 	}
 
 	function challenge_submit (evt) {
+		chal_button.button ("disable");
 		evt.preventDefault ();
 		chal_input.focus ();
 		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
@@ -170,6 +187,9 @@
 		},
 
 		reset: function () {
+			greeting_button.button ("enable");
+			chal_button.button ("enable");
+			
 			APP.switchPage (MOD_NAME);
 			APP.switchSection ($('#activate-load'), sections_parent);
 

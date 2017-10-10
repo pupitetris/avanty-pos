@@ -1,3 +1,0 @@
-Easy file for desireable ideas for the system.
-
-* Use the HTML5 API to detect online/offline status and reflect that on the shell bar.

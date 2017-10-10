@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="638,1095" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="0,490" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -53,7 +53,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type cashier.]]></comment>
-	<position x="640" y="1320"/>
+	<position x="640" y="1340"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -81,7 +81,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
-	<position x="640" y="1380"/>
+	<position x="640" y="1400"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -97,10 +97,14 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[user accounts]]></comment>
-	<position x="20" y="1220"/>
+	<position x="40" y="1180"/>
 	<column name="user_id" not-null="true">
 		<type name="smallserial" length="0"/>
 		<comment><![CDATA[Independent ID for users, to allow for login name changes.]]></comment>
+	</column>
+	<column name="creator_user_id">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[uid of the user that created this user.]]></comment>
 	</column>
 	<column name="login" not-null="true">
 		<type name="varchar" length="0"/>
@@ -126,6 +130,10 @@ CAUTION: Do not modify this file unless you know what you are doing.
 		<type name="boolean" length="0"/>
 		<comment><![CDATA[true if the user has never opened session.]]></comment>
 	</column>
+	<column name="created" not-null="true" default-value="CURRENT_TIMESTAMP">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[Time of creation.]]></comment>
+	</column>
 	<constraint name="account_pk" type="pk-constr" table="av.account">
 		<columns names="user_id" ref-type="src-columns"/>
 	</constraint>
@@ -143,7 +151,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type maintenance.]]></comment>
-	<position x="640" y="1440"/>
+	<position x="640" y="1460"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -188,7 +196,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
-	<position x="640" y="1160"/>
+	<position x="640" y="1200"/>
 	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[when the activity occurred]]></comment>
@@ -268,7 +276,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="terminal">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="60" y="760"/>
+	<position x="20" y="780"/>
 	<column name="terminal_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -352,7 +360,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="rate">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="1000" y="580"/>
+	<position x="980" y="720"/>
 	<column name="rate_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -386,7 +394,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="payment">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="1400" y="280"/>
+	<position x="1400" y="320"/>
 	<column name="timestamp" not-null="true">
 		<type name="av.ts" length="0"/>
 	</column>
@@ -407,7 +415,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	</column>
 
 	<customidxs object-type="column">
-		<object name="rate_id" index="1"/>
+		<object name="rate_id" index="2"/>
 		<object name="ticket_id" index="0"/>
 	</customidxs>
 
@@ -437,7 +445,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[catalog, describes a coin or a bill]]></comment>
-	<position x="1400" y="460"/>
+	<position x="1400" y="520"/>
 	<column name="tender_id" not-null="true">
 		<type name="smallserial" length="0"/>
 	</column>
@@ -462,7 +470,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 <table name="tender_exchange">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<position x="1800" y="360"/>
+	<position x="1800" y="400"/>
 	<column name="type" not-null="true">
 		<type name="av.exchange_type" length="0"/>
 	</column>
@@ -746,7 +754,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
-	<position x="620" y="860"/>
+	<position x="580" y="860"/>
 
 	<customidxs object-type="column">
 		<object name="terminal_id" index="0"/>
@@ -787,7 +795,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<role name="postgres"/>
 	<comment><![CDATA[RPC requests being currently handled by CHARP (Challenge-Authenticated Remote Procedures)]]></comment>
 	<appended-sql><![CDATA[GRANT USAGE ON SEQUENCE request_request_id_seq TO avanty;]]></appended-sql>
-	<position x="560" y="1600"/>
+	<position x="600" y="1620"/>
 	<column name="request_id" not-null="true">
 		<type name="serial" length="0"/>
 		<comment><![CDATA[id of this request currently being processed. will be copied to request_log as soon as its life has ended.]]></comment>
@@ -1548,6 +1556,8 @@ END;]]></definition>
 		<type name="av.uid" length="0"/>
 	</parameter>
 	<definition><![CDATA[BEGIN
+	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
+
 	PERFORM 1 FROM supervisor_challenge 
 		WHERE user_id = _uid 
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
@@ -1612,6 +1622,8 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_string av.supervisor_challenge.string%TYPE;
 BEGIN
+	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
+
 	SELECT string INTO _string
 		FROM supervisor_challenge 
 		WHERE user_id = _uid 
@@ -1725,6 +1737,53 @@ END;]]></definition>
 	RETURN FOUND;
 END;]]></definition>
 </function>
+
+<function name="supervisor_created"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check if the system requires an operations supervisor to be created.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
+
+	PERFORM 1 FROM user_supervisor WHERE user_id <> 1;
+
+	RETURN FOUND;
+END;]]></definition>
+</function>
+
+<constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
+	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
+	<columns names="creator_user_id" ref-type="src-columns"/>
+	<columns names="user_id" ref-type="dst-columns"/>
+</constraint>
+
+<relationship name="rel_account_account" type="relfk"
+	 src-table="av.account"
+	 dst-table="av.account"
+	 src-required="false" dst-required="false">
+	<line>
+		<position x="429.4" y="1239.76"/>
+	<position x="429.4" y="1169"/>
+	<position x="292.267" y="1169"/>
+	</line>
+	<label ref-type="dst-label">
+		<position x="-5.86667" y="1.8"/>
+	</label>
+</relationship>
 
 <permission>
 	<object name="avanty" type="database"/>

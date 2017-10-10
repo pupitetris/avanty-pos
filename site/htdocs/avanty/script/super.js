@@ -24,14 +24,22 @@
 		newsuper_shell = section_newsuper.find ('.shell');
 
 		newsuper_form = section_newsuper.find ('form');
+		newsuper_form.validate ({
+			submitHandler: super_create_super_submit,
+			rules: {
+				'newsuper-login': { required: true },
+				'newsuper-pass': { required: true },
+				'newsuper-pass2': { required: true }
+			}
+		});
 
-		newsuper_login = $('#newsuper-login');
+		newsuper_login = section_newsuper.find ('input[name="newsuper-login"]');
 		newsuper_login.input ();
 
-		newsuper_pass = $('#newsuper-pass');
+		newsuper_pass = section_newsuper.find ('input[name="newsuper-pass"]');
 		newsuper_pass.input ();
 
-		newsuper_pass2 = $('#newsuper-pass2');
+		newsuper_pass2 = section_newsuper.find ('input[name="newsuper-pass2"]');
 		newsuper_pass2.input ();
 
 		newsuper_submit = section_newsuper.find ('button');
@@ -49,6 +57,18 @@
 		} else {
 			newsuper_shell.show ();
 		}
+
+		newsuper_login.focus ();
+	}
+
+	function super_create_super_submit (form) {
+		evt.preventDefault ();
+
+		newsuper_submit.button ("disable");
+
+		var login = newsuper_login.val ();
+		var pass = newsuper_pass.val ();
+		var pass2 = newsuper_pass2.val ();
 	}
 
 	var mod = {

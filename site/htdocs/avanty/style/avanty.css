@@ -21,10 +21,9 @@ h1 {
 	margin-bottom: 0.5em;
 }
 
-.avanty .label, h1, h2, h3, h4, h5 {
+.avanty .label, label, h1, h2, h3, h4, h5 {
     user-select: none;
     -webkit-user-select: none;
-    -moz-user-select: none;
 }
 
 .numbers {
@@ -48,7 +47,7 @@ h1 {
 }
 
 form table {
-	border-spacing: 0.25em;
+	border-spacing: 0.5em;
 	margin: auto;
 }
 
@@ -60,9 +59,21 @@ form tbody th {
 form tbody td {
 	text-align: left;
 	vertical-align: baseline;
+	position: relative;
 }
 
 form tfoot td {
 	text-align: center;
 	padding-top: 1em;
+}
+
+form label.error {
+	display: block;
+	position: absolute;
+	top: 29px;
+	left: -8px;
+	width: 100%;
+	text-align: right;
+	font-size: 50%;
+	color: red;
 }

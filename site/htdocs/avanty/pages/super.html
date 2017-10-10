@@ -1,15 +1,23 @@
 <div id="super-sections">
   <div class="section" id="super-newsuper">
-	<div class="onboard"></div>
 	<div class="shell">
 	</div>
 	<h2>Alta de usuario supervisor</h2>
 	<form class="cont">
 	  <table>
 		<tbody>
-		  <tr><th class="label">Usuario:</th><td><input id="newsuper-login" type="text" size="10" /></td></tr>
-		  <tr><th class="label">Contraseña:</th><td><input id="newsuper-pass" type="password" size="10" /></td></tr>
-		  <tr><th class="label">Contraseña:<br/><i>(confirmar)</i></th><td><input id="newsuper-pass2" type="password" size="10" /></td></tr>
+		  <tr>
+			<th><label for="newsuper-login">Usuario:</label></th>
+			<td><input name="newsuper-login" type="text" size="10" /></td></tr>
+		  <tr>
+			<th><label for="newsuper-pass">Contraseña:</label></th>
+			<td><input name="newsuper-pass" type="password" size="10" /></td>
+		  </tr>
+		  <tr>
+			<th><label for="newsuper-pass2">Contraseña:</label><br/>
+			  <i class="label">(confirmar)</i></th>
+			<td><input name="newsuper-pass2" type="password" size="10" /></td>
+		  </tr>
 		</tbody>
 		<tfoot>
 		  <tr><td colspan="2"><button type="submit" class="button-icon"><img src="img/icons/yes.svg" /> Crear cuenta</button></td></tr>

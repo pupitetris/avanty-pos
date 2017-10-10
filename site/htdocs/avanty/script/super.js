@@ -36,7 +36,7 @@
 		newsuper_submit.button ();
 
 		$.validator.addMethod ('validate-login', function (val, ele) { 
-			var re = new RegExp ('^[a-zA-Z0-9_áéíóúñÁÉÚÍÓÚÑüÜ.]+$');
+			var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
 			return re.exec (val);
 		}, 'La clave tiene caracteres no válidos.');
 

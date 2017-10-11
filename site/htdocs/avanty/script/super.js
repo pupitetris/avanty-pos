@@ -6,7 +6,7 @@
 (function () {
 	var MOD_NAME = 'super';
 
-	var super_first; // True when supervisor creation is required, right after activation.
+	var super_is_first; // True when supervisor creation is required, right after activation.
 
 	var sections_parent;
 	var section_newsuper;
@@ -75,23 +75,36 @@
 	function super_create_super () {
 		APP.switchSection (section_newsuper, sections_parent);
 
-		if (super_first) {
+		if (super_is_first) {
 			newsuper_shell.hide ();
 		} else {
 			newsuper_shell.show ();
 		}
 
+		newsuper_submit.button ("enable");
 		newsuper_login.focus ();
 	}
 
-	function super_create_super_submit (form) {
-		evt.preventDefault ();
+	function super_create_super_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
 
 		newsuper_submit.button ("disable");
 
 		var login = newsuper_login.val ();
 		var pass = newsuper_pass.val ();
-		var pass2 = newsuper_pass2.val ();
+
+		APP.charp.request ('user_create', [login, pass, 'supervisor'],
+						   {
+							   success: super_user_create_super_success,
+							   error: function () { newsuper_submit.button ("enable"); return true; }
+						   });
+	}
+
+	function super_user_create_super_success () {
+		if (super_is_first)
+			APP.loadModule ('login');
+		else
+			super_main ();
 	}
 
 	var mod = {
@@ -110,7 +123,7 @@
 		reset: function () {
 			APP.switchPage (MOD_NAME);
 
-			super_first = false;
+			super_is_first = false;
 
 			var cred = APP.charp.credentialsGet ();
 			if (cred.login == 'supervisor') {
@@ -118,15 +131,15 @@
 								   function (data) {
 									   if (!data) {
 										   // operations supervisor not created. Create one immediately.
-										   super_first = true;
+										   super_is_first = true;
 										   super_create_super ();
 									   } else // operations supervisor present. Go to login screen.
-										   super_login ();
+										   super_main ();
 								   });
 				return;
 			}
 
-			super_login ();
+			super_main ();
 		}
 	};
 

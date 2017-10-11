@@ -244,7 +244,7 @@
 
 		main: function () {
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
-			APP.loadModule ('activate'); // Start here with something like this.
+			APP.loadModule ('activate');
 		}
 	};
 

@@ -134,7 +134,7 @@
 										   super_is_first = true;
 										   super_create_super ();
 									   } else // operations supervisor present. Go to login screen.
-										   super_main ();
+										   APP.loadModule ('login');
 								   });
 				return;
 			}

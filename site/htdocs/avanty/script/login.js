@@ -1,12 +1,8 @@
-// This file is part of the CHARP project. -*- tab-width: 4; -*-
+// This file is part of Microsafe AVANTY. -*- tab-width: 4; -*-
 //
-// Copyright © 2011 - 2014
-//   Free Software Foundation Europe, e.V.,
-//   Talstrasse 110, 40217 Dsseldorf, Germany
-//
-// Licensed under the EUPL V.1.1. See the file LICENSE.txt for copying conditions.
+// Copyright © 2017 Microsafe, S.A. de C.V.
+// Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
-// Sample module that offers a login dialog and a few other elements to play with.
 (function () {
 
 	function loadCredentials () {

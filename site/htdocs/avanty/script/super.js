@@ -8,32 +8,25 @@
 
 	var super_is_first; // True when supervisor creation is required, right after activation.
 
-	var sections_parent;
-	var section_newsuper;
-
-	var newsuper_form;
-	var newsuper_login;
-	var newsuper_pass;
-	var newsuper_pass2;
-	var newsuper_submit;
+	var ui = {};
 
 	function layout_init () {
-		sections_parent = $('#super-sections');
-		section_newsuper = $('#super-newsuper');
+		ui.sections_parent = $('#super-sections');
+		ui.section_newsuper = $('#super-newsuper');
 
-		newsuper_shell = section_newsuper.find ('.shell');
+		ui.newsuper_shell = ui.section_newsuper.find ('.shell');
 
-		newsuper_login = section_newsuper.find ('input[name="newsuper-login"]');
-		newsuper_login.input ();
+		ui.newsuper_login = ui.section_newsuper.find ('input[name="newsuper-login"]');
+		ui.newsuper_login.input ();
 
-		newsuper_pass = section_newsuper.find ('input[name="newsuper-pass"]');
-		newsuper_pass.input ();
+		ui.newsuper_pass = ui.section_newsuper.find ('input[name="newsuper-pass"]');
+		ui.newsuper_pass.input ();
 
-		newsuper_pass2 = section_newsuper.find ('input[name="newsuper-pass2"]');
-		newsuper_pass2.input ();
+		ui.newsuper_pass2 = ui.section_newsuper.find ('input[name="newsuper-pass2"]');
+		ui.newsuper_pass2.input ();
 
-		newsuper_submit = section_newsuper.find ('button');
-		newsuper_submit.button ();
+		ui.newsuper_submit = ui.section_newsuper.find ('button');
+		ui.newsuper_submit.button ();
 
 		$.validator.addMethod ('validate-login', function (val, ele) { 
 			var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
@@ -41,12 +34,12 @@
 		}, 'La clave tiene caracteres no válidos.');
 
 		$.validator.addMethod ('validate-pass2', function (val, ele) {
-			var pass = newsuper_pass.val ();
+			var pass = ui.newsuper_pass.val ();
 			return pass == val;
 		}, 'Las contraseñas deben de coincidir.');
 
-		newsuper_form = section_newsuper.find ('form');
-		newsuper_form.validate ({
+		ui.newsuper_form = ui.section_newsuper.find ('form');
+		ui.newsuper_form.validate ({
 			submitHandler: super_create_super_submit,
 			rules: {
 				'newsuper-login': {
@@ -66,37 +59,37 @@
 		});
 
 		// Custom validations:
-		newsuper_pass2.addClass ('validate-pass2');
+		ui.newsuper_pass2.addClass ('validate-pass2');
 
 		mod.loaded = true;
 		mod.onLoad ();
 	}
 
 	function super_create_super () {
-		APP.switchSection (section_newsuper, sections_parent);
+		APP.switchSection (ui.section_newsuper, ui.sections_parent);
 
 		if (super_is_first) {
-			newsuper_shell.hide ();
+			ui.newsuper_shell.hide ();
 		} else {
-			newsuper_shell.show ();
+			ui.newsuper_shell.show ();
 		}
 
-		newsuper_submit.button ("enable");
-		newsuper_login.focus ();
+		ui.newsuper_submit.button ("enable");
+		ui.newsuper_login.focus ();
 	}
 
 	function super_create_super_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
-		newsuper_submit.button ("disable");
+		ui.newsuper_submit.button ("disable");
 
-		var login = newsuper_login.val ();
-		var pass = newsuper_pass.val ();
+		var login = ui.newsuper_login.val ();
+		var pass = ui.newsuper_pass.val ();
 
 		APP.charp.request ('user_create', [login, pass, 'supervisor'],
 						   {
 							   success: super_user_create_super_success,
-							   error: function () { newsuper_submit.button ("enable"); return true; }
+							   error: function () { ui.newsuper_submit.button ("enable"); return true; }
 						   });
 	}
 

@@ -21,6 +21,12 @@
 .avanty input.ui-widget {
 	font-size: 1.5em;
 	padding: 0 0.25em 0.2em 0.25em;
+	margin: 1px;
+}
+
+.avanty input.ui-widget.error {
+	border: 2px solid red;
+	margin: 0;
 }
 
 .avanty *:focus {

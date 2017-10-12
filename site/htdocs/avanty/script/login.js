@@ -4,13 +4,108 @@
 // Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
 (function () {
+	var MOD_NAME = 'login';
 
-	function loadCredentials () {
-		var cred = APP.charp.credentialsLoad ();
-		if (cred.login != null) {
-			$('#login-username').val (cred.login);
-			$('#login-passwd').val (cred.passwd);
+	var ui = {};
+
+	function layout_init () {
+		ui.sections_parent = $('#login-sections');
+		ui.section_enter = $('#login-enter');
+
+		ui.enter_username = ui.section_enter.find ('input[name="login-username"]');
+		ui.enter_username.input ();
+
+		ui.enter_pass = ui.section_enter.find ('input[name="login-pass"]');
+		ui.enter_pass.input ();
+
+		ui.enter_submit = ui.section_enter.find ('button');
+		ui.enter_submit.button ();
+
+		ui.enter_form = ui.section_enter.find ('form');
+		ui.enter_form.validate ({
+			submitHandler: login_enter_submit,
+			rules: {
+				'login-username': { required: true },
+				'login-pass': { required: true }
+			},
+			messages: {
+				'login-username': { required: 'Escribe la clave de tu usuario.' },
+				'login-pass': { required: 'Escribe tu contraseña.' }
+			}
+		});
+
+		mod.loaded = true;
+		mod.onLoad ();
+	}
+
+	function login_enter () {
+		APP.switchSection (ui.section_enter, ui.sections_parent);
+
+		APP.charp.credentialsSet (null, null, null);
+
+		ui.enter_username.focus ();
+		ui.enter_username.val ('');
+		ui.enter_pass.val ('');
+
+		ui.enter_submit.button ("enable");
+	}
+
+	function login_enter_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
+
+		ui.enter_submit.button ("disable");
+		
+		var login = ui.enter_username.val ();
+		var pass = ui.enter_pass.val ();
+
+		APP.charp.request ('salt_get', [login],
+						   {
+							   asAnon: true,
+							   success: function (salt) {
+								   login_try (login, pass, salt);
+							   },
+							   error: login_error
+						   });
+		
+	}
+
+	function login_try (login, pass, salt) {
+		setCredentials (login, pass, salt);
+		APP.charp.request ('user_auth', [], 
+						   { 
+							   success: login_success,
+							   error: login_error
+						   });
+	}
+
+	function login_error (err, ctx, charp) {
+		ui.enter_submit.button ("enable");
+
+		switch (err.key) {
+		case 'SQL:USERUNK':
+			APP.msgDialog ({
+				icon: 'no',
+				desc: 'Usuario no encontrado. ¿Escribiste bien tu clave de usuario?',
+				sev: CHARP.ERROR_SEV['USER'],
+				title: 'Usuario no encontrado',
+				opts: { width: '75%' }
+			});
+			return;
+		case 'SQL:REPFAIL':
+			APP.msgDialog ({
+				icon: 'no',
+				desc: 'La contraseña está equivocada.',
+				sev: CHARP.ERROR_SEV['USER'],
+				title: 'Contraseña incorrecta',
+				opts: { width: '75%' }
+			});
+			return;
 		}
+		return true;
+	}
+
+	function login_success (data) {
+		alert ('success');
 	}
 
 	function setCredentials (login, pass, salt) {
@@ -19,12 +114,10 @@
 		APP.charp.credentialsSet (login, pass, salt);
 	}
 
-	var MOD_NAME = 'login';
-
 	var mod = {
 		init: function () {
 			mod.initialized = true;
-			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layoutInit);
+			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);
 		},
 
 		onLoad: function () {
@@ -32,177 +125,14 @@
 				return;
 
 			APP.switchPage ($('#login'));
-			APP.switchSection ($('#login-dialog'), $('#login-sections'));
 
 			mod.reset ();
-			loadCredentials ();
-			$('#login-username').focus ();
 		},
 
 		reset: function () {
-			loginButtonReset ();
-
-			clearInputs ();
-
-			APP.charp.credentialsSet (null, null, null);
+			login_enter ();
 		}
 	};
-
-	function loginButtonReset () {
-		APP.buttonBusy ($('#login-button'), false);
-	}
-
-	function clearInputs () {
-		$('#login-username,#login-passwd')
-			.val ('')
-			.blur ();
-	}
-
-	function layoutInit () {
-		var loginButton = $('#login-button');
-		var fileButton = $('#file-button');
-
-		function login_try (new_login, pass, salt) {
-			setCredentials (new_login, pass, salt);
-			APP.charp.request ('user_auth', [], 
-							   { 
-								   success: login_success,
-								   error: login_error
-							   });
-		}
-
-		function login_success (data, ctx, charp, req) {
-			if (data) {
-				alert ('Autentificación exitosa.');
-				APP.buttonBusy (loginButton, false);
-			}
-		}
-		
-		function login_error (err, ctx, charp) {
-			loginButtonReset ();
-
-			switch (err.key) {
-			case 'SQL:USERUNK':
-				$('#login-username').addClass ('error');
-				$('#login-username').after ('<span class="error login-error">Usuario no encontrado. ¿Escribió bien su nombre de usuario?</span>');
-				break;
-			case 'SQL:REPFAIL':
-				$('#login-passwd').addClass ('error');
-				$('#login-passwd').after ('<span class="error login-error">Contraseña incorrecta.</span>');
-				break;
-			default:
-				return charp.handleError (err);
-			}
-		}
-
-		var form = $('.login-form form');
-
-		function loginSubmit () {
-			if (validator.form ()) {
-				APP.buttonBusy (loginButton, true);
-
-				var new_login = $('#login-username').val ();
-				var pass = $('#login-passwd').val ();
-				var cred = APP.charp.credentialsGet ();
-
-				if (cred.login != null && cred.salt != null && cred.login == new_login) {
-					login_try (new_login, pass, cred.salt);
-				} else {
-					// We have never logged in before or we have but with a different user.
-					APP.charp.request ('salt_get', [new_login],
-									   {
-										   asAnon: true,
-										   success: function (data, ctx, charp, req) {
-											   login_try (new_login, pass, data);
-										   },
-										   error: login_error
-									   });
-				}
-			}
-			return false;
-		}
-
-		var validator = form.validate ({
-			rules: {
-				username: 'required',
-				passwd: 'required'
-			},
-			messages: {
-				username: 'Escriba su nombre de usuario.',
-				passwd: 'Por favor escriba su contraseña.'
-			},
-			errorElement: 'span'
-		});
-
-		form.bind ('submit', loginSubmit);
-
-		loginButton
-			.button ()
-			.bind ('click', loginSubmit);
-
-		function loginFocus () {
-			var errors = $('.login-error', $(this).parent ());
-			if (errors.length > 0) {
-				errors.remove ();
-				$(this).removeClass ('error');
-			}
-			return true;
-		}
-
-		$('#login-username,#login-passwd')
-			.bind ('focus', loginFocus)
-			.bind ('keyup', function (ev) { if (ev.keyCode == 13) loginSubmit (); });
-
-		function fileButtonClick () {
-			if (APP.charp.cred.login == null)
-				return alert ('Primero inicie sesión.');
-
-			APP.charp.request ('file_image_test', [$('#file-filename').val ()], { 
-				charpReplyHandler: function (url, ctx) {
-					$('#file-img').attr ('src', url);
-				}
-			});
-		}
-
-		fileButton
-			.button ()
-			.bind ('click', fileButtonClick);
-
-		$('#anon-button')
-			.bind ('click', function () {
-				APP.charp.request ('get_random_bytes', ['hola', 'adios'],
-								   {
-									   asAnon: true, 
-									   success: function (data) {
-										   $('#anon-button').text ('Request anónimo: ' + data[0].random);
-									   }
-								   });
-			});
-
-		$('#save-button')
-			.bind ('click', function () {
-				setCredentials ($('#login-username').val (),
-								$('#login-passwd').val (),
-								APP.charp.cred.salt);
-				APP.charp.credentialsSave ();
-			});
-
-		$('#load-button')
-			.bind ('click', function () {
-				loadCredentials ();
-			});
-
-		$('#del-button')
-			.bind ('click', function () {
-				APP.charp.credentialsDelete ();
-				APP.charp.credentialsSet (null, null, null);
-				$('#login-username,#login-passwd')
-					.val ('');
-			});
-
-		mod.loaded = true;
-		mod.onLoad ();
-	}
 
 	APP.addModule (MOD_NAME, mod);
 }) ();

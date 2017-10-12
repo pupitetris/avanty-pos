@@ -114,8 +114,6 @@
 		},
 
 		reset: function () {
-			APP.switchPage (MOD_NAME);
-
 			super_is_first = false;
 
 			var cred = APP.charp.credentialsGet ();
@@ -125,6 +123,7 @@
 									   if (!data) {
 										   // operations supervisor not created. Create one immediately.
 										   super_is_first = true;
+										   APP.switchPage (MOD_NAME);
 										   super_create_super ();
 									   } else // operations supervisor present. Go to login screen.
 										   APP.loadModule ('login');
@@ -132,6 +131,7 @@
 				return;
 			}
 
+			APP.switchPage (MOD_NAME);
 			super_main ();
 		}
 	};

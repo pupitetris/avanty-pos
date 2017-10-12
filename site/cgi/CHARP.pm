@@ -52,18 +52,18 @@ $CHARP::ERROR_SEV_EXIT		= 5;
 	'CGI:CMDUNK'		=> { 'code' => 22, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_USER	   },
 	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $CHARP::ERROR_SEV_USER	    },
+	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $CHARP::ERROR_SEV_USER	   },
 	'SQL:ASSERT'		=> { 'code' => 13, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $CHARP::ERROR_SEV_PERM	    },
-	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $CHARP::ERROR_SEV_PERM	    },
-	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $CHARP::ERROR_SEV_USER	    },
-	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $CHARP::ERROR_SEV_USER	    },
-	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $CHARP::ERROR_SEV_USER	    },
-	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $CHARP::ERROR_SEV_EXIT	    },
-	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $CHARP::ERROR_SEV_EXIT	    }
+	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $CHARP::ERROR_SEV_PERM	   },
+	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $CHARP::ERROR_SEV_PERM	   },
+	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $CHARP::ERROR_SEV_USER	   },
+	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $CHARP::ERROR_SEV_USER	   },
+	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $CHARP::ERROR_SEV_USER	   },
+	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $CHARP::ERROR_SEV_EXIT	   },
+	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $CHARP::ERROR_SEV_EXIT	   }
 );
 
 foreach my $key (keys %CHARP::ERRORS) {

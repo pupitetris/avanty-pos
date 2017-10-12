@@ -253,16 +253,18 @@ sub request_reply_do {
     }
 
     my @fields;
-    my $names = $sth->{NAME_lc_hash};
-    foreach my $name (keys %$names) {
-	$fields[$names->{$name}] = $name;
+    my $names = $sth->{NAME_lc};
+    my $types = $sth->{TYPE};
+    for (my $i = 0; $i < scalar (@$names); $i++) {
+	my $type = $ctx->{'dbh'}->type_info ($types->[$i]);
+	push @fields, "{\"name\":\"$names->[$i]\",\"type\":\"$type->{TYPE_NAME}\"}";
     }
 
     CHARP::json_print_headers ($fcgi);
 
-    print '{"fields":["' . 
-	join ('","', @fields) .
-	'"],"data":' .
+    print '{"fields":[' . 
+	join (',', @fields) .
+	'],"data":' .
 	CHARP::json_encode ($sth->fetchall_arrayref ()) .
 	'}';
 

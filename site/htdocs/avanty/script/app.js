@@ -250,7 +250,9 @@
 
 	$(document).ready (function () {
 		if (document.documentElement.requestFullscreen) {
-			document.documentElement.requestFullscreen ();
+			window.setTimeout (function () {
+				document.documentElement.requestFullscreen ();
+			}, 250);
 		}
 
 		if (!APP.DEVEL) {

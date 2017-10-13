@@ -67,7 +67,7 @@ h1 {
 #hourglass {
 	display: none;
 	position: absolute;
-	left: calc(100vw - 112px);
+	left: calc(100vw - 3 * (48px + 8px) - 8px); /* 8px is the distance between elements. */
 	top: 8px;
 	z-index: 10000;
 }
@@ -126,4 +126,26 @@ form label.error {
 	text-align: right;
 	font-size: 50%;
 	color: red;
+}
+
+.shell {
+	z-index: 1000;
+}
+
+.shell-tool {
+	margin-top: 8px;
+}
+
+.avanty button.shell-tool.button-icon {
+	padding: 8px;
+}
+
+.avanty button.shell-tool img {
+	position: static;
+	vertical-align: middle;
+}
+
+.shell-logout {
+	position: absolute;
+	left: calc(100vw - 58px);
 }

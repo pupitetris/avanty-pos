@@ -13,8 +13,11 @@
 	function layout_init () {
 		ui.sections_parent = $('#super-sections');
 		ui.section_newsuper = $('#super-newsuper');
+		ui.section_main = $('#super-main');
 
-		ui.newsuper_shell = ui.section_newsuper.find ('.shell');
+		ui.shell = ui.sections_parent.find ('.shell');
+		ui.shell_logout = ui.shell.find ('.shell-logout');
+		ui.shell_logout.button ();
 
 		ui.newsuper_login = ui.section_newsuper.find ('input[name="newsuper-login"]');
 		ui.newsuper_login.input ();
@@ -69,9 +72,9 @@
 		APP.switchSection (ui.section_newsuper, ui.sections_parent);
 
 		if (super_is_first) {
-			ui.newsuper_shell.hide ();
+			ui.shell.hide ();
 		} else {
-			ui.newsuper_shell.show ();
+			ui.shell.show ();
 		}
 
 		ui.newsuper_submit.button ("enable");
@@ -98,6 +101,11 @@
 			APP.loadModule ('login');
 		else
 			super_main ();
+	}
+
+	function super_main () {
+		APP.switchSection (ui.section_main, ui.sections_parent);
+		ui.shell.show ();
 	}
 
 	var mod = {

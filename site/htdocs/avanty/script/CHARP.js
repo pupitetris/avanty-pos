@@ -1,10 +1,7 @@
-// This file is part of the CHARP project. -*- tab-width: 4; -*-
+// This file is part of Microsafe AVANTY. -*- tab-width: 4; -*-
 //
-// Copyright © 2011 - 2014
-//   Free Software Foundation Europe, e.V.,
-//   Talstrasse 110, 40217 Dsseldorf, Germany
-//
-// Licensed under the EUPL V.1.1. See the file LICENSE.txt for copying conditions.
+// Copyright © 2017 Microsafe, S.A. de C.V.
+// Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
 function CHARP () {
 	this.cred = { login: null, passwd: null, salt: null };
@@ -140,6 +137,8 @@ CHARP.ERRORS = {
 		},
 
 		replySuccess: function (data, status, req, ctx) {
+			this.setBusy (false);
+
 			if (status != 'success')
 				return;
 
@@ -156,6 +155,8 @@ CHARP.ERRORS = {
 		},
 
 		replyComplete: function (req, status, ctx) {
+			this.setBusy (false);
+
 			if (ctx.complete)
 				ctx.complete (status, ctx, req);
 
@@ -177,6 +178,7 @@ CHARP.ERRORS = {
 			if (ctx.charpReplyHandler)
 				return ctx.charpReplyHandler (url + '?' + CHARP.paramsUriEncode (params), ctx);
 
+			this.setBusy (true);
 			var charp = this;
 			CHARP.ajaxPost (url, params, 
 							function (data, status, req) { return charp.replySuccess (data, status, req, ctx); },
@@ -184,6 +186,8 @@ CHARP.ERRORS = {
 		},
 
 		requestSuccess: function (data, status, req, ctx) {
+			this.setBusy (false);
+
 			if (ctx.asAnon)
 				return this.replySuccess (data, status, req, ctx);
 
@@ -198,6 +202,8 @@ CHARP.ERRORS = {
 		},
 		
 		requestComplete: function (req, status, ctx) {
+			this.setBusy (false);
+
 			if (ctx.req_complete)
 				ctx.req_complete (status, ctx, req);
 
@@ -224,6 +230,7 @@ CHARP.ERRORS = {
 
 			ctx.reqData = data;
 
+			this.setBusy (true);
 			var charp = this;
 			CHARP.ajaxPost (this.BASE_URL + 'request', data, 
 							function (data, status, req) { return charp.requestSuccess (data, status, req, ctx); },
@@ -259,6 +266,17 @@ CHARP.ERRORS = {
 			localStorage.removeItem ('charp_salt');
 		},
 		
+		setBusyCB: function (cb) {
+			// This will be called with a boolean param (busy or not busy) for ui feedback.
+			this.busyCB = busyCB;
+		},
+
+		setBusy: function (busy) {
+			if (!this.busyCB)
+				return;
+			this.busyCB (busy);
+		},
+
 		init: function () {
 			return this;
 		}

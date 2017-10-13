@@ -120,6 +120,7 @@
 			if (cred.login == 'supervisor') {
 				APP.charp.request ('supervisor_created', [],
 								   function (data) {
+									   APP.hourglass.enable ();
 									   if (!data) {
 										   // operations supervisor not created. Create one immediately.
 										   super_is_first = true;
@@ -131,6 +132,7 @@
 				return;
 			}
 
+			APP.hourglass.enable ();
 			APP.switchPage (MOD_NAME);
 			super_main ();
 		}

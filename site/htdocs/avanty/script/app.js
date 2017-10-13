@@ -12,7 +12,7 @@
 			return this.addClass("ui-widget ui-widget-content ui-corner-all");
 		};
 	} (jQuery));
-	
+
 	function msgDialogAppendP (parent, contents, className) {
 		if (contents && typeof contents.selector != 'undefined') {
 			contents.addClass (className);
@@ -37,11 +37,62 @@
 		return p;
 	}
 
+	function hourglass () {
+	}
+
+	hourglass.prototype = {
+		// Provided div should start hidden.
+		init: function (div) {
+			if (!div)
+				div = $('#hourglass');
+			this.div = div;
+
+			this.setEnabled (false);
+			this.setShowing (false);
+		},
+
+		setEnabled: function (enabled) {
+			this.enabled = enabled;
+			if (this.showing) {
+				if (this.enabled)
+					this.div.show ();
+				else
+					this.div.hide ();
+			}
+			return this;
+		},
+
+		enable: function () { this.setEnabled (true); return this; },
+
+		disable: function () { this.setEnabled (false); return this; },
+
+		setShowing: function (showing) {
+			this.showing = showing;
+			if (this.enabled) {
+				if (this.showing)
+					this.div.show ();
+				else
+					this.div.hide ();
+			}
+			return this;
+		},
+
+		show: function () {	this.setShowing (true); return this; },
+
+		hide: function () {	this.setShowing (false); return this; }
+	}
+
+	function show_hourglass (busy) {
+		APP.hourglass.setShowing (busy);
+	}
+	
 	window.APP = APP = {
 		// This is where modules are registered:
 		mod: {},
 		
 		charp: new CHARP ().init (),
+
+		hourglass: new hourglass ().init (),
 
 		extendClass: function (childClass, superClass) {
 			childClass.prototype.__proto__ = superClass.prototype;
@@ -243,6 +294,8 @@
 		VERSION: '0.5',
 
 		main: function () {
+			APP.charp.setBusyCB (show_hourglass);
+
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
 			APP.loadModule ('activate');
 		}

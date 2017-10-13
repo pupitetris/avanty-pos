@@ -76,6 +76,7 @@
 
 	function activate_load_is_activated (data) {
 		if (!data) { // System is not activated. Proceed with activation.
+			APP.hourglass.enable ();
 			APP.switchSection ($('#activate-greeting'), sections_parent);
 			return;
 		}
@@ -193,6 +194,7 @@
 			greeting_button.button ("enable");
 			chal_button.button ("disable");
 			
+			APP.hourglass.disable ();
 			APP.switchPage (MOD_NAME);
 			APP.switchSection ($('#activate-load'), sections_parent);
 

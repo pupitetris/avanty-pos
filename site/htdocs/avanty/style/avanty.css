@@ -54,7 +54,6 @@ h1 {
 	position: absolute;
 	left: calc(100vw - 112px);
 	top: 8px;
-	background-image: url('../img/spinner.gif');
 	z-index: 10000;
 }
 

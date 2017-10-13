@@ -38,17 +38,25 @@
 	}
 
 	function hourglass () {
+		return this;
 	}
 
 	hourglass.prototype = {
 		// Provided div should start hidden.
 		init: function (div) {
-			if (!div)
+			if (!div) {
 				div = $('#hourglass');
+				if (div.length == 0) {
+					var that = this;
+					window.setTimeout (function () { that.div = $('#hourglass'); }, 250);
+				}
+			}
 			this.div = div;
 
 			this.setEnabled (false);
 			this.setShowing (false);
+
+			return this;
 		},
 
 		setEnabled: function (enabled) {
@@ -86,7 +94,7 @@
 		APP.hourglass.setShowing (busy);
 	}
 	
-	window.APP = APP = {
+	window.APP = {
 		// This is where modules are registered:
 		mod: {},
 		

@@ -268,7 +268,7 @@ CHARP.ERRORS = {
 		
 		setBusyCB: function (cb) {
 			// This will be called with a boolean param (busy or not busy) for ui feedback.
-			this.busyCB = busyCB;
+			this.busyCB = cb;
 		},
 
 		setBusy: function (busy) {

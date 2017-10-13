@@ -18,9 +18,6 @@
 		ui.enter_pass = ui.section_enter.find ('input[name="login-pass"]');
 		ui.enter_pass.input ();
 
-		ui.enter_submit = ui.section_enter.find ('button');
-		ui.enter_submit.button ();
-
 		ui.enter_form = ui.section_enter.find ('form');
 		ui.enter_form.validate ({
 			submitHandler: login_enter_submit,
@@ -33,6 +30,12 @@
 				'login-pass': { required: 'Escribe tu contraseña.' }
 			}
 		});
+
+		ui.enter_submit = ui.enter_form.find ('button');
+		ui.enter_submit.button ();
+
+		ui.enter_lostpass = $('#login-lostpass');
+		ui.enter_lostpass.button ();
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -82,6 +85,15 @@
 		ui.enter_submit.button ("enable");
 
 		switch (err.key) {
+		case 'SQL:USERDIS':
+			APP.msgDialog ({
+				icon: 'no',
+				desc: 'Este usuario se encuentra deshabilitado.',
+				sev: CHARP.ERROR_SEV['PERM'],
+				title: 'Usuario deshabilitado',
+				opts: { width: '75%' }
+			});
+			return;
 		case 'SQL:USERUNK':
 			APP.msgDialog ({
 				icon: 'no',
@@ -105,7 +117,25 @@
 	}
 
 	function login_success (data) {
-		alert ('success');
+		APP.charp.request ('this_user_types_get', [],
+						   {
+							   asObject: true,
+							   success: function (types) {
+								   mod.user_types = types;
+								   if (types.maintenance) {
+									   APP.loadModule ('maint');
+									   return;
+								   }
+								   if (types.supervisor) {
+									   APP.loadModule ('super');
+									   return;
+								   }
+								   if (types.cashier) {
+									   APP.loadModule ('cash');
+									   return;
+								   }
+							   }
+						   });
 	}
 
 	function setCredentials (login, pass, salt) {
@@ -115,6 +145,8 @@
 	}
 
 	var mod = {
+		user_types: {},
+
 		init: function () {
 			mod.initialized = true;
 			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);

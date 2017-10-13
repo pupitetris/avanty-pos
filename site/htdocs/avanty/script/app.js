@@ -420,11 +420,8 @@
 	};
 
 	$(document).ready (function () {
-		if (document.documentElement.requestFullscreen) {
-			window.setTimeout (function () {
-				document.documentElement.requestFullscreen ();
-			}, 250);
-		}
+		if (document.documentElement.requestFullscreen)
+			document.documentElement.requestFullscreen ();
 
 		if (!APP.DEVEL) {
 			window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };

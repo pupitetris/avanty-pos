@@ -18,6 +18,7 @@ use utf8;
     'CGI:CMDNUMPARAM'	=> 'CGI command %s: %s required parameters, %s delivered.',
     'CGI:CMDERR'	=> 'CGI command %s: execution error.',
     'SQL:USERUNK'	=> 'User `%s` with status `%s` not found.',
+    'SQL:USERDIS'	=> 'User `%s` is disabled.',
     'SQL:PROCUNK'	=> 'Function `%s` not found.',
     'SQL:REQUNK'	=> 'Request not found.',
     'SQL:REPFAIL'	=> 'Wrong signature. Verify your username and password.',

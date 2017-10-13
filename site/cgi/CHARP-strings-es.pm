@@ -18,6 +18,7 @@ use utf8;
     'CGI:CMDNUMPARAM'	=> 'Comando CGI %s: %s parámetros requeridos, se entregaron %s.',
     'CGI:CMDERR'	=> 'Comando CGI falló al ser ejecutado.',
     'SQL:USERUNK'	=> 'Usuario `%s` con status `%s` no encontrado.',
+    'SQL:USERDIS'	=> 'El usuario `%s` está deshabilitado.',
     'SQL:PROCUNK'	=> 'Función `%s` desconocida.',
     'SQL:REQUNK'	=> 'Petición no encontrada.',
     'SQL:REPFAIL'	=> 'Firma errónea. Verificar nombre de usuario y contraseña.',

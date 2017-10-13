@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="464,760" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="48,18" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -77,7 +77,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 <usertype name="charp_error_code" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="USERUNK,PROCUNK,REQUNK,REPFAIL,ASSERT,USERPARMPERM,USERPERM,MAILFAIL,DATADUP,NOTFOUND,EXIT,SUCCESS"/>
+	<enumeration values="USERUNK,USERDIS,PROCUNK,REQUNK,REPFAIL,ASSERT,USERPARMPERM,USERPERM,MAILFAIL,DATADUP,NOTFOUND,EXIT,SUCCESS"/>
 </usertype>
 
 <table name="user_supervisor" hide-ext-attribs="true">
@@ -1532,14 +1532,27 @@ END;]]></definition>
 		<type name="av.charp_account_status" length="0"/>
 	</parameter>
 	<definition><![CDATA[DECLARE
-	_id integer;
+	_id av.account.user_id%TYPE;
+	_user_status av.account.status%TYPE;
 BEGIN
-	SELECT a.user_id INTO _id FROM account AS a
-	       WHERE a.login = _login AND a.status = _status;
+	SELECT a.user_id, a.status INTO _id, _user_status FROM account AS a
+	       WHERE a.login = _login;
+
 	IF NOT FOUND THEN
 	   PERFORM charp_raise('USERUNK', _login::text, _status::text);
 	END IF;
-	RETURN _id;
+
+	IF _status = _user_status THEN
+		RETURN _id;
+	END IF;
+
+	IF _user_status = 'disabled' THEN
+	   PERFORM charp_raise('-USERDIS', _login::text);
+	END IF;
+
+	IF _user_status = 'deleted' THEN
+	   PERFORM charp_raise('USERUNK', _login::text, _status::text);
+	END IF;
 END;]]></definition>
 </function>
 
@@ -1845,6 +1858,42 @@ END;]]></definition>
 			PERFORM charp_raise ('ASSERT', '_role NOT FOUND');
 	END CASE;
 END;]]></definition>
+</function>
+
+<function name="this_user_types_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get the types this user is in.]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="cashier">
+		<type name="boolean" length="0"/>
+	</parameter>
+	<parameter name="supervisor">
+		<type name="boolean" length="0"/>
+	</parameter>
+	<parameter name="maintenance">
+		<type name="boolean" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[SELECT c.user_id IS NOT NULL as cashier,
+	s.user_id IS NOT NULL as supervisor,
+    m.user_id IS NOT NULL as maintenance
+    FROM account AS a 
+    	NATURAL LEFT JOIN user_cashier AS c
+    	NATURAL LEFT JOIN user_supervisor AS s 
+    	NATURAL LEFT JOIN user_maintenance AS m
+        WHERE a.user_id = _uid;]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

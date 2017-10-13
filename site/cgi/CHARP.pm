@@ -53,6 +53,7 @@ $CHARP::ERROR_SEV_EXIT		= 5;
 	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_USER	   },
+	'SQL:USERDIS'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_PERM	   },
 	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $CHARP::ERROR_SEV_USER	   },

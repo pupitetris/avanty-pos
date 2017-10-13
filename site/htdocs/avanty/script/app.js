@@ -13,7 +13,7 @@
 		};
 	} (jQuery));
 
-	function msgDialogAppendP (parent, contents, className) {
+	function msg_dialog_append_p (parent, contents, className) {
 		if (contents && typeof contents.selector != 'undefined') {
 			contents.addClass (className);
 			if (parent)
@@ -37,18 +37,18 @@
 		return p;
 	}
 
-	function hourglass () {
+	function Hourglass () {
 		return this;
 	}
 
-	hourglass.prototype = {
+	Hourglass.prototype = {
 		// Provided div should start hidden.
 		init: function (div) {
 			if (!div) {
-				div = $('#hourglass');
+				div = this.getDefaultElement ();
 				if (div.length == 0) {
 					var that = this;
-					window.setTimeout (function () { that.div = $('#hourglass'); }, 250);
+					window.setTimeout (function () { that.div = that.getDefaultElement (); }, 250);
 				}
 			}
 			this.div = div;
@@ -57,6 +57,10 @@
 			this.setShowing (false);
 
 			return this;
+		},
+
+		getDefaultElement: function () {
+			return $('#hourglass');
 		},
 
 		setEnabled: function (enabled) {
@@ -88,7 +92,111 @@
 		show: function () {	this.setShowing (true); return this; },
 
 		hide: function () {	this.setShowing (false); return this; }
+	};
+
+	function Clock () {
+		return this;
 	}
+
+	(function () {
+		var sup = Hourglass.prototype;
+
+		var interval;
+		var interval_secs;
+		var display_time;
+
+		function two_digits (num) {
+			return (num < 10)?
+				'0' + num.toString ():
+				num.toString ();
+		}
+
+		function update_clock () {
+			if (!this.div || !this.div.length)
+				return;
+
+			var d = new Date ();
+			var new_time = two_digits (d.getHours ()) + ':' + two_digits (d.getMinutes ());
+			var new_date = d.getFullYear () + '/' +
+				two_digits (d.getMonth() + 1) + '/' + two_digits (d.getDate ())
+
+			if (display_time) {
+				if (display_time == new_time)
+					return;
+				set_interval.call (this, true, 60);
+			}
+
+			display_time = new_time;
+			this.time.text (new_time);
+			this.date.text (new_date);
+		}
+
+		function set_interval (enable, secs) {
+			// disable if an interval call is defined.
+			if (!enable && interval) {
+				window.clearInterval (interval);
+				interval_secs = 0;
+				interval = undefined;
+				return;
+			}
+			
+			// enable: sets the interval call, but will not if it is already there
+			// and the time interval is the same.
+			if (this.interval_secs != secs)
+				// time interval has changed, so remove old intervall call if it exists:
+				set_interval.call (this, false);
+			
+			// we set the new interval, but only if none is currently running.
+			if (!interval) {
+				this.interval_secs = secs;
+				var that = this;
+				interval = window.setInterval (function () { update_clock.call (that); }, secs * 1000);
+			}
+			return;
+		}
+
+		function get_subelements (div) {
+			this.date = div.find ('.date');
+			this.time = div.find ('.time');
+		}
+
+		Clock.prototype = {
+			__proto__: Hourglass.prototype,
+			
+			init: function (div) {
+				sup.init.call (this, div);
+				if (div && div.length)
+					get_subelements.call (this, div);
+				this.enable ();
+				this.show ();
+			},
+			
+			getDefaultElement: function () {
+				var div = $('#clock');
+				if (div && div.length)
+					get_subelements.call (this, div);
+				return div;
+			},
+
+			setEnabled: function (enabled) {
+				sup.setEnabled.call (this, enabled);
+				if (enabled && this.showing) {
+					set_interval.call (this, true, 1);
+					return;
+				}
+				set_interval.call (this, false);
+			},
+
+			setShowing: function (showing) {
+				sup.setShowing.call (this, showing);
+				if (showing && this.enabled) {
+					set_interval.call (this, true, 1);
+					return;
+				}
+				set_interval.call (this, false);
+			}
+		};
+	}) ();
 
 	function show_hourglass (busy) {
 		APP.hourglass.setShowing (busy);
@@ -100,7 +208,9 @@
 		
 		charp: new CHARP ().init (),
 
-		hourglass: new hourglass ().init (),
+		hourglass: new Hourglass ().init (),
+
+		clock: new Clock ().init (),
 
 		extendClass: function (childClass, superClass) {
 			childClass.prototype.__proto__ = superClass.prototype;
@@ -225,11 +335,11 @@
 				div.append ('<div class="icon"><img src="img/icons/' + img_file + '" alt="" /></div>');
 			}
 			if (opts.desc)
-				msgDialogAppendP (div, opts.desc, 'desc');
+				msg_dialog_append_p (div, opts.desc, 'desc');
 			if (opts.msg)
-				msgDialogAppendP (div, opts.msg, 'msg');
+				msg_dialog_append_p (div, opts.msg, 'msg');
 			if (opts.sev)
-				msgDialogAppendP (div, (typeof opts.sev == "number")?
+				msg_dialog_append_p (div, (typeof opts.sev == "number")?
 								  CHARP.ERROR_SEV_MSG[opts.sev]: opts.sev.toString (), 'error-sev');
 
 			if (div.parent ().length == 0)

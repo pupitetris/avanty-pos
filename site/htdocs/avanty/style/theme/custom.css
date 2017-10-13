@@ -90,7 +90,7 @@
     font-style: italic;
     clear: both;
     white-space: pre;
-    overflow-x: auto;
+    overflow-x: overlay;
 }
 
 .avanty .ui-dialog-content .msg.msg-mono {

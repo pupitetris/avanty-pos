@@ -16,8 +16,9 @@
 		ui.section_main = $('#super-main');
 
 		ui.shell = ui.sections_parent.find ('.shell');
-		ui.shell_logout = ui.shell.find ('.shell-logout');
-		ui.shell_logout.button ();
+		ui.shell_lock = ui.shell.find ('.shell-lock');
+		ui.shell_lock.button ();
+		ui.shell_lock.bind ('click', function () { APP.loadModule ('lock'); });
 
 		ui.newsuper_login = ui.section_newsuper.find ('input[name="newsuper-login"]');
 		ui.newsuper_login.input ();
@@ -77,14 +78,17 @@
 			ui.shell.show ();
 		}
 
-		ui.newsuper_submit.button ("enable");
+		ui.newsuper_login.val ('');
+		ui.newsuper_pass.val ('');
+		ui.newsuper_pass2.val ('');
+		ui.newsuper_submit.button ('enable');
 		ui.newsuper_login.focus ();
 	}
 
 	function super_create_super_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
-		ui.newsuper_submit.button ("disable");
+		ui.newsuper_submit.button ('disable');
 
 		var login = ui.newsuper_login.val ();
 		var pass = ui.newsuper_pass.val ();
@@ -92,7 +96,7 @@
 		APP.charp.request ('user_create', [login, pass, 'supervisor'],
 						   {
 							   success: super_user_create_super_success,
-							   error: function () { ui.newsuper_submit.button ("enable"); return true; }
+							   error: function () { ui.newsuper_submit.button ('enable'); return true; }
 						   });
 	}
 

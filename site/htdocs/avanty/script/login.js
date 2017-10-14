@@ -50,70 +50,30 @@
 		ui.enter_username.val ('');
 		ui.enter_pass.val ('');
 
-		ui.enter_submit.button ("enable");
+		ui.enter_submit.button ('enable');
 	}
 
 	function login_enter_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
-		ui.enter_submit.button ("disable");
+		ui.enter_submit.button ('disable');
 		
 		var login = ui.enter_username.val ();
 		var pass = ui.enter_pass.val ();
 
-		APP.charp.request ('salt_get', [login],
-						   {
-							   asAnon: true,
-							   success: function (salt) {
-								   login_try (login, pass, salt);
-							   },
-							   error: login_error
-						   });
-		
+		mod.loginTry (APP.charp, login, pass, login_success, login_error);
 	}
 
-	function login_try (login, pass, salt) {
-		setCredentials (login, pass, salt);
-		APP.charp.request ('user_auth', [], 
-						   { 
-							   success: login_success,
-							   error: login_error
-						   });
+	function set_credentials (charp, login, pass, salt) {
+		if (pass.indexOf (salt) != 0)
+			pass = dcodeIO.bcrypt.hashSync (pass, salt);
+		charp.credentialsSet (login, pass, salt);
 	}
 
 	function login_error (err, ctx, charp) {
-		ui.enter_submit.button ("enable");
+		ui.enter_submit.button ('enable');
 
-		switch (err.key) {
-		case 'SQL:USERDIS':
-			APP.msgDialog ({
-				icon: 'no',
-				desc: 'Este usuario se encuentra deshabilitado.',
-				sev: CHARP.ERROR_SEV['PERM'],
-				title: 'Usuario deshabilitado',
-				opts: { width: '75%' }
-			});
-			return;
-		case 'SQL:USERUNK':
-			APP.msgDialog ({
-				icon: 'no',
-				desc: 'Usuario no encontrado. ¿Escribiste bien tu clave de usuario?',
-				sev: CHARP.ERROR_SEV['USER'],
-				title: 'Usuario no encontrado',
-				opts: { width: '75%' }
-			});
-			return;
-		case 'SQL:REPFAIL':
-			APP.msgDialog ({
-				icon: 'no',
-				desc: 'La contraseña está equivocada.',
-				sev: CHARP.ERROR_SEV['USER'],
-				title: 'Contraseña incorrecta',
-				opts: { width: '75%' }
-			});
-			return;
-		}
-		return true;
+		return mod.loginErrorHandler (err, ctx, charp);
 	}
 
 	function login_success (data) {
@@ -138,14 +98,59 @@
 						   });
 	}
 
-	function setCredentials (login, pass, salt) {
-		if (pass.indexOf (salt) != 0)
-			pass = dcodeIO.bcrypt.hashSync (pass, salt);
-		APP.charp.credentialsSet (login, pass, salt);
-	}
-
 	var mod = {
 		user_types: {},
+
+		loginTry: function (charp, login, clear_pass, success_cb, error_cb) {
+			function auth_try (salt) {
+				set_credentials (charp, login, clear_pass, salt);
+				charp.request ('user_auth', [], 
+							   { 
+								   success: success_cb,
+								   error: error_cb
+							   });
+			}
+
+			APP.charp.request ('salt_get', [login],
+							   {
+								   asAnon: true,
+								   success: auth_try,
+								   error: error_cb
+							   });
+		},
+
+		loginErrorHandler: function (err, ctx, charp) {
+			switch (err.key) {
+			case 'SQL:USERDIS':
+				APP.msgDialog ({
+					icon: 'no',
+					desc: 'Este usuario se encuentra deshabilitado.',
+					sev: CHARP.ERROR_SEV['PERM'],
+					title: 'Usuario deshabilitado',
+					opts: { width: '75%' }
+				});
+				return;
+			case 'SQL:USERUNK':
+				APP.msgDialog ({
+					icon: 'no',
+					desc: 'Usuario no encontrado. ¿Escribiste bien tu clave de usuario?',
+					sev: CHARP.ERROR_SEV['USER'],
+					title: 'Usuario no encontrado',
+					opts: { width: '75%' }
+				});
+				return;
+			case 'SQL:REPFAIL':
+				APP.msgDialog ({
+					icon: 'no',
+					desc: 'La contraseña está equivocada.',
+					sev: CHARP.ERROR_SEV['USER'],
+					title: 'Contraseña incorrecta',
+					opts: { width: '75%' }
+				});
+				return;
+			}
+			return true;
+		},
 
 		init: function () {
 			mod.initialized = true;

@@ -11,16 +11,10 @@
 	var activate_sequence = [1,2,3,4,5];
 	var activate_current = 0;
 
-	var activate_load_icon;
-	var greeting_cont;
-	var greeting_button;
-	var chal_button;
-	var chal_input;
-	var chal_value;
-	var sections_parent;
+	var ui = {};
 
 	function layout_init () {
-		sections_parent = $('#activate-sections');
+		ui.sections_parent = $('#activate-sections');
 
 		// "Blank" screen, where we go when things fail.
 
@@ -33,24 +27,24 @@
 
 		$('.activate-quadrant').bind ('click', quadrant_click);
 
-		greeting_cont = $('#activate-greeting-continue');
+		ui.greeting_cont = $('#activate-greeting-continue');
 		
-		greeting_button = greeting_cont.find ('button');
-		greeting_button.button ();
-		greeting_button.bind ('click', greeting_click);
+		ui.greeting_button = ui.greeting_cont.find ('button');
+		ui.greeting_button.button ();
+		ui.greeting_button.bind ('click', greeting_click);
 
-		activate_load_icon = $('#activate-load img');
+		ui.activate_load_icon = $('#activate-load img');
 
 		// Challenge screen.
 
 		var chal_cont = $('#activate-chal');
 		chal_cont.find ('form').bind ('submit', challenge_submit);
 
-		chal_button = chal_cont.find ('button');
-		chal_button.button ();
+		ui.chal_button = chal_cont.find ('button');
+		ui.chal_button.button ();
 
-		chal_input = chal_cont.find ('input');
-		chal_input.input ();
+		ui.chal_input = chal_cont.find ('input');
+		ui.chal_input.input ();
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -58,7 +52,7 @@
 
 	// In case of an unhandled error, blank the screen.
 	function activate_blank_error () {
-		APP.switchSection ($('#activate-blank'), sections_parent);
+		APP.switchSection ($('#activate-blank'), ui.sections_parent);
 		return true; // Call default handler to show the error dialog.
 	}
 
@@ -77,7 +71,7 @@
 	function activate_load_is_activated (data) {
 		if (!data) { // System is not activated. Proceed with activation.
 			APP.hourglass.enable ();
-			APP.switchSection ($('#activate-greeting'), sections_parent);
+			APP.switchSection ($('#activate-greeting'), ui.sections_parent);
 			return;
 		}
 
@@ -101,18 +95,18 @@
 		if (activate_current < activate_sequence.length)
 			return;
 
-		greeting_cont.show ();
-		greeting_button.focus ();
+		ui.greeting_cont.show ();
+		ui.greeting_button.focus ();
 	}
 
 	function greeting_click (evt) {
-		greeting_button.button ("disable");
-		APP.switchSection ($('#activate-chal'), sections_parent);
+		ui.greeting_button.button ("disable");
+		APP.switchSection ($('#activate-chal'), ui.sections_parent);
 		activate_challenge_get ();
 	}
 
 	function activate_challenge_get () {
-		chal_input.val ('');
+		ui.chal_input.val ('');
 		APP.charp.request ('activation_challenge_get', [],
 						   {
 							   success: activate_challenge_get_success,
@@ -121,24 +115,24 @@
 	}
 
 	function activate_challenge_get_success (data) {
-		chal_value = data;
-		chal_button.button ("enable");
-		chal_input.focus ();
-		$('#activate-chal-value').text (chal_value);
+		ui.chal_value = data;
+		ui.chal_button.button ("enable");
+		ui.chal_input.focus ();
+		$('#activate-chal-value').text (ui.chal_value);
 	}
 
 	function challenge_submit (evt) {
 		evt.preventDefault ();
-		chal_button.button ("disable");
-		chal_input.focus ();
-		APP.charp.request ('activation_challenge_check', [chal_value, chal_input.val ()],
+		ui.chal_button.button ("disable");
+		ui.chal_input.focus ();
+		APP.charp.request ('activation_challenge_check', [ui.chal_value, ui.chal_input.val ()],
 						   {
 							   success: activate_challenge_check_success,
 							   error: function (err) {
 								   switch (err.key) {
 								   case 'SQL:EXIT':
 									   if (err.desc == 'BAD_SOLUTION') {
-										   chal_button.button ("enable");
+										   ui.chal_button.button ("enable");
 										   APP.msgDialog ({
 											   icon: 'no',
 											   desc: 'La solución proporcionada no es correcta.',
@@ -149,7 +143,7 @@
 										   return;
 									   }
 								   case 'SQL:NOTFOUND':
-									   chal_button.button ("enable");
+									   ui.chal_button.button ("enable");
 									   APP.msgDialog ({
 										   icon: 'timeout.png',
 										   desc: 'El reto ha expirado.',
@@ -191,18 +185,18 @@
 		reset: function () {
 			$('#activate-chal-value').text ('--------');
 
-			greeting_button.button ("enable");
-			chal_button.button ("disable");
+			ui.greeting_button.button ("enable");
+			ui.chal_button.button ("disable");
 			
 			APP.hourglass.disable ();
 			APP.switchPage (MOD_NAME);
-			APP.switchSection ($('#activate-load'), sections_parent);
+			APP.switchSection ($('#activate-load'), ui.sections_parent);
 
 			activate_current = 0;
-			greeting_cont.hide ();
+			ui.greeting_cont.hide ();
 
-			activate_load_icon.hide ();
-			activate_load_icon.fadeIn (FADE_DELAY, activate_load_start);
+			ui.activate_load_icon.hide ();
+			ui.activate_load_icon.fadeIn (FADE_DELAY, activate_load_start);
 		}
 	};
 

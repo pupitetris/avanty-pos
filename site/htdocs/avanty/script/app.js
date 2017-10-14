@@ -169,6 +169,7 @@
 					get_subelements.call (this, div);
 				this.enable ();
 				this.show ();
+				return this;
 			},
 			
 			getDefaultElement: function () {
@@ -194,6 +195,13 @@
 					return;
 				}
 				set_interval.call (this, false);
+			},
+
+			// color as null reverts to default color.
+			color: function (color) {
+				if (color === undefined)
+					return this.div.css ('color');
+				this.div.css ('color', (color == null)? '': color);
 			}
 		};
 	}) ();

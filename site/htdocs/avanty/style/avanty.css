@@ -4,6 +4,7 @@
 @import url('activate.css');
 @import url('super.css');
 @import url('login.css');
+@import url('lock.css');
 
 body.avanty {
 	font-family: 'Open Sans', sans-serif;

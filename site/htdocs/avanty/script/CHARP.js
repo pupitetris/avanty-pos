@@ -238,10 +238,25 @@ CHARP.ERRORS = {
 		},
 
 		credentialsGet: function () {
-			return this.cred;
+			var cred = {
+				login: this.cred.login,
+				passwd: this.cred.passwd,
+				salt: this.cred.salt
+			};
+			return cred;
 		},
 
-		credentialsSet: function (login, passwd_hash, salt) {
+		credentialsSet: function (login_or_cred, passwd_hash, salt) {
+			if (typeof login_or_cred == "object" && login_or_cred != null) {
+				var cred = login_or_cred;
+				if (('login') in cred) this.cred.login = cred.login;
+				if (('passwd') in cred) this.cred.passwd = cred.passwd;
+				if (('salt') in cred) this.cred.salt = cred.salt;
+				return;
+			}
+
+			var login = login_or_cred;
+
 			this.cred.login = login;
 			this.cred.passwd = passwd_hash;
 			this.cred.salt = salt;
@@ -277,7 +292,15 @@ CHARP.ERRORS = {
 			this.busyCB (busy);
 		},
 
-		init: function () {
+		init: function (charp) {
+			if (charp) { // Clone
+				this.BASE_URL = charp.BASE_URL;
+
+				var cred = charp.credentialsGet ();
+				this.cred.login = cred.login;
+				this.cred.passwd = cred.passwd;
+				this.cred.salt = cred.salt;
+			}
 			return this;
 		}
 	};

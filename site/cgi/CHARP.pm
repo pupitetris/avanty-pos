@@ -272,14 +272,7 @@ sub error_get {
 sub execute {
 	my $sth = shift;
 
-#	print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
-
 	my $rv = $sth->execute (@_);
-
-#	print STDERR "return: " . $rv . "\n";
-#	print STDERR "error: " . $sth->err . "\n";
-#	print STDERR "errstr: " . $sth->errstr . "\n";
-#	print STDERR "state: " . $sth->state . "\n";
 
 	return $rv;
 }
@@ -357,9 +350,13 @@ sub connect {
 	my ($attr_hash) = @_;
 
 	$attr_hash = {} if (!defined $attr_hash);
-	connect_attrs_add ($attr_hash);
+	$attr_hash->{'PrintError'} = $CHARP::DB_PRINT_ERROR;
+	# Add required attributes that are db-dependant:
+	db_connect_attrs_add ($attr_hash);
 
-	my $dbh = DBI->connect_cached ("dbi:$CHARP::DB_DRIVER:$CHARP::DB_STR" . dsn_add (), 
+	DBI->trace ($CHARP::DB_TRACE, $CHARP::DB_TRACE_FNAME);
+
+	my $dbh = DBI->connect_cached ("dbi:$CHARP::DB_DRIVER:$CHARP::DB_STR" . db_dsn_add (), 
 								   $CHARP::DB_USER, $CHARP::DB_PASS, $attr_hash);
 	undef $CHARP::DB_STR;
 	undef $CHARP::DB_USER;
@@ -370,10 +367,10 @@ sub connect {
 		my $msg = $DBI::errstr;
 		$msg =~ s/\n.*//mg; # Remove sensitive information.
 		dispatch_error ({'err' => 'DBI:CONNECT', 'msg' => $msg });
-	} else {
-		$dbh->do ("SET application_name='charp'");
+		return;
 	}
 
+	$dbh->do ("SET application_name='charp'");
 	return $dbh;
 }
 

@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="48,18" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="47,17" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1083,18 +1083,19 @@ BEGIN
 
 	SELECT INTO _sqlcode
 	       CASE _code_t
-		    WHEN 'USERUNK'      THEN 'CH001'
-		    WHEN 'PROCUNK'      THEN 'CH002'
-		    WHEN 'REQUNK'       THEN 'CH003'
-		    WHEN 'REPFAIL'      THEN 'CH004'
-		    WHEN 'ASSERT'       THEN 'CH005'
-		    WHEN 'USERPARMPERM' THEN 'CH006'
-		    WHEN 'USERPERM'     THEN 'CH007'
-		    WHEN 'MAILFAIL'     THEN 'CH008'
-		    WHEN 'DATADUP'      THEN 'CH009'
-		    WHEN 'NOTFOUND'     THEN 'CH010'
-		    WHEN 'EXIT'         THEN 'CH011'
-		    ELSE 'CH000'
+		    WHEN 'USERUNK'      THEN 'RP001'
+			WHEN 'USERDIS'      THEN 'RP002'
+		    WHEN 'PROCUNK'      THEN 'RP003'
+		    WHEN 'REQUNK'       THEN 'RP004'
+		    WHEN 'REPFAIL'      THEN 'RP005'
+		    WHEN 'ASSERT'       THEN 'RP006'
+		    WHEN 'USERPARMPERM' THEN 'RP007'
+		    WHEN 'USERPERM'     THEN 'RP008'
+		    WHEN 'MAILFAIL'     THEN 'RP009'
+		    WHEN 'DATADUP'      THEN 'RP010'
+		    WHEN 'NOTFOUND'     THEN 'RP011'
+		    WHEN 'EXIT'         THEN 'RP012'
+		    ELSE 'RP000'
 	       END;
 
 	RAISE EXCEPTION '|>%|%|', _code, array_to_json(_args) USING ERRCODE = _sqlcode;

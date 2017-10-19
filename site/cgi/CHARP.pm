@@ -39,7 +39,7 @@ $CHARP::ERROR_SEV_EXIT		= 5;
 
 # Last error code is 25.
 %CHARP::ERRORS = (
-	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $CHARP::ERROR_SEV_RETRY	},
+	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $CHARP::ERROR_SEV_RETRY	   },
 	'DBI:PREPARE'		=> { 'code' =>  2, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'DBI:EXECUTE'		=> { 'code' =>  3, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
 	'CGI:REQPARM'		=> { 'code' =>  4, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
@@ -70,6 +70,7 @@ $CHARP::ERROR_SEV_EXIT		= 5;
 foreach my $key (keys %CHARP::ERRORS) {
 	my $lvl = (split (':', $key))[0];
 	my $err = $CHARP::ERRORS{$key};
+	$err->{'type'} = substr ($key, index ($key, ':') + 1);
 	$err->{'desc'} = $CHARP::ERROR_DESCS{$key};
 	$err->{'level'} = $CHARP::ERROR_LEVELS{$lvl};
 	$err->{'key'} = $key;

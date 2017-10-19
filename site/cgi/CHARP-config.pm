@@ -1,4 +1,4 @@
-# -*- tab-width: 8; -*-
+# -*- tab-width: 4; -*-
 package CHARP;
 
 # Set limits on the amount of information a message can contain.

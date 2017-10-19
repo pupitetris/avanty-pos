@@ -43,7 +43,7 @@ sub request_challenge {
 	if (!defined $rv) {
 	    CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $func_sth, $req_login, 
 				       $ip_addr, $req_res);
-	    return;
+	    return CHARP::error_is_fatal ($func_sth);
 	}
 	my $rh = ${$func_sth->fetchall_arrayref ({})}[0];
 
@@ -62,7 +62,7 @@ sub request_challenge {
     if (!defined $rv) {
 	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chal_sth, $req_login, 
 				   $ip_addr, $req_res);
-	return;
+	return CHARP::error_is_fatal ($chal_sth);
     }
 
     my $res = ${$chal_sth->fetchall_arrayref ({})}[0];
@@ -149,7 +149,7 @@ sub request_reply {
 	$request_id = $err->{'parms'}->[3] if $err->{'type'} eq 'REPFAIL';
 	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chk_sth, $req_login, 
 				   $ip_addr, 'REQUEST_CHECK', $request_id, $err);
-	return;
+	return CHARP::error_is_fatal ($chk_sth);
     }
 
     my $req = ${$chk_sth->fetchall_arrayref ({})}[0];
@@ -241,7 +241,7 @@ sub request_reply_do {
     if (!defined $rv) {
 	CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $sth, $req_login, 
 				   $ip_addr, $func_name, $req_request_id);
-	return;
+	return CHARP::error_is_fatal ($sth);
     }
 
     # Log that the execution of the RP was successful:
@@ -292,7 +292,7 @@ sub request_main {
 
 sub main {
     my $dbh = CHARP::connect ();
-    return if !defined $dbh;
+    exit 128 if !defined $dbh;
 
     my $ctx = CHARP::init ($dbh);
 

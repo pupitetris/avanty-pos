@@ -72,14 +72,20 @@ sub sql_boolarr_type {
     return { 'pg_type' => PG_BOOLARRAY };
 }
 
-sub state_num {
+sub db_err {
+    my $h = shift;
+
+    return $h->err;
+}
+
+sub db_state_num {
     my $sth = shift;
     my $dbh = shift;
 
     return $sth->state;
 }
 
-sub state_str {
+sub db_state_str {
     my $sth = shift;
     my $dbh = shift;
 

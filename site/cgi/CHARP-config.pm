@@ -8,7 +8,7 @@ $CGI::DISABLE_UPLOADS = 1;
 # FIXME: if we enable uploads, we have to use different calls to deal with uploaded files.
 
 $DB_NAME = 'avanty';
-$DB_HOST = 'localhost';
+$DB_HOST = '127.0.0.1';
 $DB_PORT = '5432';
 $DB_USER = 'avanty';
 $DB_PASS = '123';

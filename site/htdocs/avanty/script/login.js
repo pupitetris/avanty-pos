@@ -19,6 +19,7 @@
 		ui.enter_pass.input ();
 
 		ui.enter_form = ui.section_enter.find ('form');
+		ui.enter_form.attr ('autocomplete', 'off');
 		ui.enter_form.validate ({
 			submitHandler: login_enter_submit,
 			rules: {
@@ -72,6 +73,7 @@
 
 	function login_error (err, ctx, charp) {
 		ui.enter_submit.button ('enable');
+		ui.enter_username.focus ();
 
 		return mod.loginErrorHandler (err, ctx, charp);
 	}

@@ -43,6 +43,7 @@
 		}, 'Las contraseñas deben de coincidir.');
 
 		ui.newsuper_form = ui.section_newsuper.find ('form');
+		ui.newsuper_form.attr ('autocomplete', 'off');
 		ui.newsuper_form.validate ({
 			submitHandler: super_create_super_submit,
 			rules: {

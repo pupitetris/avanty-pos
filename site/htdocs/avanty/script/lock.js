@@ -27,6 +27,7 @@
 		ui.submit.button ();
 
 		ui.form = ui.section_unlock.find ('form');
+		ui.form.attr ('autocomplete', 'off');
 		ui.form.bind ('submit', unlock_submit);
 
 		mod.loaded = true;

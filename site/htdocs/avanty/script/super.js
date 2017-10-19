@@ -108,7 +108,8 @@
 	}
 
 	function super_main () {
-		APP.switchSection (ui.section_main, ui.sections_parent);
+		APP.history.setHome (MOD_NAME, ui.section_main);
+		APP.switchSection (ui.section_main);
 		ui.shell.show ();
 	}
 

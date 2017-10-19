@@ -206,19 +206,112 @@
 		};
 	}) ();
 
+	// Object that helps keeping track of the page-and-section movement
+	// and allows the user to go back and forth.
+	function History () {
+		return this;
+	}
+
+	(function () {
+		function index_of (process) {
+			if (!process)
+				return this._curr;
+
+			var idx;
+			for (idx = this._curr; idx < this._hist.length; idx++)
+				if (this._hist[idx].process == process)
+					break;
+			return idx;
+		}
+
+		History.prototype = {
+			// process is a string identifying the process that is changing page.
+			// page is a string, usually the id of the module's page.
+			push: function (page, section, process, data) {
+				this._hist.splice (0, this._curr,
+								   { page: page, section: section, process: process, data: data });
+				this._curr = 0;
+			},
+
+			// You can go back on a specific process, or in general, in a cross-proces way.
+			// Returns undefined if you can't pop for that process, or in general, any more.
+			pop: function (process) {
+				var idx = index_of.call (this, process);
+				if (this._curr < this._hist.length)
+					this._curr = idx + 1;
+				return this._hist[idx];
+			},
+
+			// Clear history of matching process or all of it.
+			clear: function (process) {
+				if (!process) {
+					this.init ();
+					return;
+				}
+
+				for (var i = 0; i < this._hist.length; i++)
+					if (this._hist[idx].process == process) {
+						if (i < this._curr)
+							this._curr --;
+						this._hist.splice (i--, 1);
+					}
+			},
+			
+			// Just inspect the history, see what is the current slot, if any.
+			get: function (process) {
+				var idx = index_of.call (this, process);
+				return this._hist[idx];
+			},
+
+			setHome: function (page, section) {
+				this._home = { page: page, section: section };
+			},
+
+			go: function (page, section, process) {
+				APP.switchPage (page);
+				APP.switchSection (section);
+
+				this.push (page, section, process);
+			},
+
+			back: function (process) {
+				var slot = this.pop (process);
+				if (!slot) {
+					if (process)
+						return false;
+					slot = this._home;
+				}
+				
+				APP.switchPage (slot.page);
+				APP.switchSection (slot.section);
+				return true;
+			},
+
+			init: function () {
+				this._hist = [];
+				this._curr = 0;
+				return this;
+			}
+		}
+	}) ();
+
+	// CHARP busy handler
 	function show_hourglass (busy) {
 		APP.hourglass.setShowing (busy);
 	}
 	
+	var current_page;
+
+	// Public functions
 	window.APP = {
 		// This is where modules are registered:
 		mod: {},
 		
-		charp: new CHARP ().init (),
-
+		// Our service objects:
+		    charp: new     CHARP ().init (),
 		hourglass: new Hourglass ().init (),
-
-		clock: new Clock ().init (),
+		    clock: new     Clock ().init (),
+		  history: new   History ().init (),
 
 		extendClass: function (childClass, superClass) {
 			childClass.prototype.__proto__ = superClass.prototype;
@@ -272,24 +365,29 @@
 			div.load ('pages/' + html_file + add, cb);
 		},
 
-		appendPageAndLoadLayout: function (page_id, html_file, load_cb) {
+		appendPageAndLoadLayout: function (page, html_file, load_cb) {
 			var div = document.createElement ('div');
-			div.id = page_id;
+			div.id = page;
 			div.className = 'page';
 			$('body').append (div);
 			APP.loadLayout ($(div), html_file, load_cb);
 		},
 
-		switchPage: function (div_or_id) {
-			var div = (typeof div_or_id == 'string')? $('#' + div_or_id): div_or_id;
-			$('body > .page').hide ()
-			div.show ();
+		switchPage: function (page) {	
+			if (current_page == page)
+				return;
+
+			var page_ele = $('#' + page);
+			if (page_ele.length == 0)
+				throw ('Page element #' + page + ' not found.');
+
+			$('body > .page').hide ();
+			page_ele.show ();
+			current_page = page;
 		},
 
-		switchSection: function (div, parent) {
-			if (!parent)
-				parent = $('#main-sections');
-			parent.find ('> .section').hide ();
+		switchSection: function (div) {
+			div.parent ().find ('> .section').hide ();
 			div.show ();
 		},
 

@@ -161,12 +161,11 @@
 			if (!mod.loaded)
 				return;
 
-			APP.switchPage ($('#login'));
-
 			mod.reset ();
 		},
 
 		reset: function () {
+			APP.switchPage (MOD_NAME);
 			login_enter ();
 		}
 	};

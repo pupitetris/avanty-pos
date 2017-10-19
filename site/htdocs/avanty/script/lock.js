@@ -58,7 +58,7 @@
 	function unlock_success (charp) {
 		APP.charp.credentialsSet (charp.credentialsGet ());
 		APP.clock.color (null);
-		// pop interface.
+		APP.history.back ();
 	}
 
 	function unlock_error (err, ctx, charp) {

@@ -31,9 +31,9 @@ require "CHARP-$CHARP::DB_DRIVER.pm";
 	'HTTP' => 5
 );
 
-$CHARP::ERROR_SEV_INTERNAL = 1;
+$CHARP::ERROR_SEV_INTERNAL	= 1;
 $CHARP::ERROR_SEV_PERM		= 2;
-$CHARP::ERROR_SEV_RETRY	= 3;
+$CHARP::ERROR_SEV_RETRY		= 3;
 $CHARP::ERROR_SEV_USER		= 4;
 $CHARP::ERROR_SEV_EXIT		= 5;
 
@@ -271,17 +271,22 @@ sub error_get {
 sub execute {
 	my $sth = shift;
 
-	#print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
+#	print STDERR "execute: " . $sth->{'Statement'} . ' ' . join (', ', @_) . "\n";
 
 	my $rv = $sth->execute (@_);
 
-	#print STDERR "return: " . $rv . "\n";
+#	print STDERR "return: " . $rv . "\n";
+#	print STDERR "error: " . $sth->err . "\n";
+#	print STDERR "errstr: " . $sth->errstr . "\n";
+#	print STDERR "state: " . $sth->state . "\n";
 
 	return $rv;
 }
 
 sub error_log {
 	my ($request_id, $err, $login, $ip_addr, $res, $status) = @_;
+
+	return if error_is_fatal ($CHARP::ctx->{'err_sth'});
 
 	execute ($CHARP::ctx->{'err_sth'}, 
 			 $request_id, $err->{'type'}, $login, $ip_addr, $res, $err->{'parms_str'}, $status);
@@ -301,10 +306,24 @@ sub error_execute_send {
 					'err' => $err->{'code'}, 
 					'msg' => $err->{'msg'}, 
 					'parms' => $err->{'parms'}, 
-					'state' => state_num ($sth, $dbh), 
-					'statestr' => state_str ($sth, $dbh),
+					'state' => db_state_num ($sth, $dbh), 
+					'statestr' => db_state_str ($sth, $dbh),
 					'objs' => $err->{'objs'}
 				});
+}
+
+sub error_is_fatal {
+	my $sth = shift;
+
+	if (db_err ($sth) == 7) { # A fatal error was returned: the last query failed.
+		my $state = db_state_num ($sth);
+		my $class = substr ($state, 0, 2);
+		if ($state eq '08') { # Problem with the connection.
+			return 1;
+		}
+	}
+
+	return;
 }
 
 sub dispatch_error {
@@ -347,9 +366,11 @@ sub connect {
 	undef $CHARP::DB_DRIVER;
 
 	if (!defined $dbh) {
-		dispatch_error ({'err' => 'DBI:CONNECT', 'msg' => $DBI::errstr });
+		my $msg = $DBI::errstr;
+		$msg =~ s/\n.*//mg; # Remove sensitive information.
+		dispatch_error ({'err' => 'DBI:CONNECT', 'msg' => $msg });
 	} else {
-		$dbh->do ("SET application_name='fcgi'");
+		$dbh->do ("SET application_name='charp'");
 	}
 
 	return $dbh;

@@ -121,7 +121,7 @@
 							   });
 		},
 
-		loginErrorHandler: function (err, ctx, charp) {
+		loginErrorHandler: function (err, ctx) {
 			switch (err.key) {
 			case 'SQL:USERDIS':
 				APP.msgDialog ({

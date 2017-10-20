@@ -382,7 +382,7 @@
 			var div = document.createElement ('div');
 			div.id = page;
 			div.className = 'page';
-			$('body').append (div);
+			$('#cont').append (div);
 			APP.loadLayout ($(div), html_file, load_cb);
 		},
 
@@ -394,7 +394,7 @@
 			if (page_ele.length == 0)
 				throw ('Page element #' + page + ' not found.');
 
-			$('body > .page').hide ();
+			$('#cont > .page').hide ();
 			page_ele.show ();
 			current_page = page;
 		},
@@ -462,7 +462,7 @@
 								  CHARP.ERROR_SEV_MSG[opts.sev]: opts.sev.toString (), 'error-sev');
 
 			if (div.parent ().length == 0)
-				$('body').append (div);
+				$('#dialogs').append (div);
 
 			var dialogOpts = CHARP.extendObj ({
 				title: opts.title,
@@ -470,7 +470,7 @@
 				modal: true,
 				resizable: false,
 				minWidth: 632,
-				zIndex: 2000
+				appendTo: $('#dialogs')
 			}, opts.opts);
 
 			if (!dialogOpts.buttons)

@@ -80,9 +80,13 @@ h1 {
 /* clock showing the date/time */
 #clock {
 	position: absolute;
-	left: 64px;
-	top: 8px;
+	top: 0;
+	left: calc((50px + 8px) + 8px);
 	z-index: 10000;
+	height: 50px;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
 }
 
 #clock span {
@@ -216,6 +220,10 @@ button.shell-tool img {
 
 .shell-logout {
 	left: calc(100vw - 3 * (50px + 8px)); /* 8px is the distance between elements. */
+}
+
+.shell-back {
+	left: 8px; /* 8px is the distance between elements. */
 }
 
 .avanty button.shell-tool.button-icon {

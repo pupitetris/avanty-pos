@@ -2,3 +2,8 @@
 	color: white;
 	background-color: black;
 }
+
+#lock .shell {
+	box-shadow: none;
+	background-color: transparent;
+}

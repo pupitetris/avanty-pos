@@ -84,7 +84,12 @@
 		ui.shell_lock.on ('click', function () { APP.loadModule ('lock'); });
 
 		ui.shell_menu = ui.shell.find ('.shell-menu');
-		ui.shell_menu.tabs ({ collapsible: true });
+		ui.shell_menu.tabs (
+			{
+				collapsible: true,
+				show: { effect: 'blind', duration: 125 },
+				hide: { effect: 'blind', duration: 125 }
+			});
 
 		ui.shell_menu.find ('button').button ();
 		ui.shell_users_create = $('#super-tab-users-create');

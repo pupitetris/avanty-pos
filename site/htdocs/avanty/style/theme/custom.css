@@ -122,6 +122,10 @@
     vertical-align: top;
 }
 
+.avanty .ui-tabs li.ui-tabs-tab.ui-state-focus {
+	z-index: 1;
+}
+
 .avanty .ui-tabs .ui-tabs-nav li:first-child {
 	border-bottom-left-radius: 8px;
 }

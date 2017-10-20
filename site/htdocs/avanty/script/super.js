@@ -6,6 +6,7 @@
 (function () {
 	var MOD_NAME = 'super';
 
+	var menu_selected = 0;
 	var super_is_first; // True when supervisor creation is required, right after activation.
 
 	var ui = {};
@@ -79,9 +80,13 @@
 		ui.section_main = $('#super-main');
 
 		ui.shell = ui.sections_parent.find ('.shell');
+		ui.shell.find ('button').button ();
+
 		ui.shell_lock = ui.shell.find ('.shell-lock');
-		ui.shell_lock.button ();
 		ui.shell_lock.on ('click', function () { APP.loadModule ('lock'); });
+
+		ui.shell_logout = ui.shell.find ('.shell-logout');
+		ui.shell_logout.on ('click', super_logout);
 
 		ui.shell_menu = ui.shell.find ('.shell-menu');
 		ui.shell_menu.tabs (
@@ -129,12 +134,40 @@
 		mod.onLoad ();
 	}
 
-	var menu_selected = 0;
-
 	function collapse_menu (collapse) {
 		if (collapse === true)
 			menu_selected = ui.shell_menu.tabs ('option', 'active');
 		ui.shell_menu.tabs ('option', 'active', (collapse === false)? menu_selected: false);
+	}
+
+	function super_logout () {
+		var desc;
+		var icon;
+		
+		if (APP.history.length () > 0) {
+			desc = '<>Parece que dejaste actividades pendientes.<br>¿Estás seguro que quieres salir?';
+			icon = 'warning';
+		} else {
+			desc = '¿Estás seguro que quieres salir?';
+			icon = 'question';
+		}
+
+		APP.msgDialog ({
+			icon: icon,
+			desc: desc,
+			title: 'Cerrar sesión',
+			opts: {
+				buttons: {
+					'Sí, salir': super_do_logout,
+					'Cancelar': null
+				},
+				width: '75%'
+			}
+		});
+	}
+
+	function super_do_logout () {
+		APP.loadModule ('login');
 	}
 
 	function super_create_user () {

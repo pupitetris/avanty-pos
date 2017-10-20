@@ -95,8 +95,8 @@ h1 {
 #hourglass {
 	display: none;
 	position: absolute;
-	left: calc(100vw - 3 * (48px + 8px) - 8px); /* 8px is the distance between elements. */
-	top: 8px;
+	left: calc(100vw - 4 * (50px + 8px)); /* 8px is the distance between elements. */
+	top: 10px;
 	z-index: 10000;
 }
 
@@ -201,6 +201,23 @@ form label.error {
 	width: 50%;
 }
 
+button.shell-tool {
+	position: absolute;
+}
+
+button.shell-tool img {
+	width: 32px;
+	height: 32px;
+}
+
+.shell-lock {
+	left: calc(100vw - 1 * (50px + 8px)); /* 8px is the distance between elements. */
+}
+
+.shell-logout {
+	left: calc(100vw - 3 * (50px + 8px)); /* 8px is the distance between elements. */
+}
+
 .avanty button.shell-tool.button-icon {
 	padding: 8px;
 }
@@ -208,9 +225,4 @@ form label.error {
 .avanty button.shell-tool img {
 	position: static;
 	vertical-align: middle;
-}
-
-.shell-lock {
-	position: absolute;
-	left: calc(100vw - 58px);
 }

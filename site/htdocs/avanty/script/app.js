@@ -271,11 +271,16 @@
 				APP.switchPage (page);
 				APP.switchSection (section);
 
+				var slot = this.get (process);
+				if (slot && slot.page == page && slot.section == section)
+					return;
+
 				this.push (page, section, process);
 			},
 
 			back: function (process) {
-				var slot = this.pop (process);
+				this.pop (process);
+				var slot = this.get (process);
 				if (!slot) {
 					if (process)
 						return false;

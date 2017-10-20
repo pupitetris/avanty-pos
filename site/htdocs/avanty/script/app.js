@@ -326,9 +326,17 @@
 				return;
 			}
 				
-			toast.find ('label').html (msg);
+			function toast_hide () {
+				toast.fadeOut (250);
+			}
+
+			var label = toast.find ('span');
+			label.html (msg);
+			label.on ('click', toast_hide);
+
 			toast.fadeIn (100);
-			window.setTimeout (function () { toast.fadeOut (400); }, 3500);
+
+			window.setTimeout (toast_hide, 3500);
 		},
 
 		extendClass: function (childClass, superClass) {

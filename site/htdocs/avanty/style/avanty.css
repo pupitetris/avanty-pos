@@ -67,7 +67,8 @@ h1 {
 	align-items: center;
 }
 
-.toast label {
+.toast span {
+	pointer-events: all;
 	background-color: gray;
 	color: white;
 	font-size: 1em;

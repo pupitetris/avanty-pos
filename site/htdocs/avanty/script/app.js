@@ -263,8 +263,14 @@
 				return this._hist[idx];
 			},
 
+			length: function () {
+				return this._hist.length - this._curr;
+			},
+
 			setHome: function (page, section) {
-				this._home = { page: page, section: section };
+				this._home = (page)?
+					{ page: page, section: section } :
+					undefined;
 			},
 
 			go: function (page, section, process) {
@@ -278,6 +284,7 @@
 				this.push (page, section, process);
 			},
 
+			// Returns true if history was able to change location.
 			back: function (process) {
 				this.pop (process);
 				var slot = this.get (process);
@@ -286,7 +293,10 @@
 						return false;
 					slot = this._home;
 				}
-				
+
+				if (!slot)
+					return false;
+
 				APP.switchPage (slot.page);
 				APP.switchSection (slot.section);
 				return true;
@@ -422,6 +432,10 @@
 			if (text && text != '')
 				str = ' - ' + text.toString ();
 			$('title').text (APP.title + str);
+		},
+
+		later: function (fn) {
+			window.setTimeout (fn, 1);
 		},
 
 		eleBusy: function (ele, setBusy, append) {

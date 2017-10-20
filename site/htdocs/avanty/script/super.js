@@ -118,6 +118,7 @@
 						$(this).next ().next ().addClass ('error');
 				}
 			});
+		ui.newuser_type_combo = ui.newuser_type.next ();
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -134,6 +135,16 @@
 	function super_create_user () {
 		collapse_menu (true);
 		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
+
+		ui.newuser_form.validate ().resetForm ();
+		ui.newuser_login.val ('');
+		ui.newuser_pass.val ('');
+		ui.newuser_pass2.val ('');
+		ui.newuser_type.val ('');
+		ui.newuser_type.selectmenu ('refresh');
+		ui.newuser_type_combo.removeClass ('error');
+		ui.newuser_submit.button ('enable');
+		ui.newuser_login.focus ();
 	}
 
 	function super_create_super () {
@@ -145,6 +156,7 @@
 			ui.shell.show ();
 		}
 
+		ui.newsuper_form.validate ().resetForm ();
 		ui.newsuper_login.val ('');
 		ui.newsuper_pass.val ('');
 		ui.newsuper_pass2.val ('');

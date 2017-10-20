@@ -1,1 +1,32 @@
+#super-newuser .form-ver {
+	height: 10em;
+	align-items: flex-start;
+	margin-left: 3em;
+	width: 10em;
+}
 
+#super-newuser .form-ver > * {
+	margin-top: 0.5em;
+	width: 100%;
+}
+
+#super-newuser .form-ver > *:first-child {
+	margin-top: 0;
+}
+
+#super-newuser .form-ver > div > * {
+	width: 100%;
+	box-sizing: border-box;
+}
+
+#super-newuser button[type="submit"] {
+	margin-top: 1em;
+}
+
+#super-newuser li.ui-state-disabled {
+	display: none;
+}
+
+#super-newuser .form-ver label.error {
+	z-index: 100;
+}

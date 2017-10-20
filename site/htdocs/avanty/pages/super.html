@@ -1,5 +1,19 @@
 <div id="super-sections">
   <div class="shell">
+	<div class="shell-tool shell-menu">
+	  <ul>
+		<li><a href="#super-tab-users"><span>Usuarios</span></a></li>
+		<li><a href="#super-tab-reports"><span>Reportes</span></a></li>
+	  </ul>
+	  <div id="super-tab-users">
+		<button id="super-tab-users-create">Crear</button>
+		<button id="super-tab-users-search">Buscar</button>
+	  </div>
+	  <div id="super-tab-reports">
+		<button id="super-tab-reports-summary">Resumen</button>
+		<button id="super-tab-reports-detail">Detallado</button>
+	  </div>
+	</div>
 	<button class="shell-tool shell-lock button-icon"><img src="img/icons/lock.svg" /></button>
   </div>
   <div class="section section-small" id="super-newsuper">
@@ -25,6 +39,42 @@
 		  <tr><td colspan="2"><button type="submit">Crear cuenta</button></td></tr>
 		</tfoot>
 	  </table>
+	</form>
+  </div>
+  <div class="section section-small" id="super-newuser">
+	<form>
+	  <h2>Alta de usuario</h2>
+	  <div class="form-hor">
+		<table>
+		  <tbody>
+			<tr>
+			  <th><label for="newuser-login">Usuario:</label></th>
+			  <td><input name="newuser-login" type="text" size="10" /></td>
+			</tr>
+			<tr>
+			  <th><label for="newuser-pass">Contraseña:</label></th>
+			  <td><input name="newuser-pass" type="password" size="10" /></td>
+			</tr>
+			<tr>
+			  <th><label for="newuser-pass2">Contraseña:</label><br/>
+				<i class="label">(confirmar)</i></th>
+			  <td><input name="newuser-pass2" type="password" size="10" /></td>
+			</tr>
+		  </tbody>
+		</table>
+		<div class="form-ver">
+		  <label for="newuser-type">Tipo de usuario:</label>
+		  <div style="position: relative">
+			<select name="newuser-type">
+			  <option value="" disabled="1" selected="1">Seleccionar</option>
+			  <option value="cashier">Cajero</option>
+			  <option value="supervisor">Supervisor</option>
+			  <option value="maintenance">Mantenimiento</option>
+			</select>
+		  </div>
+		</div>
+	  </div>
+	  <button class="button-icon" type="submit"><img src="img/icons/yes.svg" />Crear cuenta</button>
 	</form>
   </div>
   <div class="section" id="super-main">

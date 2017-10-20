@@ -29,6 +29,15 @@
 	margin: 0;
 }
 
+.avanty span[role="combobox"] {
+	margin: 1px;
+}
+
+.avanty span[role="combobox"].error {
+	border: 2px solid red;
+	margin: 0;
+}
+
 .avanty *:focus {
 	outline: 5px dotted lightgray;
 	outline-offset: 5px;
@@ -111,4 +120,12 @@
 .avanty .ui-datepicker-trigger {
     padding-left: 4px;
     vertical-align: top;
+}
+
+.avanty .ui-tabs .ui-tabs-nav li:first-child {
+	border-bottom-left-radius: 8px;
+}
+
+.avanty .ui-tabs .ui-tabs-nav li:last-child {
+	border-bottom-right-radius: 8px;
 }

@@ -313,6 +313,19 @@
 		    clock: new     Clock ().init (),
 		  history: new   History ().init (),
 
+		toast: function (msg) {
+			var toast = $('body > .toast');
+
+			if (!msg) {
+				toast.hide ();
+				return;
+			}
+				
+			toast.find ('label').html (msg);
+			toast.fadeIn (100);
+			window.setTimeout (function () { toast.fadeOut (400); }, 3500);
+		},
+
 		extendClass: function (childClass, superClass) {
 			childClass.prototype.__proto__ = superClass.prototype;
 		},
@@ -518,6 +531,9 @@
 		VERSION: '0.5',
 
 		main: function () {
+			APP.toast (false);
+			$('body').show ();
+
 			APP.charp.setBusyCB (show_hourglass);
 
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.

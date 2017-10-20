@@ -6,10 +6,10 @@
 (function () {
 	var MOD_NAME = 'super';
 
-	var menu_selected = 0;
 	var super_is_first; // True when supervisor creation is required, right after activation.
 
 	var ui = {};
+	var shell;
 
 	function newuser_layout_init (name, validator_options) {
 		var section = ui['section_' + name] = $('#super-' + name);
@@ -54,31 +54,6 @@
 		pass2.addClass ('validate-pass2');
 	}
 
-	function shell_show (show) {
-		if (show) {
-			ui.sections_parent.addClass ('with-shell');
-			ui.shell.show ();
-		} else {
-			ui.sections_parent.removeClass ('with-shell');
-			ui.shell.hide ();
-		}
-	}
-
-	function shell_back_show () {
-		if (APP.history.length () == 0)
-			ui.shell_back.hide ();
-		else
-			ui.shell_back.show ();
-	}
-
-	function shell_back () {
-		// deferr to allow for the button to gain focus and the keyboard to hide.
-		APP.later (function () {
-			APP.history.back ();
-			shell_back_show ();
-		});
-	}
-
 	function layout_init () {
 		$.validator.addMethod ('validate-login', function (val, ele) { 
 			var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
@@ -94,29 +69,12 @@
 		ui.sections_parent = $('#super-sections');
 		ui.section_main = $('#super-main');
 
-		ui.shell = ui.sections_parent.find ('.shell');
-		ui.shell.find ('button').button ();
+		shell = APP.shellCreate (ui.sections_parent);
 
-		ui.shell_lock = ui.shell.find ('.shell-lock');
-		ui.shell_lock.on ('click', function () { APP.loadModule ('lock'); });
+		shell.ui.logout.on ('click', super_logout);
 
-		ui.shell_logout = ui.shell.find ('.shell-logout');
-		ui.shell_logout.on ('click', super_logout);
-
-		ui.shell_back = ui.shell.find ('.shell-back');
-		ui.shell_back.on ('click', shell_back);
-
-		ui.shell_menu = ui.shell.find ('.shell-menu');
-		ui.shell_menu.tabs (
-			{
-				collapsible: true,
-				show: { effect: 'blind', duration: 125 },
-				hide: { effect: 'blind', duration: 125 }
-			});
-
-		ui.shell_menu.find ('button').button ();
-		ui.shell_users_create = $('#super-tab-users-create');
-		ui.shell_users_create.on ('click', super_create_user);
+		shell.ui.users_create = $('#super-tab-users-create');
+		shell.ui.users_create.on ('click', super_create_user);
 
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });
 		newuser_layout_init ('newuser', {
@@ -152,12 +110,6 @@
 		mod.onLoad ();
 	}
 
-	function collapse_menu (collapse) {
-		if (collapse === true)
-			menu_selected = ui.shell_menu.tabs ('option', 'active');
-		ui.shell_menu.tabs ('option', 'active', (collapse === false)? menu_selected: false);
-	}
-
 	function super_logout () {
 		var desc;
 		var icon;
@@ -189,9 +141,9 @@
 	}
 
 	function super_create_user () {
-		collapse_menu (true);
+		shell.menuCollapse (true);
 		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
-		shell_back_show ();
+		shell.backShow ();
 
 		ui.newuser_form.validate ().resetForm ();
 		ui.newuser_login.val ('');
@@ -207,11 +159,10 @@
 	function super_create_super () {
 		APP.switchSection (ui.section_newsuper);
 
-		if (super_is_first) {
-			ui.shell.hide ();
-		} else {
-			ui.shell.show ();
-		}
+		if (super_is_first)
+			shell.show (false);
+		else
+			shell.show (true);
 
 		ui.newsuper_form.validate ().resetForm ();
 		ui.newsuper_login.val ('');
@@ -256,7 +207,7 @@
 	function super_user_create_user_success (login) {
 		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
 		APP.history.back ();
-		shell_back_show ();
+		shell.backShow ();
 	}
 
 	function super_create_super_submit (form, evt) {
@@ -286,8 +237,8 @@
 	}
 
 	function super_main () {
-		shell_show (true);
-		shell_back_show ();
+		shell.show (true);
+		shell.backShow ();
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
 	}

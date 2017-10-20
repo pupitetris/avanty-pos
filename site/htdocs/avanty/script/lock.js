@@ -7,16 +7,15 @@
 	var MOD_NAME = 'lock';
 
 	var ui = {};
+	var shell;
 
 	function layout_init () {
 		ui.sections_parent = $('#lock-sections');
 		ui.section_overlay = $('#lock-overlay');
 		ui.section_unlock = $('#lock-unlock');
 
-		ui.shell = ui.sections_parent.find ('.shell');
-		ui.shell_unlock = ui.shell.find ('.shell-lock');
-		ui.shell_unlock.button ();
-		ui.shell_unlock.on ('click', unlock_start);
+		shell = APP.shellCreate (ui.sections_parent);
+		shell.ui.unlock.on ('click', unlock_start);
 
 		ui.user = ui.section_unlock.find ('span');
 
@@ -37,7 +36,7 @@
 	function unlock_start () {
 		APP.switchSection (ui.section_unlock);
 
-		ui.shell_unlock.hide ();
+		shell.ui.unlock.hide ();
 		ui.pass.focus ();
 	}
 
@@ -81,11 +80,10 @@
 		},
 
 		reset: function () {
-			APP.switchPage (MOD_NAME);
-			APP.switchSection (ui.section_overlay);
+			APP.history.go (MOD_NAME, ui.section_overlay);
 			APP.clock.color ('white');
 			
-			ui.shell_unlock.show ();
+			shell.ui.unlock.show ();
 			ui.user.text (APP.charp.credentialsGet ().login);
 			ui.pass.val ('');
 			ui.submit.button ('enable');

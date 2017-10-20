@@ -37,6 +37,99 @@
 		return p;
 	}
 
+	function Shell () {
+		return this;
+	}
+
+	(function () {
+
+		function layout_init (sections_parent) {
+			var ui = this.ui;
+
+			ui.sections_parent = sections_parent;
+			ui.shell = ui.sections_parent.find ('.shell');
+			ui.shell.find ('button').button ();
+
+			var lock = ui.shell.find ('.shell-lock');
+			if (lock.length > 0) {
+				ui.lock = lock;
+				ui.lock.on ('click.shell', function () { APP.loadModule ('lock'); });
+			}
+
+			var unlock = ui.shell.find ('.shell-unlock');
+			if (unlock.length > 0)
+				ui.unlock = unlock;
+
+			var logout = ui.shell.find ('.shell-logout');
+			if (logout.length > 0)
+				ui.logout = logout;
+
+			var back = ui.shell.find ('.shell-back');
+			if (back.length > 0) {
+				ui.back = back;
+				var that = this;
+				ui.back.on ('click.shell', function () { that.backGo (); });
+			}
+
+			var menu = ui.shell.find ('.shell-menu');
+			if (menu.length > 0) {
+				ui.menu = menu;
+				ui.menu.tabs (
+					{
+						collapsible: true,
+						show: { effect: 'blind', duration: 125 },
+						hide: { effect: 'blind', duration: 125 }
+					});
+
+				ui.menu.find ('button').button ();
+			}
+		}
+
+		Shell.prototype = {
+			init: function (sections_parent) {
+				this.ui = {};
+				this._menu_selected = 0;
+				layout_init.call (this, sections_parent);
+				return this;
+			},
+
+			show: function (show) {
+				if (show) {
+					this.ui.sections_parent.addClass ('with-shell');
+					this.ui.shell.show ();
+				} else {
+					this.ui.sections_parent.removeClass ('with-shell');
+					this.ui.shell.hide ();
+				}
+			},
+
+			menuCollapse: function (collapse) {
+				if (collapse === true)
+					this._menu_selected = this.ui.menu.tabs ('option', 'active');
+
+				this.ui.menu.tabs ('option', 'active',
+								   (collapse === false)?
+								   this._menu_selected: false);
+			},
+
+			backShow: function () {
+				if (APP.history.length () == 0)
+					this.ui.back.hide ();
+				else
+					this.ui.back.show ();
+			},
+
+			backGo: function () {
+				// deferr to allow for the button to gain focus and the keyboard to hide.
+				var that = this;
+				APP.later (function () {
+					APP.history.back ();
+					that.backShow ();
+				});
+			}
+		}
+	}) ();
+
 	function Hourglass () {
 		return this;
 	}
@@ -327,6 +420,10 @@
 		hourglass: new Hourglass ().init (),
 		    clock: new     Clock ().init (),
 		  history: new   History ().init (),
+
+		shellCreate: function (sections_parent) {
+			return new Shell ().init (sections_parent);
+		},
 
 		toast: function (msg) {
 			var toast = $('body > .toast');

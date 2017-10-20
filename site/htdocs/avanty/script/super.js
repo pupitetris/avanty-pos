@@ -64,6 +64,21 @@
 		}
 	}
 
+	function shell_back_show () {
+		if (APP.history.length () == 0)
+			ui.shell_back.hide ();
+		else
+			ui.shell_back.show ();
+	}
+
+	function shell_back () {
+		// deferr to allow for the button to gain focus and the keyboard to hide.
+		APP.later (function () {
+			APP.history.back ();
+			shell_back_show ();
+		});
+	}
+
 	function layout_init () {
 		$.validator.addMethod ('validate-login', function (val, ele) { 
 			var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
@@ -87,6 +102,9 @@
 
 		ui.shell_logout = ui.shell.find ('.shell-logout');
 		ui.shell_logout.on ('click', super_logout);
+
+		ui.shell_back = ui.shell.find ('.shell-back');
+		ui.shell_back.on ('click', shell_back);
 
 		ui.shell_menu = ui.shell.find ('.shell-menu');
 		ui.shell_menu.tabs (
@@ -145,7 +163,7 @@
 		var icon;
 		
 		if (APP.history.length () > 0) {
-			desc = '<>Parece que dejaste actividades pendientes.<br>¿Estás seguro que quieres salir?';
+			desc = '<>Parece que dejaste actividades pendientes.<br /><br />¿Estás seguro que quieres salir?';
 			icon = 'warning';
 		} else {
 			desc = '¿Estás seguro que quieres salir?';
@@ -173,6 +191,7 @@
 	function super_create_user () {
 		collapse_menu (true);
 		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
+		shell_back_show ();
 
 		ui.newuser_form.validate ().resetForm ();
 		ui.newuser_login.val ('');
@@ -237,6 +256,7 @@
 	function super_user_create_user_success (login) {
 		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
 		APP.history.back ();
+		shell_back_show ();
 	}
 
 	function super_create_super_submit (form, evt) {
@@ -266,9 +286,10 @@
 	}
 
 	function super_main () {
+		shell_show (true);
+		shell_back_show ();
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
-		shell_show (true);
 	}
 
 	var mod = {

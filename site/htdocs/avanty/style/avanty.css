@@ -192,6 +192,9 @@ form label.error {
 .shell {
 	position: relative;
 	z-index: 100;
+	height: 66px;
+	background-color: #f0f0d0;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .shell-tool {
@@ -199,10 +202,11 @@ form label.error {
 }
 
 .shell-menu {
-	position: relative;
+	position: absolute;
 	display: inline-block;
 	left: 25%;
 	width: 50%;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 button.shell-tool {

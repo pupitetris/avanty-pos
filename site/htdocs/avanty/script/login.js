@@ -47,7 +47,7 @@
 
 		APP.charp.credentialsSet (null, null, null);
 
-		ui.enter_username.focus ();
+		APP.later (function () { ui.enter_username.focus (); });
 		ui.enter_username.val ('');
 		ui.enter_pass.val ('');
 
@@ -167,6 +167,8 @@
 		},
 
 		reset: function () {
+			APP.history.setHome (null);
+			APP.history.clear ();
 			APP.switchPage (MOD_NAME);
 			login_enter ();
 		}

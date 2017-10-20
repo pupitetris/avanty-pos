@@ -43,7 +43,7 @@
 	}
 
 	function login_enter () {
-		APP.switchSection (ui.section_enter, ui.sections_parent);
+		APP.switchSection (ui.section_enter);
 
 		APP.charp.credentialsSet (null, null, null);
 

@@ -21,24 +21,24 @@
 		var blank_button = $('#activate-blank button');
 		blank_button.button ();
 		// Give the user the option of starting again the process, even if a fatal error occurred.
-		blank_button.bind ('click', function () { mod.reset (); });
+		blank_button.on ('click', function () { mod.reset (); });
 		
 		// Greeting screen.
 
-		$('.activate-quadrant').bind ('click', quadrant_click);
+		$('.activate-quadrant').on ('click', quadrant_click);
 
 		ui.greeting_cont = $('#activate-greeting-continue');
 		
 		ui.greeting_button = ui.greeting_cont.find ('button');
 		ui.greeting_button.button ();
-		ui.greeting_button.bind ('click', greeting_click);
+		ui.greeting_button.on ('click', greeting_click);
 
 		ui.activate_load_icon = $('#activate-load img');
 
 		// Challenge screen.
 
 		var chal_cont = $('#activate-chal');
-		chal_cont.find ('form').bind ('submit', challenge_submit);
+		chal_cont.find ('form').on ('submit', challenge_submit);
 
 		ui.chal_button = chal_cont.find ('button');
 		ui.chal_button.button ();
@@ -52,7 +52,7 @@
 
 	// In case of an unhandled error, blank the screen.
 	function activate_blank_error () {
-		APP.switchSection ($('#activate-blank'), ui.sections_parent);
+		APP.switchSection ($('#activate-blank'));
 		return true; // Call default handler to show the error dialog.
 	}
 
@@ -71,7 +71,7 @@
 	function activate_load_is_activated (data) {
 		if (!data) { // System is not activated. Proceed with activation.
 			APP.hourglass.enable ();
-			APP.switchSection ($('#activate-greeting'), ui.sections_parent);
+			APP.switchSection ($('#activate-greeting'));
 			return;
 		}
 
@@ -101,7 +101,7 @@
 
 	function greeting_click (evt) {
 		ui.greeting_button.button ("disable");
-		APP.switchSection ($('#activate-chal'), ui.sections_parent);
+		APP.switchSection ($('#activate-chal'));
 		activate_challenge_get ();
 	}
 
@@ -190,7 +190,7 @@
 			
 			APP.hourglass.disable ();
 			APP.switchPage (MOD_NAME);
-			APP.switchSection ($('#activate-load'), ui.sections_parent);
+			APP.switchSection ($('#activate-load'));
 
 			activate_current = 0;
 			ui.greeting_cont.hide ();

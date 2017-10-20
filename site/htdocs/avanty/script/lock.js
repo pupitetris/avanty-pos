@@ -16,7 +16,7 @@
 		ui.shell = ui.sections_parent.find ('.shell');
 		ui.shell_unlock = ui.shell.find ('.shell-lock');
 		ui.shell_unlock.button ();
-		ui.shell_unlock.bind ('click', unlock_start);
+		ui.shell_unlock.on ('click', unlock_start);
 
 		ui.user = ui.section_unlock.find ('span');
 
@@ -28,14 +28,14 @@
 
 		ui.form = ui.section_unlock.find ('form');
 		ui.form.attr ('autocomplete', 'off');
-		ui.form.bind ('submit', unlock_submit);
+		ui.form.on ('submit', unlock_submit);
 
 		mod.loaded = true;
 		mod.onLoad ();
 	}
 
 	function unlock_start () {
-		APP.switchSection (ui.section_unlock, ui.sections_parent);
+		APP.switchSection (ui.section_unlock);
 
 		ui.shell_unlock.hide ();
 		ui.pass.focus ();
@@ -82,7 +82,7 @@
 
 		reset: function () {
 			APP.switchPage (MOD_NAME);
-			APP.switchSection (ui.section_overlay, ui.sections_parent);
+			APP.switchSection (ui.section_overlay);
 			APP.clock.color ('white');
 			
 			ui.shell_unlock.show ();

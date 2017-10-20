@@ -15,6 +15,7 @@ body.avanty {
 	height: 100vh;
 	background-color: white;
 	overflow: hidden;
+	display: none;
 }
 
 h1, h2, h3, h4, h5 {
@@ -52,6 +53,29 @@ h1 {
 	background-color: rgba(0,0,0,0.125);
 }
 
+.toast {
+	pointer-events: none;
+	position: absolute;
+	top: 0;
+	left: 0;
+	z-index: 11000;
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+.toast label {
+	background-color: gray;
+	color: white;
+	font-size: 1em;
+	padding: 0.75em;
+	border-radius: 0.5em;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+}
+
 /* clock showing the date/time */
 #clock {
 	position: absolute;
@@ -62,9 +86,9 @@ h1 {
 
 #clock span {
 	display: block;
-	width: 100%;
 	text-align: center;
 	font-size: small;
+	white-space: nowrap;
 }
 
 #hourglass {
@@ -88,6 +112,8 @@ h1 {
 
 .section {
 	display: flex;
+	position: absolute;
+	top: 0;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
@@ -97,6 +123,15 @@ h1 {
 
 .section.section-small {
 	height: calc(100vh - 200px);
+}
+
+.with-shell .section {
+	margin-top: 90px;
+	height: calc(100vh - 90px); /* 90px is the shell's height */
+}
+
+.with-shell .section.section-small {
+	height: calc(100vh - 200px - 90px); /* 90px is the shell's height */
 }
 
 form, .cont {
@@ -137,12 +172,32 @@ form label.error {
 	color: red;
 }
 
+.form-hor {
+	display: flex;
+	flex-direction: row;
+	align-items: top;
+}
+
+.form-ver {
+	display: flex;
+	flex-direction: column;
+	align-items: left;
+}
+
 .shell {
+	position: relative;
 	z-index: 1000;
 }
 
 .shell-tool {
 	margin-top: 8px;
+}
+
+.shell-menu {
+	position: relative;
+	display: inline-block;
+	left: 25%;
+	width: 50%;
 }
 
 .avanty button.shell-tool.button-icon {

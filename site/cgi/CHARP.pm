@@ -76,6 +76,10 @@ foreach my $key (keys %CHARP::ERRORS) {
 	$err->{'key'} = $key;
 }
 
+%CHARP::STATESTR_TO_TYPE = (
+	'unique_violation' => $CHARP::ERRORS{'SQL:DATADUP'}
+	);
+
 sub init {
 	my $dbh = shift;
 
@@ -167,7 +171,7 @@ sub error_send {
 	my $fcgi = shift;
 	my $ctx = shift;
 
-	my $err_key = $ctx->{'err'};
+	my $err_key = $ctx->{'key'};
 	my $msg = $ctx->{'msg'};
 	my $parms = $ctx->{'parms'};
 	my $state = $ctx->{'state'};
@@ -245,7 +249,8 @@ sub raise_parse {
 }
 
 sub error_get {
-	my ($sth) = @_;
+	my $sth = shift;
+	my $dbh = shift;
 
 	my $err;
 
@@ -254,13 +259,21 @@ sub error_get {
 	if (substr ($errstr, 0, 2) eq '|>') { # Probably an exception raised by us (charp_raise).
 		$err = raise_parse ($sth->errstr);
 	} else { # Execute error, not raised by us.
-		$err = {
-			'type' => 'EXECUTE',
-			'code' => 'DBI:EXECUTE',
-			'msg' => $sth->errstr,
-			'parms_str' => ''
-		};
+		my %err_hash;
 
+		my $statestr = db_state_str ($sth, $dbh);
+		if (exists $CHARP::STATESTR_TO_TYPE{$statestr}) {
+			%err_hash = %{$CHARP::STATESTR_TO_TYPE{$statestr}};
+		} else {
+			%err_hash = (
+				'type' => 'EXECUTE',
+				'code' => 'DBI:EXECUTE',
+				'msg' => $sth->errstr,
+				'parms_str' => ''
+			);
+		}
+
+		$err = \%err_hash;
 		$err->{'msg'} =~ /^([^\n]+)/;
 		my $objstr = $1;
 		$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
@@ -289,7 +302,7 @@ sub error_log {
 sub error_execute_send {
 	my ($dbh, $fcgi, $sth, $login, $ip_addr, $res, $request_id, $err) = @_;
 
-	$err = error_get ($sth) if !$err;
+	$err = error_get ($sth, $dbh) if !$err;
 
 	if ($err->{'dolog'}) {
 		error_log ($request_id, $err, $login, $ip_addr, $res, 'exception');
@@ -297,7 +310,7 @@ sub error_execute_send {
 
 	error_send ($fcgi,
 				{
-					'err' => $err->{'code'}, 
+					'key' => $err->{'key'}, 
 					'msg' => $err->{'msg'}, 
 					'parms' => $err->{'parms'}, 
 					'state' => db_state_num ($sth, $dbh), 

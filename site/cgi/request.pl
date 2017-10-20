@@ -18,7 +18,7 @@ sub request_challenge {
 	my $ctx = shift;
 
 	if ($fcgi->request_method () ne 'POST') {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:NOTPOST' });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:NOTPOST' });
 		return;
 	}
 
@@ -52,7 +52,7 @@ sub request_challenge {
 	}
 
 	if (!defined $req_res || !defined $req_params || !defined $req_login) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:REQPARAM' });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:REQPARAM' });
 		return;
 	}
 	
@@ -93,21 +93,21 @@ sub request_reply_file {
 	$sth->fetchrow_hashref ('NAME_lc'); # Avoid 'still Active' warning, exhaust response buffer.
 
 	if (! exists $res->{'filename'}) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:MISSING:MSG'}, $func_name) });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:MISSING:MSG'}, $func_name) });
 		return;
 	}
 	if (! exists $res->{'mimetype'}) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:MISSING:MSG'}, $func_name) });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:MISSING:MSG'}, $func_name) });
 		return;
 	}
 
 	if (! -e $res->{'filename'}) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:NOTFOUND:MSG'}, $func_name, $res->{'filename'}) });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:NOTFOUND:MSG'}, $func_name, $res->{'filename'}) });
 		return;
 	}
 
 	if (! sysopen ($fd, $res->{'filename'}, 0)) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:OPENFAIL:MSG'}, $func_name, $res->{'filename'}, $!) });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:FILESEND', 'msg' => sprintf ($CHARP::STRS{'CGI:FILESEND:OPENFAIL:MSG'}, $func_name, $res->{'filename'}, $!) });
 		return;
 	}
 
@@ -135,7 +135,7 @@ sub request_reply {
 	my $req_hash = $fcgi->param ('hash');
 
 	if (!defined $req_login || !defined $req_chal || !defined $req_hash) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:REQPARAM' });
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:REQPARAM' });
 		return;
 	}
 
@@ -144,7 +144,7 @@ sub request_reply {
 	my $rv = CHARP::execute ($chk_sth, $req_login, $ip_addr, $req_chal, $req_hash);
 
 	if (!defined $rv) {
-		my $err = CHARP::error_get ($chk_sth);
+		my $err = CHARP::error_get ($chk_sth, $ctx->{'dbh'});
 		my $request_id;
 		$request_id = $err->{'parms'}->[3] if $err->{'type'} eq 'REPFAIL';
 		CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chk_sth, $req_login, 
@@ -177,7 +177,7 @@ sub request_reply_do {
 
 	my $req_params_arr = eval { CHARP::json_decode ($req_params); };
 	if ($@ ne '') {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:BADPARAM', 'msg' => $@, 'parms' => [ $func_name, $req_params ]});
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:BADPARAM', 'msg' => $@, 'parms' => [ $func_name, $req_params ]});
 		return;
 	}
 
@@ -186,14 +186,14 @@ sub request_reply_do {
 
 	$num_fparams-- if $func_params_arr[0] eq 'UID';
 	if (scalar (@$req_params_arr) != $num_fparams) {
-		CHARP::error_send ($fcgi, { 'err' => 'CGI:NUMPARAM', 'parms' => [ $func_name, $num_fparams, scalar (@$req_params_arr) ]});
+		CHARP::error_send ($fcgi, { 'key' => 'CGI:NUMPARAM', 'parms' => [ $func_name, $num_fparams, scalar (@$req_params_arr) ]});
 		return;
 	}
 
 	my $sth = $ctx->{'dbh'}->prepare_cached (CHARP::call_procedure_query ("rp.$func_name ($placeholders)"), 
 											 CHARP::prepare_attrs ());
 	if (!defined $sth) {
-		CHARP::dispatch_error ({ 'err' => 'ERROR_DBI:PREPARE', 'msg' => $DBI::errstr });
+		CHARP::dispatch_error ({ 'key' => 'ERROR_DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;
 	}
 
@@ -216,7 +216,7 @@ sub request_reply_do {
 
 		eval { $sth->bind_param ($i, $val, $::SQL_TYPES{$type}); };
 		if ($@ ne '') {
-			CHARP::error_send ($fcgi, { 'err' => 'CGI:BINDPARAM', 
+			CHARP::error_send ($fcgi, { 'key' => 'CGI:BINDPARAM', 
 										'msg' => $@, 
 										'parms' => [ $func_name, $count, $val, $req_params ]});
 			return;
@@ -286,7 +286,7 @@ sub request_main {
 		return request_reply ($fcgi, $ctx);
 	}
 
-	CHARP::error_send ($fcgi, { 'err' => 'CGI:PATHUNK' });
+	CHARP::error_send ($fcgi, { 'key' => 'CGI:PATHUNK' });
 	return;
 }
 

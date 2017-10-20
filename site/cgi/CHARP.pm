@@ -221,31 +221,31 @@ sub parse_csv {
 sub raise_parse {
 	my $raisestr = shift;
 
-	my $raise = {};
+	my $err = {};
 
 	my @fields = split ('\|', $raisestr);
 
 	if (substr ($fields[1], 1, 1) eq '-') {
-		$raise->{'type'} = substr ($fields[1], 2);
+		$err->{'type'} = substr ($fields[1], 2);
 	} else {
-		$raise->{'dolog'} = 1;
-		$raise->{'type'} = substr ($fields[1], 1);
+		$err->{'dolog'} = 1;
+		$err->{'type'} = substr ($fields[1], 1);
 	}
 
 	my $parms_str = $fields[2];
 	if ($parms_str eq '') {
-		$raise->{'parms_str'} = '[]';
-		$raise->{'parms'} = [];
+		$err->{'parms_str'} = '[]';
+		$err->{'parms'} = [];
 	} else {
-		$raise->{'parms_str'} = $parms_str;
-		$raise->{'parms'} = $CHARP::JSON->decode ($parms_str);
+		$err->{'parms_str'} = $parms_str;
+		$err->{'parms'} = $CHARP::JSON->decode ($parms_str);
 	}
 
-	$raise->{'code'} = 'SQL:' . $raise->{'type'};
-	$raise->{'msg'} = substr ($fields[2], length ($raise->{'parms_str'}) + 2);
-	$raise->{'objs'} = [$raise->{'msg'} =~ /'([^']+)'/g];
+	$err->{'key'} = 'SQL:' . $err->{'type'};
+	$err->{'msg'} = substr ($fields[2], length ($err->{'parms_str'}) + 2);
+	$err->{'objs'} = [$err->{'msg'} =~ /'([^']+)'/g];
 
-	return $raise;
+	return $err;
 }
 
 sub error_get {
@@ -256,38 +256,33 @@ sub error_get {
 
 	my $errstr = $sth->errstr;
 	$errstr =~ s/^ERROR:\s+//; # PostgreSQL 9.6 prepends the error string with this.
-	if (substr ($errstr, 0, 2) eq '|>') { # Probably an exception raised by us (charp_raise).
-		$err = raise_parse ($sth->errstr);
-	} else { # Execute error, not raised by us.
-		my %err_hash;
 
-		my $statestr = db_state_str ($sth, $dbh);
-		if (exists $CHARP::STATESTR_TO_TYPE{$statestr}) {
-			%err_hash = %{$CHARP::STATESTR_TO_TYPE{$statestr}};
-		} else {
-			%err_hash = (
-				'type' => 'EXECUTE',
-				'code' => 'DBI:EXECUTE',
-				'msg' => $sth->errstr,
-				'parms_str' => ''
-			);
-		}
-
-		$err = \%err_hash;
-		$err->{'msg'} =~ /^([^\n]+)/;
-		my $objstr = $1;
-		$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
+	if (substr ($errstr, 0, 2) eq '|>') { 
+		# Probably an exception raised by us (charp_raise).
+		return raise_parse ($sth->errstr);
 	}
 
+	# Execute error, not raised by us.
+	my %err_hash;
+
+	my $statestr = db_state_str ($sth, $dbh);
+	if (exists $CHARP::STATESTR_TO_TYPE{$statestr}) {
+		%err_hash = %{$CHARP::STATESTR_TO_TYPE{$statestr}};
+	} else {
+		%err_hash = (
+			'type' => 'EXECUTE',
+			'key' => 'DBI:EXECUTE',
+			'msg' => $sth->errstr,
+			'parms_str' => ''
+			);
+	}
+
+	$err = \%err_hash;
+	$err->{'msg'} =~ /^([^\n]+)/;
+	my $objstr = $1;
+	$err->{'objs'} = [$objstr =~ /"([^"]+)"/g];
+
 	return $err;
-}
-
-sub execute {
-	my $sth = shift;
-
-	my $rv = $sth->execute (@_);
-
-	return $rv;
 }
 
 sub error_log {
@@ -295,8 +290,8 @@ sub error_log {
 
 	return if error_is_fatal ($CHARP::ctx->{'err_sth'});
 
-	execute ($CHARP::ctx->{'err_sth'}, 
-			 $request_id, $err->{'type'}, $login, $ip_addr, $res, $err->{'parms_str'}, $status);
+	$CHARP::ctx->{'err_sth'}->execute ($request_id, $err->{'type'}, $login, 
+									   $ip_addr, $res, $err->{'parms_str'}, $status);
 }
 
 sub error_execute_send {

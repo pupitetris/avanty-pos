@@ -39,7 +39,7 @@ sub request_challenge {
 		$req_res = 'anon_' . $req_res;
 
 		my $func_sth = $ctx->{'func_sth'};
-		my $rv = CHARP::execute ($func_sth, $req_res);
+		my $rv = $func_sth->execute ($req_res);
 		if (!defined $rv) {
 			CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $func_sth, $req_login, 
 									   $ip_addr, $req_res);
@@ -57,7 +57,7 @@ sub request_challenge {
 	}
 	
 	my $chal_sth = $ctx->{'chal_sth'};
-	my $rv = CHARP::execute ($chal_sth, $req_login, $ip_addr, $req_res, $req_params);
+	my $rv = $chal_sth->execute ($req_login, $ip_addr, $req_res, $req_params);
 
 	if (!defined $rv) {
 		CHARP::error_execute_send ($ctx->{'dbh'}, $fcgi, $chal_sth, $req_login, 
@@ -141,7 +141,7 @@ sub request_reply {
 
 	my $ip_addr = $fcgi->remote_addr ();
 	my $chk_sth = $ctx->{'chk_sth'};
-	my $rv = CHARP::execute ($chk_sth, $req_login, $ip_addr, $req_chal, $req_hash);
+	my $rv = $chk_sth->execute ($req_login, $ip_addr, $req_chal, $req_hash);
 
 	if (!defined $rv) {
 		my $err = CHARP::error_get ($chk_sth, $ctx->{'dbh'});
@@ -230,7 +230,7 @@ sub request_reply_do {
 		$info_error = CHARP::info_handler ($fcgi, $raise);
 	};
 
-	my $rv = CHARP::execute ($sth);
+	my $rv = $sth->execute ();
 
 	$CHARP::INFO_HANDLER = undef;
 	if ($info_error) {

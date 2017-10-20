@@ -164,8 +164,24 @@
 		APP.charp.request ('user_create', [login, pass, type],
 						   {
 							   success: function () { super_user_create_user_success (login); },
-							   error: function () { ui.newuser_submit.button ('enable'); return true; }
+							   error: super_user_create_user_error
 						   });
+	}
+
+	function super_user_create_user_error (err, ctx) {
+		ui.newuser_submit.button ('enable');
+		switch (err.key) {
+		case 'SQL:DATADUP':
+			APP.msgDialog ({
+				icon: 'no',
+				desc: 'El nombre de usuario que escogiste ya existe. Prueba con otro nombre de usuaro.',
+				sev: CHARP.ERROR_SEV['USER'],
+				title: 'Usuario ya existe',
+				opts: { width: '75%' }
+			});
+			return;
+		}
+		return true;
 	}
 
 	function super_user_create_user_success (login) {

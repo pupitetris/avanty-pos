@@ -71,11 +71,11 @@
 		charp.credentialsSet (login, pass, salt);
 	}
 
-	function login_error (err, ctx, charp) {
+	function login_error (err, ctx) {
 		ui.enter_submit.button ('enable');
 		ui.enter_username.focus ();
 
-		return mod.loginErrorHandler (err, ctx, charp);
+		return mod.loginErrorHandler (err, ctx);
 	}
 
 	function login_success (data) {

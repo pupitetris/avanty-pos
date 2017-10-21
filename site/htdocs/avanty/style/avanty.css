@@ -202,11 +202,17 @@ form label.error {
 	margin-top: 8px;
 }
 
-.shell-menu {
+.avanty .shell-menu {
 	position: absolute;
 	display: inline-block;
+	top: -6px;
+	padding: 0;
+	border-width: 0;
 	left: 25%;
 	width: 50%;
+}
+
+.shell-menu > div {
     box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
@@ -238,4 +244,10 @@ button.shell-tool img {
 .avanty button.shell-tool img {
 	position: static;
 	vertical-align: middle;
+}
+
+.shell h4 {
+	margin-top: 1em;
+	margin-bottom: 0.75em;
+	border-bottom: 1px solid lightgray;
 }

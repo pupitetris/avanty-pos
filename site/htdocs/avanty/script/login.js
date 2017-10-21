@@ -78,12 +78,14 @@
 		return mod.loginErrorHandler (err, ctx);
 	}
 
-	function login_success (data) {
+	function login_success (is_first) {
+		mod.is_first = is_first;
 		APP.charp.request ('this_user_types_get', [],
 						   {
 							   asObject: true,
 							   success: function (types) {
 								   mod.user_types = types;
+								   // Since an user can be more than one, the order is important.
 								   if (types.maintenance) {
 									   APP.loadModule ('maint');
 									   return;
@@ -102,11 +104,12 @@
 
 	var mod = {
 		user_types: {},
+		is_first: false,
 
 		loginTry: function (charp, login, clear_pass, success_cb, error_cb) {
 			function auth_try (salt) {
 				set_credentials (charp, login, clear_pass, salt);
-				charp.request ('user_auth', [], 
+				charp.request ('this_user_is_first', [], 
 							   { 
 								   success: success_cb,
 								   error: error_cb

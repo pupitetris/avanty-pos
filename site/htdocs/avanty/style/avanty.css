@@ -2,9 +2,10 @@
 @import url('theme/jquery-ui.min.css');
 @import url('theme/custom.css');
 @import url('activate.css');
+@import url('lock.css');
 @import url('super.css');
 @import url('login.css');
-@import url('lock.css');
+@import url('cash.css');
 
 body.avanty {
 	font-family: 'Open Sans', sans-serif;

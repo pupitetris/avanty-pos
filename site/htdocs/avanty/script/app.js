@@ -80,8 +80,6 @@
 						show: { effect: 'blind', duration: 125 },
 						hide: { effect: 'blind', duration: 125 }
 					});
-
-				ui.menu.find ('button').button ();
 			}
 		}
 
@@ -104,6 +102,9 @@
 			},
 
 			menuCollapse: function (collapse) {
+				if (!this.ui.menu)
+					return;
+				
 				if (collapse === true)
 					this._menu_selected = this.ui.menu.tabs ('option', 'active');
 
@@ -113,6 +114,9 @@
 			},
 
 			backShow: function () {
+				if (!this.ui.back)
+					return;
+				
 				if (APP.history.length () == 0)
 					this.ui.back.hide ();
 				else

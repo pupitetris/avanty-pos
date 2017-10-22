@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="47,17" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="46,694" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1895,6 +1895,47 @@ END;]]></definition>
     	NATURAL LEFT JOIN user_supervisor AS s 
     	NATURAL LEFT JOIN user_maintenance AS m
         WHERE a.user_id = _uid;]]></definition>
+</function>
+
+<function name="this_user_password_change"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Change the password of the calling user. Return the new salt.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_plain_password">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_salt account.salt%TYPE;
+	_login account.login%TYPE;
+BEGIN
+	_salt := pgcrypto.gen_salt ('bf', 8);
+	UPDATE account 
+		SET is_first = FALSE,
+			salt = _salt,
+			password = pgcrypto.crypt (_plain_password, _salt)
+		WHERE user_id = _uid AND status = 'active'
+		RETURNING login INTO _login;
+
+	IF NOT FOUND THEN
+		PERFORM charp_raise('USERDIS', _login::text);
+	END IF;
+
+	RETURN _salt;
+END;]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

@@ -291,14 +291,11 @@ sub request_main {
 }
 
 sub main {
-	my $dbh = CHARP::connect ();
-	exit 128 if !defined $dbh;
-
-	my $ctx = CHARP::init ($dbh);
+	my $ctx = CHARP::connect ();
 
 	# Wait for requests, call dispatcher callback and loop.
 	CHARP::dispatch (\&request_main, $ctx);
-	$dbh->disconnect ();
+	CHARP::disconnect ($ctx);
 }
 
 main ();

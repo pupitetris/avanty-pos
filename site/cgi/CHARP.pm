@@ -85,7 +85,7 @@ sub init {
 
 	my $err_sth = $dbh->prepare (call_procedure_query ('charp_log_error (?, ?, ?, ?, ?, ?, ?)'), prepare_attrs ());
 	if (!defined $err_sth) {
-		dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
+		dispatch_error ({ 'key' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;
 	}
 
@@ -99,7 +99,7 @@ sub init {
 
 	my $chal_sth = $dbh->prepare ('SELECT charp_request_create (?, ?, ?, ?) AS chal', prepare_attrs ());
 	if (!defined $chal_sth) {
-		dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
+		dispatch_error ({ 'key' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;
 	}
 
@@ -110,7 +110,7 @@ sub init {
 
 	my $chk_sth = $dbh->prepare (call_procedure_query ('charp_request_check (?, ?, ?, ?)'), prepare_attrs ());
 	if (!defined $chk_sth) {
-		dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
+		dispatch_error ({ 'key' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;
 	}
 
@@ -121,14 +121,14 @@ sub init {
 
 	my $func_sth = $dbh->prepare ('SELECT charp_function_params (?) AS fparams', prepare_attrs ());
 	if (!defined $func_sth) {
-		dispatch_error ({ 'err' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
+		dispatch_error ({ 'key' => 'DBI:PREPARE', 'msg' => $DBI::errstr });
 		return;
 	}
 
 	$func_sth->bind_param (1, undef, SQL_VARCHAR); # fname
 
 	my $ctx = { 
-		'dbh'		   => $dbh, 
+		'dbh'	   => $dbh, 
 		'chal_sth' => $chal_sth,
 		'chk_sth'  => $chk_sth,
 		'func_sth' => $func_sth,
@@ -288,6 +288,7 @@ sub error_get {
 sub error_log {
 	my ($request_id, $err, $login, $ip_addr, $res, $status) = @_;
 
+	# if we can't communicate with the server, doesn't make sense to try to log the error.
 	return if error_is_fatal ($CHARP::ctx->{'err_sth'});
 
 	$CHARP::ctx->{'err_sth'}->execute ($request_id, $err->{'type'}, $login, 
@@ -349,6 +350,9 @@ sub dispatch {
 	my $ctx = shift;
 
 	while (my $fcgi = CGI::Fast->new) {
+		if (!$ctx->{'dbh'}->ping ()) {
+			$ctx = CHARP::connect ();
+		}
 		my $res = &$callback ($fcgi, $ctx);
 		last if defined $res;
 	}
@@ -374,12 +378,20 @@ sub connect {
 	if (!defined $dbh) {
 		my $msg = $DBI::errstr;
 		$msg =~ s/\n.*//mg; # Remove sensitive information.
-		dispatch_error ({'err' => 'DBI:CONNECT', 'msg' => $msg });
-		return;
+		dispatch_error ({'key' => 'DBI:CONNECT', 'msg' => $msg });
+		exit 128;
 	}
 
 	$dbh->do ("SET application_name='charp'");
-	return $dbh;
+
+	my $ctx = CHARP::init ($dbh);
+	return $ctx;
+}
+
+sub disconnect {
+	my $ctx = shift;
+
+	$ctx->{'dbh'}->disconnect ();
 }
 
 1;

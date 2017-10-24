@@ -23,7 +23,7 @@
 		var pass2 = ui[name + '_pass2'] = section.find ('input[name="' + name + '-pass2"]');
 		pass2.input ();
 
-		var submit = ui[name + '_submit'] = section.find ('button');
+		var submit = ui[name + '_submit'] = section.find ('button[type="submit"]');
 		submit.button ();
 
 		var form = ui[name + '_form'] = section.find ('form');
@@ -106,6 +106,11 @@
 			});
 		ui.newuser_type_combo = ui.newuser_type.next ();
 
+		newuser_layout_init ('super_chpass', { submitHandler: super_chpass_submit });
+		ui.super_chpass_cancel = ui.section_super_chpass.find ('button[type="button"]');
+		ui.super_chpass_cancel.button ();
+		ui.super_chpass_cancel.on ('click', super_chpass_finish);
+
 		mod.loaded = true;
 		mod.onLoad ();
 	}
@@ -154,6 +159,74 @@
 		ui.newuser_type_combo.removeClass ('error');
 		ui.newuser_submit.button ('enable');
 		ui.newuser_login.focus ();
+	}
+
+	function super_chpass_user () {
+		if (mod.chpass) {
+			APP.switchSection (ui.section_super_chpass);
+			APP.switchPage (MOD_NAME);
+			shell.show (false);
+		} else {
+			APP.history.go (MOD_NAME, ui.section_super_chpass, 'super-chpass-user');
+			shell.backShow ();
+			shell.show (true);
+		}
+
+		ui.super_chpass_form.validate ().resetForm ();
+		ui.super_chpass_login.val ('');
+		ui.super_chpass_pass.val ('');
+		ui.super_chpass_pass2.val ('');
+		ui.super_chpass_submit.button ('enable');
+		ui.super_chpass_cancel.button ('enable');
+		ui.super_chpass_login.focus ();
+	}
+
+	function super_chpass_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
+
+		ui.super_chpass_submit.button ('disable');
+		ui.super_chpass_cancel.button ('disable');
+
+		var login = ui.super_chpass_login.val ();
+		var pass = ui.super_chpass_pass.val ();
+
+		APP.charp.request ('user_password_change', [login, pass],
+						   {
+							   success: function () { super_chpass_success (login); },
+							   error: function (err) { super_chpass_error (err, login); }
+						   });
+	}
+
+	function super_chpass_error (err, login) {
+		ui.super_chpass_submit.button ('enable');
+		ui.super_chpass_cancel.button ('enable');
+		switch (err.key) {
+		case 'SQL:NOTFOUND':
+			APP.msgDialog ({
+				icon: 'no',
+				desc: '<>El usuario con nombre <i>' + login + '</i> no existe.',
+				sev: CHARP.ERROR_SEV['USER'],
+				title: 'Usuario no existe',
+				opts: { width: '75%' }
+			});
+			return;
+		}
+		return true;
+	}
+
+	function super_chpass_success (login) {
+		APP.toast ('Contraseña para <i> ' + login + ' </i> cambiada con éxito.');
+		super_chpass_finish ();
+	}
+
+	function super_chpass_finish () {
+		if (mod.chpass) {
+			mod.chpass = false;
+			APP.loadModule ('login');
+		} else {
+			APP.history.back ();
+			shell.backShow ();
+		}
 	}
 
 	function super_create_super () {
@@ -262,15 +335,27 @@
 			var cred = APP.charp.credentialsGet ();
 			if (cred.login == 'supervisor') {
 				APP.charp.request ('supervisor_created', [],
-								   function (data) {
+								   function (is_created) {
 									   APP.hourglass.enable ();
-									   if (!data) {
+									   if (!is_created) {
 										   // operations supervisor not created. Create one immediately.
 										   super_is_first = true;
 										   APP.switchPage (MOD_NAME);
 										   super_create_super ();
-									   } else // operations supervisor present. Go to login screen.
-										   APP.loadModule ('login');
+										   return;
+									   }
+
+									   // operations supervisor present.
+
+									   if (mod.chpass) {
+										   // Login screen is in challenge routine, give the user
+										   // a dialog to change the password of an account.
+										   super_chpass_user ();
+										   return;
+									   }
+
+									   // No special mode. Go to login screen.
+									   APP.loadModule ('login');
 								   });
 				return;
 			}

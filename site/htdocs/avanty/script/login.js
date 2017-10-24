@@ -37,9 +37,36 @@
 
 		ui.enter_lostpass = $('#login-lostpass');
 		ui.enter_lostpass.button ();
+		ui.enter_lostpass.on ('click', request_challenge);
+
+		// Secret combo for supervisor challenge request.
+		ui.sections_parent.find ('.quadrant').on ('click',
+												  function (evt) {
+													  if (APP.mod.activate.quadrantClick (evt))
+														  quadrant_success ();
+												  });
 
 		mod.loaded = true;
 		mod.onLoad ();
+	}
+
+	function quadrant_success () {
+		ui.enter_lostpass.show ();
+	}
+
+	function request_challenge () {
+		ui.enter_lostpass.hide ();
+		APP.mod.activate.requestChallenge (request_challenge_success);
+	}
+
+	function request_challenge_success () {
+		var mod_super = APP.mod['super'];
+		if (!mod_super) {
+			APP.loadModule ('super', function (mod_super) { mod_super.chpass = true; });
+		} else {
+			mod_super.chpass = true;
+			mod_super.reset ();
+		}
 	}
 
 	function login_enter () {

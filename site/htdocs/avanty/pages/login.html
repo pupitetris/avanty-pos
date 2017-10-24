@@ -1,23 +1,30 @@
 <div id="login-sections">
-  <div class="section section-small" id="login-enter">
-	<form>
-	  <h2>Abrir sesión</h2>
-      <table>
-		<tbody>
-		  <tr>
-			<th><label for="login-username">Usuario:</label></th>
-			<td><input name="login-username" type="text" size="10" value="" /></td>
-		  </tr>
-		  <tr>
-			<th><label for="login-pass">Contraseña:</label></th>
-			<td><input name="login-pass" type="password" size="10" value="" /></td>
-		  </tr>
-		</tbody>
-		<tfoot>
-		  <tr><td colspan="2"><button type="submit">Ingresar</button></td></tr>
-		</tfoot>
-      </table>
-	</form>
-	<button id="login-lostpass">Olvidé la contraseña</button>
+  <div class="section" id="login-enter">
+	<div class="quadrant quadrant-1" id="login-quadrant-1"></div>
+	<div class="quadrant quadrant-2" id="login-quadrant-2"></div>
+	<div class="quadrant quadrant-3" id="login-quadrant-3"></div>
+	<div class="quadrant quadrant-4" id="login-quadrant-4"></div>
+	<div class="quadrant quadrant-5" id="login-quadrant-5"></div>
+	<div class="section-small">
+	  <form>
+		<h2>Abrir sesión</h2>
+		<table>
+		  <tbody>
+			<tr>
+			  <th><label for="login-username">Usuario:</label></th>
+			  <td><input name="login-username" type="text" size="10" value="" /></td>
+			</tr>
+			<tr>
+			  <th><label for="login-pass">Contraseña:</label></th>
+			  <td><input name="login-pass" type="password" size="10" value="" /></td>
+			</tr>
+		  </tbody>
+		  <tfoot>
+			<tr><td colspan="2"><button type="submit">Ingresar</button></td></tr>
+		  </tfoot>
+		</table>
+	  </form>
+	</div>
+	<button id="login-lostpass">Solicitar reto</button>
   </div>
 </div>

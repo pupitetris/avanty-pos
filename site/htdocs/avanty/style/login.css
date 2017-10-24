@@ -1,5 +1,6 @@
 #login-lostpass {
+	display: none;
 	position: absolute;
 	top: calc(100vh - 3em);
-	left: calc(100% - 23ex);
+	left: calc(100% - 16ex);
 }

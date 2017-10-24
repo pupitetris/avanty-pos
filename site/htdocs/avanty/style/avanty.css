@@ -127,18 +127,34 @@ h1 {
 	height: 100vh;
 }
 
-.section.section-small {
+.section-small {
+	/* Sections that have few elements and will use the keyboard */
+	/* have reduced area so that the contents center on the screen */
+	/* when the keyboard is shown. */
 	height: calc(100vh - 200px);
 }
 
 .with-shell .section {
-	margin-top: 90px;
-	height: calc(100vh - 90px); /* 90px is the shell's height */
+	margin-top: 70px;
+	height: calc(100vh - 70px); /* 70px is the shell's height */
 }
 
 .with-shell .section.section-small {
-	height: calc(100vh - 200px - 90px); /* 90px is the shell's height */
+	height: calc(100vh - 200px - 70px); /* 70px is the shell's height */
 }
+
+
+.quadrant {
+	position: absolute;
+	width: 50%;
+	height: 50%;
+}
+
+.quadrant-1 { top: 0; left: 0; }
+.quadrant-2 { top: 0; left: 50vw; }
+.quadrant-3 { top: 50vh; left: 50vw; }
+.quadrant-4 { top: 50vh; left: 0; }
+.quadrant-5 { top: 25vh; left: 25vw; display: table; }
 
 form, .cont {
 	display: flex;
@@ -163,8 +179,20 @@ form tbody td {
 }
 
 form tfoot td {
-	text-align: center;
 	padding-top: 1em;
+	text-align: center;
+}
+
+form tfoot td:first-child {
+	text-align: right;
+}
+
+form tfoot td:last-child {
+	text-align: left;
+}
+
+form tfoot td[colspan="2"] {
+	text-align: center;
 }
 
 form label.error {

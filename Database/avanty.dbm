@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.0" author="Arturo Espinosa" last-position="46,694" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,27" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1337,10 +1337,14 @@ BEGIN
 	       charp_get_function_params (p.proargtypes) AS fparams, 
 	       a.password AS password
 	       INTO _req
-	       FROM request AS r NATURAL JOIN account AS a NATURAL JOIN pg_proc AS p
+	       FROM request AS r 
+	       		NATURAL JOIN account AS a 
+	       		NATURAL JOIN pg_proc AS p
+	       		JOIN pg_namespace AS ns ON (p.pronamespace = ns.oid)
 	       WHERE a.login = _login 
 			 AND r.random_bytes = _chal
-			 AND r.ip_addr = _ip_addr;
+			 AND r.ip_addr = _ip_addr
+			 AND ns.nspname = 'rp';
 
 	IF _req IS NULL THEN
 		PERFORM charp_raise('REQUNK', _username, _ip_addr::text, _chal);
@@ -1647,7 +1651,8 @@ BEGIN
 	SELECT string INTO _string
 		FROM supervisor_challenge 
 		WHERE user_id = _uid 
-			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP);
+			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
+			AND solution IS NULL;
 
 	IF NOT FOUND THEN
 		INSERT INTO supervisor_challenge 
@@ -1918,6 +1923,69 @@ END;]]></definition>
 	<parameter name="_plain_password">
 		<type name="varchar" length="0"/>
 	</parameter>
+	<definition><![CDATA[BEGIN
+	RETURN av.user_password_change (_uid, _plain_password);
+END;]]></definition>
+</function>
+
+<function name="user_password_change"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Change a user's password. Only supervisors can change other users' passwords.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_plain_password">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_user_id av.account.user_id%TYPE;
+BEGIN
+	PERFORM 1 FROM user_supervisor WHERE user_id = _uid;
+	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
+
+	SELECT user_id INTO _user_id FROM account WHERE login = _login;
+	IF NOT FOUND THEN PERFORM charp_raise('NOTFOUND'); END IF;
+
+	PERFORM av.user_password_change (_user_id, _plain_password);
+END;]]></definition>
+</function>
+
+<function name="user_password_change"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Change a user's password with the given plain-text password. Return the newly generated salt.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="varchar" length="0"/>
+	</return-type>
+	<parameter name="_user_id">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_plain_password">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<definition><![CDATA[DECLARE
 	_salt account.salt%TYPE;
 	_login account.login%TYPE;
@@ -1927,7 +1995,7 @@ BEGIN
 		SET is_first = FALSE,
 			salt = _salt,
 			password = pgcrypto.crypt (_plain_password, _salt)
-		WHERE user_id = _uid AND status = 'active'
+		WHERE user_id = _user_id AND status = 'active'
 		RETURNING login INTO _login;
 
 	IF NOT FOUND THEN
@@ -1949,9 +2017,9 @@ END;]]></definition>
 	 dst-table="av.account"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="429.4" y="1239.76"/>
-	<position x="429.4" y="1169"/>
-	<position x="292.267" y="1169"/>
+		<position x="429.716" y="1239.82"/>
+	<position x="429.716" y="1169"/>
+	<position x="292.477" y="1169"/>
 	</line>
 	<label ref-type="dst-label">
 		<position x="-5.86667" y="1.8"/>

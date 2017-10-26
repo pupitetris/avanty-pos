@@ -233,7 +233,7 @@ form label.error {
 .avanty .shell-menu {
 	position: absolute;
 	display: inline-block;
-	top: -6px;
+	top: 2px;
 	padding: 0;
 	border-width: 0;
 	left: 25%;

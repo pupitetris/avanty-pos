@@ -350,7 +350,7 @@ sub dispatch {
 	my $ctx = shift;
 
 	while (my $fcgi = CGI::Fast->new) {
-		if (!$ctx->{'dbh'}->ping ()) {
+		if ($ctx->{'dbh'} && !$ctx->{'dbh'}->ping ()) {
 			$ctx = CHARP::connect ();
 		}
 		my $res = &$callback ($fcgi, $ctx);
@@ -375,7 +375,7 @@ sub connect {
 	undef $CHARP::DB_PASS;
 	undef $CHARP::DB_DRIVER;
 
-	if (!defined $dbh) {
+	if (!$dbh) {
 		my $msg = $DBI::errstr;
 		$msg =~ s/\n.*//mg; # Remove sensitive information.
 		dispatch_error ({'key' => 'DBI:CONNECT', 'msg' => $msg });

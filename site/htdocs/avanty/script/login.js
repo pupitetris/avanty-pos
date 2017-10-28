@@ -99,7 +99,11 @@
 
 	function login_error (err, ctx) {
 		ui.enter_submit.button ('enable');
-		ui.enter_username.focus ();
+
+		if (err.key == 'SQL:REPFAIL')
+			ui.enter_pass.focus ();
+		else
+			ui.enter_username.focus ();
 
 		return mod.loginErrorHandler (err, ctx);
 	}

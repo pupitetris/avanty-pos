@@ -42,7 +42,8 @@ $CHARP_LANG = 'es';
 
 # Trace top-level DBI method calls returning with results or errors and SQL statements executed:
 $DB_TRACE = '0|SQL';
-$DB_TRACE_FNAME = *STDERR;
+$DB_TRACE_FNAME = 'c:/opt/Apache24/logs/DBI.log';
+#$DB_TRACE_FNAME = *STDERR;
 
 # Send errors to stderr? (Effectively showing on the web server's error.log)
 # $DB_PRINT_ERROR = 0; # Production

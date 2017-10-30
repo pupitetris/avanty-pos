@@ -1,0 +1,133 @@
+.ticket {
+	/* At 11px font-size, allows for 42 chars per line on 80mm paper (1px ~ 1/81in) */
+	width: 256px;
+	font-family: monospace;
+	display: block;
+
+	/* Nice-to-haves for ticket display: */
+	outline: 1px solid lightgray;
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	padding: 1em;
+	overflow: hidden;
+}
+
+.ticket, .font-a {
+	/* font-size 11 triggers font (A) command: */
+	font-size: 11px;
+}
+
+.font-b {
+	/* font-size 8 triggers font (B) command: */
+	font-size: 8px;
+}
+
+.ticket header {
+	/* text-align triggers justification command: */
+	text-align: center;
+}
+
+.ticket address {
+	/* Remove user agent defaults: */
+	font-style: unset;
+}
+
+.ticket p {
+	/* Remove user agent defaults: */
+	margin: unset;
+}
+
+.ticket .right {
+	/* text-align triggers justification command: */
+	text-align: right;
+}
+
+.ticket ul {
+	/* Remove user agent defaults: */
+	list-style-type: none;
+	padding: unset;
+	margin: unset;
+}
+
+.ticket li {
+	/* Preserve white spaces on the printer output: */
+	white-space: pre-wrap;
+
+	/* Remove user agent defaults: */
+	display: block;
+	text-align: unset;
+}
+
+.ticket b {
+	/* Trigger double-strike: */
+	font-weight: 700;
+
+	/* Remove user agent defaults: */
+	font-weight: unset;
+}
+
+.ticket em {
+	/* This will trigger emphasis: */
+	font-style: italic;
+}
+
+.ticket h1 {
+	/* Remove user agent defaults: */
+	margin: 0;
+	font-size: unset;
+	font-weight: unset;
+}
+
+.ticket h1, .ticket .double {
+	/* Invoke X & Y character scaling: */
+	transform: scaleX(2) scaleY(2); 
+
+	/* X & Y can be scaled independently in integer increments. */
+	/* If both X and Y are negatively scaled (mirrored), it triggers upside-down. */
+	/* TODO: 90-degree rotations (ESC V) not supported yet. */
+	/* Scale values whose absolute value is outside the 1-8 range will give unpredictable results. */
+	/* Nested transforms won't work (the engine consults the element's direct affine matrix). */
+
+	/* Tweaks needed so text displays correctly on-screen. Irrelevant for printing: */
+
+	/* Avoid element growing from the center and overflowing to the left */
+	transform-origin: left; 
+
+	/* If element is now double the size, make it half as wide. Adjust according to scaleX. */
+	/* Useful in conjunction with text-align: right, otherwise irrelevant. */
+	width: 50%; 
+}
+
+/* hr produces a cut command, optionally partial */
+.ticket hr {
+	/* Dotted for partial cut. Otherwise, it's a full cut: */
+	border-style: dotted; 
+
+	height: 1px; /* Needs to be >0 or element will not be considered visible. */
+
+	/* Remove user agent defaults: */
+	margin: unset;
+
+	/* Just for looks: */
+	border-top-width: 2px;
+	border-bottom-width: 0;
+	border-left-width: 0;
+	border-right-width: 0;
+	border-color: red;
+}
+
+/* figure produces a barcode command */
+.ticket figure {
+	text-align: center;
+
+	/* Remove user agent defaults: */
+	margin: unset;
+}
+
+.ticket figure div {
+	/* This sets the printed barcode height (1px = 1/96th of an inch) */
+	height: 0.5in;
+
+	background-image: url('../img/barcode.png');
+	background-repeat: repeat;
+	margin: auto;
+}

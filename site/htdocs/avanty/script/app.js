@@ -665,6 +665,36 @@
 			APP.charp.setBusyCB (show_hourglass);
 
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
+
+			var dev_conf = {
+				connect: {
+					host: 'localhost',
+					port: { secure: [8181, 8282, 8383, 8484], insecure: [8182, 8283, 8384, 8485] },
+					usingSecure: true,
+					keepAlive: 60,
+					retries: 0,
+					delay: 0
+				},
+				printer: {
+					name: 'BTP-R180',
+					type: 'ESCPOS',
+					basedir: 'C:/avanty/site/htdocs/avanty/',
+					qz_type: 'escp',
+					qz_options: {
+						encoding: 'CP437'
+					},
+					cutter_distance: 48, // 1/96ths of an inch
+					defaults: {
+						motion: { x: 180, y: 180 },
+						standard: { line_spacing: 10 },
+						page: { line_spacing: 10 }
+					}
+				}
+			};
+
+			APP.loadModule ('devices', // Printer and HIDs.
+							function (mod) { mod.configure (dev_conf) });
+
 			APP.loadModule ('activate');
 		}
 	};

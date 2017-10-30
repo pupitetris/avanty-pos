@@ -74,6 +74,13 @@
 
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
+//		ui.ticket = $('#ticket');
+//		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.ticket); });
+
+//		ui.print_button = ui.section_main.find ('button');
+//		ui.print_button.button ();
+//		ui.print_button.on ('click', function () { APP.mod.devices.print (ui.ticket); });
+
 		mod.loaded = true;
 		mod.onLoad ();
 	}

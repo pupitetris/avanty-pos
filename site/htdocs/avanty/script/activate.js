@@ -148,7 +148,7 @@
 									   ui.chal_submit.button ("enable");
 									   ui.chal_cancel.button ("enable");
 									   APP.msgDialog ({
-										   icon: 'timeout.png',
+										   icon: 'timeout',
 										   desc: 'El reto ha expirado.',
 										   sev: 'El reto debe de ser contestado antes de cierto tiempo. Se proporcionará otro reto para ser contestado antes de que expire nuevamente.',
 										   title: 'Reto expirado',

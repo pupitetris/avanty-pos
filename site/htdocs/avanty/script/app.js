@@ -213,14 +213,18 @@
 				return;
 
 			var d = new Date ();
+
 			var new_time = two_digits (d.getHours ()) + ':' + two_digits (d.getMinutes ());
+			if (this.useSeconds)
+				new_time += ':' + two_digits (d.getSeconds ());
+
 			var new_date = d.getFullYear () + '/' +
 				two_digits (d.getMonth() + 1) + '/' + two_digits (d.getDate ())
 
 			if (display_time) {
 				if (display_time == new_time)
 					return;
-				set_interval.call (this, true, 60);
+				set_interval.call (this, true, (this.useSeconds)? 1: 60);
 			}
 
 			display_time = new_time;
@@ -240,7 +244,7 @@
 			// enable: sets the interval call, but will not if it is already there
 			// and the time interval is the same.
 			if (this.interval_secs != secs)
-				// time interval has changed, so remove old intervall call if it exists:
+				// time interval has changed, so remove old interval call if it exists:
 				set_interval.call (this, false);
 			
 			// we set the new interval, but only if none is currently running.
@@ -260,10 +264,11 @@
 		Clock.prototype = {
 			__proto__: Hourglass.prototype,
 			
-			init: function (div) {
-				sup.init.call (this, div);
-				if (div && div.length)
-					get_subelements.call (this, div);
+			init: function (opts) {
+				sup.init.call (this, opts.div);
+				if (opts.div && opts.div.length)
+					get_subelements.call (this, opts.div);
+				this.useSeconds = opts.useSeconds;
 				this.enable ();
 				this.show ();
 				return this;
@@ -422,7 +427,7 @@
 		// Our service objects:
 		    charp: new     CHARP ().init (),
 		hourglass: new Hourglass ().init (),
-		    clock: new     Clock ().init (),
+			clock: new     Clock ().init ({useSeconds: true}),
 		  history: new   History ().init (),
 
 		shellCreate: function (sections_parent) {

@@ -672,6 +672,9 @@
 		ticket.find ('img').each (
 			function (i, e) {
 				var ele = $(e);
+				if (ele.hasClass ('processed'))
+					return;
+				ele.addClass ('processed');
 				ele.css ('width', (ele.width () / 2) + 'px');
 			});
 	}

@@ -108,8 +108,21 @@
 		return mod.loginErrorHandler (err, ctx);
 	}
 
+	function login_configure_terminal (info) {
+		APP.terminalId = info.terminal_id;
+		APP.terminalName = info.name;
+		APP.mod.devices.setQzCredentials (info.qz_private_key, info.qz_certificate);
+	}
+
 	function login_success (is_first) {
 		mod.is_first = is_first;
+
+		APP.charp.request ('this_terminal_info_get', [],
+						   {
+							   asObject: true,
+							   success: login_configure_terminal
+						   });
+
 		APP.charp.request ('this_user_types_get', [],
 						   {
 							   asObject: true,

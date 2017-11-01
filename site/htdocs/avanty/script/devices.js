@@ -679,10 +679,13 @@
 			});
 	}
 
+	var qz_private_key;
+	var qz_certificate;
+
 	function qz_signature_promise (toSign) {
 		return function(resolve, reject) {
 			try {
-				var pk = KEYUTIL.getKey(mod.qz_private_key);
+				var pk = KEYUTIL.getKey(qz_private_key);
 				var sig = new KJUR.crypto.Signature({"alg": "SHA1withRSA"});
 				sig.init(pk); 
 				sig.updateString(toSign);
@@ -697,7 +700,7 @@
 
 	function qz_certificate_promise (resolve, reject) {
 			try {
-				resolve (mod.qz_certificate);
+				resolve (qz_certificate);
 			} catch (err) {
 				console.error (err);
 				reject (err);
@@ -762,6 +765,11 @@
 
 		configure: function (new_config) {
 			devices_config = new_config;
+		},
+
+		setQzCredentials: function (key, cert) {
+			qz_private_key = key;
+			qz_certificate = cert;
 		}
 	};
 

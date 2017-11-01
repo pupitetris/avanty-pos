@@ -238,7 +238,8 @@
 		var bytes = barcode_collect_bytes (barcode, 16);
 
 		// Convert to Base64 and trim trailing padding chars (=). For 16 bytes, that's always two:
-		var base64 = btoa (bytes).substr (0, 22);
+		// Also non-conformingly replace + with . or bcrypt will complain.
+		var base64 = btoa (bytes).substr (0, 22).replace (/\+/g, '.');
 
 		// OK, we got our proper salt, configured for 2^8 bcrypt iterations:
 		var salt = '$2a$08$' + base64;

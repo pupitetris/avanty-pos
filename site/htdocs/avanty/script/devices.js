@@ -716,7 +716,18 @@
 		return new Promise (resolver);
 	}
 
-	var qz_connected = false;
+	function qz_error_handler (err) {
+		console.log (err);
+		APP.msgDialog ({
+			icon: 'printer-error',
+			desc: 'Fallo al conectar con el servidor de dispositivos.',
+			msg: err.message,
+			sev: CHARP.ERROR_SEV['INTERNAL'],
+			title: 'Error de comunicación',
+			opts: { width: '75%' }
+		});
+	}
+
 	var qz_conf;
 
 	var mod = {
@@ -748,19 +759,19 @@
 			function do_print (conf) {
 				var data = print_methods[devices_config.printer.type] (devices_config.printer, element);
 				qz.print (conf, data)
-					.catch (function (err) { console.error (err); });
+					.catch (qz_error_handler);
 			}
 
-			if (qz_connected)
+			if (qz.websocket.isActive ())
 				do_print (qz_conf);
 			else
 				qz.websocket.connect (devices_config.connect).then (
 					function () {
-						qz_connected = true;
 						qz_conf = qz.configs.create (devices_config.printer.name,
 													 devices_config.printer.qz_options);
 						do_print (qz_conf);
-					});
+					})
+				.catch (qz_error_handler);
 		},
 
 		configure: function (new_config) {

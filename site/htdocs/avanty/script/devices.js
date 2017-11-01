@@ -765,7 +765,7 @@
 			if (qz.websocket.isActive ())
 				do_print (qz_conf);
 			else
-				qz.websocket.connect (devices_config.connect).then (
+				qz.websocket.connect (devices_config.qz_connect).then (
 					function () {
 						qz_conf = qz.configs.create (devices_config.printer.name,
 													 devices_config.printer.qz_options);

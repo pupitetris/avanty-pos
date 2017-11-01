@@ -686,7 +686,7 @@
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
 
 			var dev_conf = {
-				connect: {
+				qz_connect: {
 					host: 'localhost',
 					port: { secure: [8181] },
 					usingSecure: true,

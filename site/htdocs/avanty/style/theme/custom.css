@@ -82,6 +82,8 @@
 .avanty .ui-dialog-content .icon img {
     width: 64px;
     height: 64px;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .avanty .ui-dialog-content p {
@@ -146,4 +148,9 @@
 
 .avanty .ui-tabs .ui-tabs-nav li:first-child {
 	margin-right: 5px;
+}
+
+.avanty .ui-widget-overlay {
+	background: black;
+	opacity: 0.5;
 }

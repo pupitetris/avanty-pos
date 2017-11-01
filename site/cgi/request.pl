@@ -80,7 +80,8 @@ sub request_challenge {
 	'DATE' => CHARP::sql_date_type,
 	'INTARR'  => CHARP::sql_intarr_type,
 	'STRARR'  => CHARP::sql_strarr_type,
-	'BOOLARR' => CHARP::sql_boolarr_type
+	'BOOLARR' => CHARP::sql_boolarr_type,
+	'REMOTE_ADDR' => CHARP::sql_inet_type
 );
 
 sub request_reply_file {
@@ -185,6 +186,7 @@ sub request_reply_do {
 	chop $placeholders;
 
 	$num_fparams-- if $func_params_arr[0] eq 'UID';
+	$num_fparams-- if $func_params_arr[1] eq 'REMOTE_ADDR';
 	if (scalar (@$req_params_arr) != $num_fparams) {
 		CHARP::error_send ($fcgi, { 'key' => 'CGI:NUMPARAM', 'parms' => [ $func_name, $num_fparams, scalar (@$req_params_arr) ]});
 		return;
@@ -203,6 +205,8 @@ sub request_reply_do {
 		my $val;
 		if ($type eq 'UID') {
 			$val = $req_user_id;
+		} elsif ($type eq 'REMOTE_ADDR') {
+			$val = $ip_addr;
 		} else {
 			last if scalar (@$req_params_arr) == 0;
 			$val = shift (@$req_params_arr);

@@ -955,7 +955,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[parameters that can be mapped by the CHARP RPC system.]]></comment>
-	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR"/>
+	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR,REMOTE_ADDR"/>
 </usertype>
 
 <usertype name="charp_cmd_code" configuration="enumeration">
@@ -1253,6 +1253,7 @@ BEGIN
 				  WHEN 'character varying[]' THEN 'STRARR'
 				  WHEN 'text[]'			     THEN 'STRARR'
 				  WHEN 'boolean[]'			 THEN 'BOOLARR'
+				  WHEN 'remote_addr'		 THEN 'REMOTE_ADDR'
 				  ELSE 'STR'
 			     END
 			     FROM generate_series(0, array_upper(_proargtypes, 1)) AS s(i)
@@ -2037,6 +2038,37 @@ END;]]></definition>
 END;]]></definition>
 </function>
 
+<domain name="remote_addr" not-null="false">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Used as parameter to RPs, maps at CHARP level to the address of the web client.]]></comment>
+		<type name="inet" length="0"/>
+</domain>
+
+<function name="this_terminal_info_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get credentials and general info on the terminal from where the user connects.]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="av.terminal" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[SELECT * FROM terminal WHERE ip_addr = _remote_addr]]></definition>
+</function>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>
@@ -2106,5 +2138,10 @@ END;]]></definition>
 	<object name="av.supervisor_challenge" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="av.terminal" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true"/>
 </permission>
 </dbmodel>

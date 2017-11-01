@@ -639,6 +639,7 @@
 				var barcode, length;
 				if (config.system == 'CODE128C') {
 					var chars = ele.attr ('data-chars');
+					if (!chars) chars = '';
 					if (chars.length % 2 > 0)
 						chars = '0' + chars;
 					barcode = ' ' + chars;

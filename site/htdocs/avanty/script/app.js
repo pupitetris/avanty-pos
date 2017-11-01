@@ -202,24 +202,22 @@
 		var interval_secs;
 		var display_time;
 
-		function two_digits (num) {
-			return (num < 10)?
-				'0' + num.toString ():
-				num.toString ();
-		}
-
 		function update_clock () {
 			if (!this.div || !this.div.length)
 				return;
 
 			var d = new Date ();
 
-			var new_time = two_digits (d.getHours ()) + ':' + two_digits (d.getMinutes ());
+			var new_time =
+				APP.String.padZeroes (d.getHours (), 2) + ':' +
+				APP.String.padZeroes (d.getMinutes (), 2);
 			if (this.useSeconds)
-				new_time += ':' + two_digits (d.getSeconds ());
+				new_time += ':' + APP.String.padZeroes (d.getSeconds (), 2);
 
-			var new_date = d.getFullYear () + '/' +
-				two_digits (d.getMonth() + 1) + '/' + two_digits (d.getDate ())
+			var new_date =
+				d.getFullYear () + '/' +
+				APP.String.padZeroes (d.getMonth() + 1, 2) + '/' +
+				APP.String.padZeroes (d.getDate (), 2)
 
 			if (display_time) {
 				if (display_time == new_time)
@@ -419,6 +417,20 @@
 	
 	var current_page;
 
+	var string = {
+		padZeroes: function (num, width) {
+			var num_str = num.toString ();
+
+			if (num_str.length > width)
+				throw 'Number ' + num_str + ' too wide (' + width + ').';
+			
+			var str = '';
+			for (var i = num_str.length; i < width; i++)
+				str += '0';
+			return str + num_str;
+		}
+	}
+
 	// Public functions
 	window.APP = {
 		// This is where modules are registered:
@@ -429,6 +441,7 @@
 		hourglass: new Hourglass ().init (),
 			clock: new     Clock ().init ({useSeconds: true}),
 		  history: new   History ().init (),
+		   String: string,
 
 		shellCreate: function (sections_parent) {
 			return new Shell ().init (sections_parent);

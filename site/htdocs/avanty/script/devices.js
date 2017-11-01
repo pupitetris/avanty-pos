@@ -653,7 +653,7 @@
 								return '{';
 							if (m[0] == '%') { // This works for CODE C, need for A & B at least.
 								var n = parseInt (m.substr (1), 16);
-								return (n < 10)? '0' + n: n.toString ();
+								return APP.String.padZeroes (n, 2);
 							}
 							return ' ';
 						});

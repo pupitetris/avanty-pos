@@ -25,7 +25,7 @@
 		if (className)
 			p.addClass (className);
 
-		if (contents) {
+		if (typeof contents == 'string') {
 			if (contents.indexOf ('<>') == 0)
 				p.html (contents.substr (2));
 			else
@@ -688,7 +688,7 @@
 			var dev_conf = {
 				connect: {
 					host: 'localhost',
-					port: { secure: [8181, 8282, 8383, 8484], insecure: [8182, 8283, 8384, 8485] },
+					port: { secure: [8181] },
 					usingSecure: true,
 					keepAlive: 60,
 					retries: 0,

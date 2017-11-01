@@ -553,8 +553,9 @@
 			$('title').text (APP.title + str);
 		},
 
-		later: function (fn) {
-			window.setTimeout (fn, 1);
+		later: function (fn, ms) {
+			if (!ms) ms = 1;
+			window.setTimeout (fn, ms);
 		},
 
 		eleBusy: function (ele, setBusy, append) {

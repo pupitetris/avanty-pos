@@ -65,23 +65,23 @@
 
 		shell.ui.logout.on ('click', cash_logout);
 
-		shell.ui.park_enter = $('#cash-tab-park-enter');
-		shell.ui.park_enter.on ('click', cash_park_enter);
+		shell.ui.park_entry = $('#cash-tab-park-entry');
+		shell.ui.park_entry.on ('click', cash_park_entry);
 
 		shell.ui.park_exit = $('#cash-tab-park-exit');
-		shell.ui.rent_enter = $('#cash-tab-rent-enter');
+		shell.ui.rent_entry = $('#cash-tab-rent-entry');
 		shell.ui.rent_exit = $('#cash-tab-rent-exit');
 		shell.ui.rent_search = $('#cash-tab-rent-search');
 		shell.ui.rent_create = $('#cash-tab-rent-create');
 
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
-//		ui.ticket = $('#ticket');
-		APP.later (function () { APP.mod.devices.escposTicketLayout ($('article.ticket')); });
-
-//		ui.print_button = ui.section_main.find ('button');
-//		ui.print_button.button ();
-//		ui.print_button.on ('click', function () { APP.mod.devices.print (ui.ticket); });
+		ui.tickets = {};
+		ui.tickets.entry = $('#cash-ticket-entry');
+		ui.tickets.entry_time = ui.tickets.entry.find ('time');
+		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
+		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
+		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.tickets.entry); }, 100);
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -270,11 +270,27 @@
 		barcode += barcode_get_type_and_length (entry_time, exit_time);
 
 		barcode += barcode_calc_checksum (barcode);
+
+		if (barcode.length % 2 > 0)
+			barcode += '0';
+		
 		return barcode;
 	}
 
-	function cash_park_enter () {
-		
+	function cash_park_entry () {
+		var ticket = {
+			terminalId: APP.terminalId,
+			entryDate: new Date ()
+		}
+
+		var barcode = barcode_get (ticket);
+
+		ui.tickets.entry_time.text (ticket.entryDate.toLocaleString ());
+		ui.tickets.entry_terminal.text (APP.terminalName);
+		ui.tickets.entry_barcode.attr ('data-chars', barcode);
+
+		APP.mod.devices.escposTicketLayout (ui.tickets.entry);
+		APP.mod.devices.print (ui.tickets.entry);
 	}
 
 	function cash_main () {

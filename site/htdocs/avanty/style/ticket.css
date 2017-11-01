@@ -26,7 +26,20 @@
 	text-align: center;
 }
 
+.ticket footer {
+	white-space: pre;
+	text-align: center;
+
+	/* font-size 8 triggers font (B) command: */
+	font-size: 8px;
+}
+
 .ticket address {
+	white-space: pre;	
+
+	/* font-size 8 triggers font (B) command: */
+	font-size: 8px;
+
 	/* Remove user agent defaults: */
 	font-style: unset;
 }
@@ -70,9 +83,9 @@
 	font-style: italic;
 }
 
-.ticket h1 {
+.ticket h1, .ticket h2 {
 	/* Remove user agent defaults: */
-	margin: 0;
+	margin: unset;
 	font-size: unset;
 	font-weight: unset;
 }
@@ -95,6 +108,14 @@
 	/* If element is now double the size, make it half as wide. Adjust according to scaleX. */
 	/* Useful in conjunction with text-align: right, otherwise irrelevant. */
 	width: 50%; 
+}
+
+.ticket h2, .ticket .wide {
+	transform: scaleX(2);
+}
+
+.ticket h2 {
+	text-transform: uppercase;
 }
 
 /* hr produces a cut command, optionally partial */

@@ -66,6 +66,8 @@
 		shell.ui.logout.on ('click', cash_logout);
 
 		shell.ui.park_enter = $('#cash-tab-park-enter');
+		shell.ui.park_enter.on ('click', cash_park_enter);
+
 		shell.ui.park_exit = $('#cash-tab-park-exit');
 		shell.ui.rent_enter = $('#cash-tab-rent-enter');
 		shell.ui.rent_exit = $('#cash-tab-rent-exit');
@@ -75,7 +77,7 @@
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
 //		ui.ticket = $('#ticket');
-//		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.ticket); });
+		APP.later (function () { APP.mod.devices.escposTicketLayout ($('article.ticket')); });
 
 //		ui.print_button = ui.section_main.find ('button');
 //		ui.print_button.button ();
@@ -172,6 +174,107 @@
 			cash_main ();
 		} else
 			APP.history.back ();
+	}
+
+	// entry and exit in seconds since epoch.
+	function barcode_get_type_and_length (entry, exit) {
+		if (!exit) return '0'; // No exit yet; it's an entry ticket.
+
+		var exit_delta = exit - entry;
+		if (exit_delta < 0)
+			throw 'ticket exitDate is smaller than entryDate.';
+
+		if (exit_delta < 1000)
+			return '3' + APP.String.padZeroes (exit_delta, 3);
+
+		if (exit_delta < 10000)
+			return '4' + APP.String.padZeroes (exit_delta, 4);
+
+		if (exit_delta < 100000)
+			return '5' + APP.String.padZeroes (exit_delta, 5);
+
+		// Too many seconds, go for minutes:
+		exit_delta = Math.floor (exit_delta / 60);
+		if (exit_delta < 100000)
+			return '8' + APP.String.padZeroes (exit_delta, 5);
+
+		// Too many minutes, go for hours:
+		exit_delta = Math.floor (exit_delta / 60);
+		// This may fail, but it would be a +11 year stay:
+		return '9' + APP.String.padZeroes (exit_delta, 5);
+	}
+
+	// partial barcode with the checksum missing.
+	function barcode_collect_bytes (barcode, count) {
+		var advance = Math.floor (barcode.length / 2) - 1;
+		var len = barcode.length;
+		var pos = advance;
+		var need = 1;
+		var got = 0;
+		var num = 0;
+		var bytes = '';
+		while (bytes.length < count) {
+			var digit = parseInt(barcode[pos]);
+			if (num < 10 || num * 10 + digit < 256) {
+				num = num * 10 + digit;
+				pos = (pos + advance) % len;
+			}
+
+			got ++;
+			if (got > need) {
+				bytes += String.fromCharCode (num);
+				num = 0;
+				got = 0;
+				need = (need + 1) % 3; // 2^8-1 has 3 digits.
+			}
+		}
+		return bytes;
+	}
+
+	// partial barcode with the checksum missing.
+	function barcode_calc_checksum (barcode) {
+		// First, collect bytes for the salt from barcode, trying to get a nice variety of values.
+		// bcrypt requires 22 base64 characters for the salt. That's 16 bytes:
+		var bytes = barcode_collect_bytes (barcode, 16);
+
+		// Convert to Base64 and trim trailing padding chars (=). For 16 bytes, that's always two:
+		var base64 = btoa (bytes).substr (0, 22);
+
+		// OK, we got our proper salt, configured for 2^8 bcrypt iterations:
+		var salt = '$2a$08$' + base64;
+
+		// Now encrypt our secret with the salt.
+		var crypt = dcodeIO.bcrypt.hashSync ('secret', salt);
+
+		// Get hash part and fix non-conforming use of . for +
+		var hash64 = crypt.substr (30).replace (/\./g, '+');
+
+		// Decode the base64 hash and get the 10th byte. That's our number.
+		var c = atob (hash64).charCodeAt (10);
+
+		return APP.String.padZeroes (c, 3);
+	}
+
+	function barcode_get (ticket) {
+		// Field 1: terminal ID
+		var barcode = APP.String.padZeroes (ticket.terminalId, 2);
+
+		// Field 2: timestamp
+		var entry_time = Math.floor (ticket.entryDate.getTime () / 1000);
+
+		// That magic number is secs since epoch for 2017-01-01 00:00:00-00:00
+		barcode += APP.String.padZeroes (entry_time - 1483228800, 9); 
+
+		// Fields 3 & 4: ticket type and stay length.
+		var exit_time = (!ticket.exitDate)? 0: Math.floor (ticket.exitDate.getTime () / 1000);
+		barcode += barcode_get_type_and_length (entry_time, exit_time);
+
+		barcode += barcode_calc_checksum (barcode);
+		return barcode;
+	}
+
+	function cash_park_enter () {
+		
 	}
 
 	function cash_main () {

@@ -700,7 +700,7 @@
 					basedir: 'C:/avanty/site/htdocs/avanty/',
 					qz_type: 'escp',
 					qz_options: {
-						encoding: 'CP437'
+						encoding: 'cp437'
 					},
 					cutter_distance: 48, // 1/96ths of an inch
 					defaults: {

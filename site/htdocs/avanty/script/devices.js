@@ -608,28 +608,6 @@
 		ESCPOS: escpos_print
 	};
 
-	// Dump data in a nice format so the stream can be analized easily.
-	function escpos_debug_data (data) {
-		var str = '';
-		data.map (function (d) { str += d.toString (); });
-
-		var map = {
-			'%0A': '↓\n',
-			'%0D': '←\n', //↵
-			'%1B': '[ESC]',
-			'%1D': '[GS]',
-			'%20': '·',
-			'%23': '#',
-			'%2C': ',',
-			'%3A': ':',
-			'%40': '@',
-			'%5B': '[',
-			'%5D': ']'
-		};
-			
-		return map_replace (encodeURIComponent (str), map);
-	}
-
 	function escpos_ticket_layout (ticket) {
 		ticket.find ('figure').each (
 			function (i, e) {
@@ -677,6 +655,28 @@
 				ele.addClass ('processed');
 				ele.css ('width', (ele.width () / 2) + 'px');
 			});
+	}
+
+	// Dump data in a nice format so the stream can be analized easily.
+	function escpos_debug_data (data) {
+		var str = '';
+		data.map (function (d) { str += d.toString (); });
+
+		var map = {
+			'%0A': '↓\n',
+			'%0D': '←\n', //↵
+			'%1B': '[ESC]',
+			'%1D': '[GS]',
+			'%20': '·',
+			'%23': '#',
+			'%2C': ',',
+			'%3A': ':',
+			'%40': '@',
+			'%5B': '[',
+			'%5D': ']'
+		};
+			
+		return map_replace (encodeURIComponent (str), map);
 	}
 
 	var qz_private_key;
@@ -728,6 +728,14 @@
 		});
 	}
 
+	function qz_str_encode_to_raw_hex (printer, str) {
+		var data = '';
+		var bytes = iconv.encode (str, printer.qz_options.encoding);
+		for (var b of bytes)
+			data += ((b < 16)? '0': '') + b.toString (16);
+		return { type: 'raw', format: 'hex', data: data };
+	}
+
 	var qz_conf;
 
 	var mod = {
@@ -758,8 +766,12 @@
 
 			function do_print (conf) {
 				var data = print_methods[devices_config.printer.type] (devices_config.printer, element);
-				qz.print (conf, data)
-					.catch (qz_error_handler);
+
+				for (var i = 0; i < data.length; i++)
+					if (typeof data[i] == 'string')
+						data[i] = qz_str_encode_to_raw_hex (devices_config.printer, data[i]);
+
+				qz.print (conf, data).catch (qz_error_handler);
 			}
 
 			if (qz.websocket.isActive ())

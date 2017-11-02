@@ -704,9 +704,9 @@
 					},
 					cutter_distance: 48, // 1/96ths of an inch
 					defaults: {
-						motion: { x: 180, y: 180 },
-						standard: { line_spacing: 10 },
-						page: { line_spacing: 10 }
+						  motion: { x: 180, y: 180 },
+						standard: { line_spacing: 30 }, // 1/6 in
+						    page: { line_spacing: 30 }  // 1/6 in
 					}
 				}
 			};

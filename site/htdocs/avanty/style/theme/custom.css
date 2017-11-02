@@ -157,6 +157,12 @@
 	padding: 0.5em 0.5em;
 }
 
+.avanty .ui-tabs .ui-tabs-nav li a img {
+	width: 32px;
+	height: 32px;
+	vertical-align: top;
+}
+
 .avanty .ui-widget-overlay {
 	background: black;
 	opacity: 0.5;

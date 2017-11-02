@@ -239,6 +239,8 @@ form label.error {
 	border-width: 0;
 	left: 25%;
 	width: 50%;
+    user-select: none;
+    -webkit-user-select: none;
 }
 
 .shell-menu > div {
@@ -279,4 +281,11 @@ button.shell-tool img {
 	margin-top: 1em;
 	margin-bottom: 0.75em;
 	border-bottom: 1px solid lightgray;
+}
+
+.shell .username {
+	display: inline-block;
+	width: 40%; /* This works for 3-tab menu. */
+	overflow: hidden;
+	vertical-align: bottom;
 }

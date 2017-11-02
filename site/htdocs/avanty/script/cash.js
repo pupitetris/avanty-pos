@@ -74,6 +74,8 @@
 		shell.ui.rent_search = $('#cash-tab-rent-search');
 		shell.ui.rent_create = $('#cash-tab-rent-create');
 
+		shell.ui.username = shell.ui.shell.find ('.username');
+
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
 		ui.tickets = {};
@@ -323,6 +325,8 @@
 		reset: function () {
 			APP.hourglass.enable ();
 			APP.switchPage (MOD_NAME);
+			var cred = APP.charp.credentialsGet ();
+			shell.ui.username.text (cred.login);
 			cash_main ();
 		}
 	};

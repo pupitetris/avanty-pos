@@ -1,0 +1,16 @@
+#cash-sections .shell-menu {
+	width: 60%;
+	left: 20%;
+}
+
+#cash-sections .shell-menu li {
+	width: calc(100% / 3 - 5px);
+}
+
+#cash-sections .shell-menu li:first-child {
+	width: calc(100% / 3);
+}
+
+#cash-sections .shell .username {
+	width: 40%;
+}

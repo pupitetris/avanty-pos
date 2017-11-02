@@ -163,6 +163,10 @@
 	vertical-align: top;
 }
 
+.avanty .ui-tabs .ui-tabs-nav li.ui-tabs-active a img {
+	opacity: 0.5;
+}
+
 .avanty .ui-widget-overlay {
 	background: black;
 	opacity: 0.5;

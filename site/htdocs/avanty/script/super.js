@@ -293,12 +293,13 @@
 
 		APP.charp.request ('user_create', [login, pass, 'supervisor'],
 						   {
-							   success: super_user_create_super_success,
+							   success: function () { super_user_create_super_success (login); },
 							   error: function () { ui.newsuper_submit.button ('enable'); return true; }
 						   });
 	}
 
-	function super_user_create_super_success () {
+	function super_user_create_super_success (login) {
+		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
 		if (super_is_first)
 			APP.loadModule ('login');
 		else

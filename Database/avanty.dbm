@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,585" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -56,7 +56,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type cashier.]]></comment>
-	<position x="640" y="1340"/>
+	<position x="640" y="1300"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -84,7 +84,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type supervisor.]]></comment>
-	<position x="640" y="1400"/>
+	<position x="640" y="1360"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -154,7 +154,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[existence table to report if a user is of type maintenance.]]></comment>
-	<position x="640" y="1460"/>
+	<position x="640" y="1420"/>
 
 	<customidxs object-type="column">
 		<object name="user_id" index="0"/>
@@ -199,7 +199,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
-	<position x="640" y="1200"/>
+	<position x="600" y="1140"/>
 	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[when the activity occurred]]></comment>
@@ -245,7 +245,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[We are keeping a registry of all challenges, for security audits.]]></comment>
-	<position x="980" y="1460"/>
+	<position x="1080" y="1460"/>
 	<column name="string" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[A random-generated string that the supervisor must give to support.]]></comment>
@@ -762,11 +762,11 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 identifier="true"
 />
 
-<table name="shift">
+<table name="cashier_shift">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
-	<position x="580" y="860"/>
+	<position x="1080" y="1120"/>
 	<column name="last_event" not-null="true">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[TS of last interactive event, to avoid insertion of events with arbitrary dates]]></comment>
@@ -778,22 +778,11 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="account_fk" index="1"/>
-		<object name="shift_pk" index="0"/>
-		<object name="terminal_fk" index="2"/>
+		<object name="cashier_shift_pk" index="0"/>
+		<object name="terminal_fk" index="1"/>
+		<object name="user_cashier_fk" index="2"/>
 	</customidxs>
 </table>
-
-<relationship name="terminal_account_has_one_account" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.account"
-	 dst-table="av.shift"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
 
 <relationship name="terminal_account_has_one_terminal" type="rel11"
 	 src-col-pattern="{sc}"
@@ -801,7 +790,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#aa0000"
 	 src-table="av.terminal"
-	 dst-table="av.shift"
+	 dst-table="av.cashier_shift"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
@@ -811,7 +800,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<role name="postgres"/>
 	<comment><![CDATA[RPC requests being currently handled by CHARP (Challenge-Authenticated Remote Procedures)]]></comment>
 	<appended-sql><![CDATA[GRANT USAGE ON SEQUENCE request_request_id_seq TO avanty;]]></appended-sql>
-	<position x="600" y="1620"/>
+	<position x="600" y="1580"/>
 	<column name="request_id" not-null="true">
 		<type name="serial" length="0"/>
 		<comment><![CDATA[id of this request currently being processed. will be copied to request_log as soon as its life has ended.]]></comment>
@@ -869,7 +858,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[CHARP requests log, for auditing]]></comment>
-	<position x="540" y="1760"/>
+	<position x="580" y="1720"/>
 	<column name="request_log_id" not-null="true">
 		<type name="integer" length="0"/>
 		<comment><![CDATA[this is copied from request table but can't be FK because it will be deleted from request]]></comment>
@@ -2086,7 +2075,7 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[SELECT terminal_id, term_type, name, qz_private_key, qz_certificate, login
 	FROM terminal 
-		NATURAL LEFT JOIN shift
+		NATURAL LEFT JOIN cashier_shift
 		NATURAL LEFT JOIN account
 	WHERE ip_addr = _remote_addr;]]></definition>
 </function>
@@ -2105,6 +2094,17 @@ END;]]></definition>
 			<column name="type"/>
 		</idxelement>
 </index>
+
+<relationship name="cashier_shift_has_one_user_cashier" type="rel11"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.user_cashier"
+	 dst-table="av.cashier_shift"
+	 src-required="true" dst-required="false"
+	 identifier="true"
+/>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
@@ -2187,7 +2187,7 @@ END;]]></definition>
 	<privileges insert="true"/>
 </permission>
 <permission>
-	<object name="av.shift" type="table"/>
+	<object name="av.cashier_shift" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>

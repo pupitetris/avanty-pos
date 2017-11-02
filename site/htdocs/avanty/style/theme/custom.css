@@ -62,7 +62,7 @@
 	-webkit-border-bottom-right-radius: 0;	*/
 }
 
-.avanty .ui-dialog-titlebar-close {
+.avanty .ui-button.ui-dialog-titlebar-close {
 	height: 2em;
 	width: 2em;
 	top: calc(50% - 17px);

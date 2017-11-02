@@ -117,7 +117,7 @@
 		ui.tickets.entry_time = ui.tickets.entry.find ('time');
 		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
 		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
-		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.tickets.entry); }, 100);
+		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.tickets.entry); });
 
 		mod.loaded = true;
 		mod.onLoad ();

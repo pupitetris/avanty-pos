@@ -577,7 +577,7 @@
 		},
 
 		later: function (fn, ms) {
-			if (!ms) ms = 1;
+			if (!ms) ms = 100;
 			window.setTimeout (fn, ms);
 		},
 

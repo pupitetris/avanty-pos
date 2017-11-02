@@ -460,9 +460,11 @@
 				toast.fadeOut (250);
 			}
 
-			var label = toast.find ('span span');
+			var cont = toast.children ('span');
+			cont.on ('click', toast_hide);
+
+			var label = cont.children ('span');
 			label.html (msg);
-			label.on ('click', toast_hide);
 
 			toast.fadeIn (100);
 

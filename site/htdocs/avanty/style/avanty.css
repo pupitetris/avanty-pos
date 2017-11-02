@@ -285,7 +285,7 @@ button.shell-tool img {
 
 .shell .username {
 	display: inline-block;
-	width: 40%; /* This works for 3-tab menu. */
+	width: 85px; /* This works for 3-tab menu. */
 	overflow: hidden;
 	vertical-align: bottom;
 }

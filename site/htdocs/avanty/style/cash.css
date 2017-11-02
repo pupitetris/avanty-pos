@@ -10,7 +10,3 @@
 #cash-sections .shell-menu li:first-child {
 	width: calc(100% / 3);
 }
-
-#cash-sections .shell .username {
-	width: 40%;
-}

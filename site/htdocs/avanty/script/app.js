@@ -73,14 +73,27 @@
 
 			var menu = ui.shell.find ('.shell-menu');
 			if (menu.length > 0) {
+				var that = this;
+
 				ui.menu = menu;
 				ui.menu.tabs (
 					{
 						active: false,
 						collapsible: true,
 						show: { effect: 'drop', direction: 'up', duration: 200 },
-						hide: { effect: 'drop', direction: 'up', duration: 200 }
+						hide: { effect: 'drop', direction: 'up', duration: 200 },
+						activate: function (evt, ui) {
+							that._menu_collapsed = (ui.newTab.length == 0);
+						}
 					});
+
+				$(window).on ('click.shell_menu',
+							  function (evt) {
+								  if (that.ui.menu.is (':hidden'))
+									  return;
+								  if ($(evt.target).closest (that.ui.menu).length < 1)
+									  that.menuCollapse (true);
+							  });
 			}
 		}
 
@@ -88,6 +101,7 @@
 			init: function (sections_parent) {
 				this.ui = {};
 				this._menu_selected = 0;
+				this._menu_collapsed = true;
 				layout_init.call (this, sections_parent);
 				return this;
 			},
@@ -105,6 +119,11 @@
 			menuCollapse: function (collapse) {
 				if (!this.ui.menu)
 					return;
+
+				if (this._menu_collapsed == collapse)
+					return;
+
+				this._menu_collapsed = collapse;
 				
 				if (collapse === true)
 					this._menu_selected = this.ui.menu.tabs ('option', 'active');
@@ -442,7 +461,8 @@
 		hourglass: new Hourglass ().init (),
 			clock: new     Clock ().init ({useSeconds: true}),
 		  history: new   History ().init (),
-		   String: string,
+		 terminal: {},     // Terminal info. See login_configure_terminal.
+		   String: string, // Our string-related utility functions.
 
 		shellCreate: function (sections_parent) {
 			return new Shell ().init (sections_parent);
@@ -537,7 +557,7 @@
 
 			var page_ele = $('#' + page);
 			if (page_ele.length == 0)
-				throw ('Page element #' + page + ' not found.');
+				throw 'Page element #' + page + ' not found.';
 
 			$('#cont > .page').hide ();
 			page_ele.show ();

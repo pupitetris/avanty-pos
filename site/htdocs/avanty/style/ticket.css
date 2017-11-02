@@ -1,4 +1,8 @@
 .ticket {
+	/* Hide tickets from the user. */
+	position: absolute;
+	left: calc(100vw + 50px);
+	
 	/* At 11px font-size, allows for 42 chars per line on 80mm paper (1px ~ 1/81in) */
 	width: 256px;
 	font-family: monospace;

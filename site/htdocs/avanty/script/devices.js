@@ -184,7 +184,7 @@
 	}
 
 	function escpos_print_text_node (state, node) {
-		var text = escpos_print_text (state, node[0].textContent);
+		var text = escpos_print_text (state, node.get (0).textContent);
 
 		switch (state.css.white_space) {
 		case 'normal':
@@ -206,14 +206,14 @@
 	}
 
 	function element_get_pseudo_content (element, pseudo) {
-		return window.getComputedStyle (element[0], pseudo).getPropertyValue ('content');
+		return window.getComputedStyle (element.get (0), pseudo).getPropertyValue ('content');
 	}
 
 	function node_name (node) {
-		if (!node[0])
+		if (!node.get (0))
 			return "";
 
-		return node[0].nodeName.toUpperCase ();
+		return node.get (0).nodeName.toUpperCase ();
 	}
 
 	function node_is_inline_and_not_br (node) {
@@ -223,26 +223,26 @@
 	}
 
 	function node_is_inline (node) {
-		if (!node[0])
+		if (!node.get (0))
 			return false;
 
-		if (node[0].nodeType == Node.TEXT_NODE)
+		if (node.get (0).nodeType == Node.TEXT_NODE)
 			return true;
 
-		if (node[0].nodeType != Node.ELEMENT_NODE)
+		if (node.get (0).nodeType != Node.ELEMENT_NODE)
 			return false;
 
 		return node.css ('display').indexOf ('inline') == 0;
 	}
 
 	function node_is_visible (node) {
-		if (!node[0])
+		if (!node.get (0))
 			return false;
 
 		var type = node_type (node);
 
 		if (type == Node.TEXT_NODE)
-			return node[0].textContent.match (/[^\s]/) && node_is_visible (node.parent ());
+			return node.get (0).textContent.match (/[^\s]/) && node_is_visible (node.parent ());
 
 		if (type != Node.ELEMENT_NODE) // comment or sth else.
 			return false;
@@ -273,20 +273,20 @@
 	}
 
 	function node_type (node) {
-		if (!node[0])
+		if (!node.get (0))
 			return undefined;
-		return node[0].nodeType;
+		return node.get (0).nodeType;
 	}
 
 	function node_prev (node) {
 		if (node_type (node) == Node.ELEMENT_NODE)
-			return $(node[0].previousSibling);
+			return $(node.get (0).previousSibling);
 		return node.prev ();
 	}
 
 	function node_next (node) {
 		if (node_type (node) == Node.ELEMENT_NODE)
-			return $(node[0].nextSibling);
+			return $(node.get (0).nextSibling);
 		return node.next ();
 	}
 

@@ -9,6 +9,31 @@
 	var ui = {};
 	var shell;
 
+	function obj_search (obj, path) {
+		if (!path)
+			return obj;
+
+		var idx;
+		while ((idx = path.indexOf ('.')) >= 0) {
+			var key = path.substr (0, idx);
+			if (!obj.hasOwnProperty (key)) // search failed
+				return null;
+			obj = obj[key];
+			path = path.substr (idx + 1);
+		}
+		return obj[path];
+	}
+
+	function cash_disable_buttons (ids) {
+		var prev_state = {};
+		for (var id of ids) {
+			var ele = obj_search (ui, id);
+			prev_state[id] = ele.is (':disabled');
+			ele.button ('disabled');
+		}
+		return prev_state;
+	}
+
 	function pass_layout_init (name, validator_options) {
 		var section = ui['section_' + name] = $('#cash-' + name);
 		
@@ -60,8 +85,12 @@
 
 		ui.sections_parent = $('#cash-sections');
 		ui.section_main = $('#cash-main');
+		ui.section_main.find ('button').button ();
 
-		shell = APP.shellCreate (ui.sections_parent);
+		ui.main_noshift = $('#cash-main-noshift');
+		ui.main_noshift.on ('click', cash_shift_begin);
+
+		ui.shell = shell = APP.shellCreate (ui.sections_parent);
 
 		shell.ui.logout.on ('click', cash_logout);
 
@@ -73,6 +102,11 @@
 		shell.ui.rent_exit = $('#cash-tab-rent-exit');
 		shell.ui.rent_search = $('#cash-tab-rent-search');
 		shell.ui.rent_create = $('#cash-tab-rent-create');
+
+		shell.ui.user_shift_begin = $('#cash-tab-user-shift-begin');
+		shell.ui.user_shift_begin.on ('click', cash_shift_begin);
+
+		shell.ui.user_shift_end = $('#cash-tab-user-shift-end');
 
 		shell.ui.username = shell.ui.shell.find ('.username');
 
@@ -134,6 +168,8 @@
 			APP.switchSection (ui.section_chpass);
 		} else
 			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
+
+		APP.later (function () { ui.chpass_orig_pass.focus (); });
 	}
 
 	function cash_chpass_submit (form, evt) {
@@ -169,6 +205,7 @@
 	}
 
 	function cash_chpass_success () {
+		APP.toast ('Contraseña cambiada con éxito.');
 		if (APP.mod.login.is_first) {
 			// End of first login exception. Restore and go back to main screen.
 			APP.mod.login.is_first = false;
@@ -305,8 +342,17 @@
 
 		shell.show (true);
 		shell.backShow ();
+
+		if (!APP.terminal.shiftUser) {
+			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
+			ui.main_noshift.show ();
+		}
+
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
+	}
+
+	function cash_shift_begin () {
 	}
 
 	var mod = {

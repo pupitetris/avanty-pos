@@ -8,19 +8,26 @@
 		<li><a href="#cash-tab-user"><span><img src="img/symbolic/user.svg" /><span class="username"></span></span></a></li>
 	  </ul>
 	  <div id="cash-tab-park">
-		<button id="cash-tab-park-entry">Entrada</button>
-		<button id="cash-tab-park-exit">Salida</button>
+		<button class="requires-shift" id="cash-tab-park-entry">Entrada</button>
+		<button class="requires-shift" id="cash-tab-park-exit">Salida</button>
 	  </div>
 	  <div id="cash-tab-rent">
-		<button id="cash-tab-rent-entry">Entrada</button>
-		<button id="cash-tab-rent-exit">Salida</button>
+		<button class="requires-shift" id="cash-tab-rent-entry">Entrada</button>
+		<button class="requires-shift" id="cash-tab-rent-exit">Salida</button>
+<!--
 		<div>
 		  <h4>Administrar pensiones</h4>
-		  <button id="cash-tab-rent-create">Crear</button>
-		  <button id="cash-tab-rent-search">Buscar</button>
+		  <button class="requires-shift" id="cash-tab-rent-create">Crear</button>
+		  <button class="requires-shift" id="cash-tab-rent-search">Buscar</button>
 		</div>
+-->
 	  </div>
 	  <div id="cash-tab-user">
+		<div>
+		  <h4>Turno</h4>
+		  <button id="cash-tab-user-shift-begin">Iniciar</button>
+		  <button class="requires-shift" id="cash-tab-user-shift-end">Finalizar</button>
+		</div>
 	  </div>
 	</div>
 	<button class="shell-tool shell-logout button-icon"><img src="img/icons/logout.svg" /></button>
@@ -52,6 +59,11 @@
 	</form>
   </div>
   <div class="section" id="cash-main">
+	<div id="cash-main-noshift">
+	  <img src="img/icons/warning.svg" />Advertencia: No has dado inicio a tu turno.
+	  <button>Iniciar turno</button>
+	</div>
+  </div>
   <div class="ticket-cont">
 	<article class="ticket" id="cash-ticket-entry">
 	  <header>
@@ -95,6 +107,5 @@ www.avanty.com.mx/facturacion</footer>
 	  <br />
 	  <hr />
 	</article>
-  </div>
   </div>
 </div>

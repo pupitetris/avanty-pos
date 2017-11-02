@@ -10,3 +10,11 @@
 #cash-sections .shell-menu li:first-child {
 	width: calc(100% / 3);
 }
+
+#cash-sections .shell .username {
+	display: inline-block;
+	width: calc(100% - 31px);
+	overflow: hidden;
+	text-align: center;
+	line-height: 16px;
+}

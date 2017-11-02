@@ -76,9 +76,10 @@
 				ui.menu = menu;
 				ui.menu.tabs (
 					{
+						active: false,
 						collapsible: true,
-						show: { effect: 'blind', duration: 125 },
-						hide: { effect: 'blind', duration: 125 }
+						show: { effect: 'drop', direction: 'up', duration: 200 },
+						hide: { effect: 'drop', direction: 'up', duration: 200 }
 					});
 			}
 		}

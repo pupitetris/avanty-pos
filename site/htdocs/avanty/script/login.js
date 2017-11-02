@@ -109,8 +109,10 @@
 	}
 
 	function login_configure_terminal (info) {
-		APP.terminalId = info.terminal_id;
-		APP.terminalName = info.name;
+		APP.terminal.id = info.terminal_id;
+		APP.terminal.name = info.name;
+		APP.terminal.shiftUser = info.shift_user;
+
 		APP.mod.devices.setQzCredentials (info.qz_private_key, info.qz_certificate);
 	}
 

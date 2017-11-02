@@ -760,7 +760,7 @@
 		// Dynamic layout and css adjustments to make tickets look good on screen.
 		escposTicketLayout: escpos_ticket_layout,
 
-		print: function (element) {
+		print: function (element, cb) {
 			if (!devices_config.printer)
 				throw 'devices: no printer configured';
 
@@ -771,7 +771,7 @@
 					if (typeof data[i] == 'string')
 						data[i] = qz_str_encode_to_raw_hex (devices_config.printer, data[i]);
 
-				qz.print (conf, data).catch (qz_error_handler);
+				qz.print (conf, data).catch (qz_error_handler).then (cb);
 			}
 
 			if (qz.websocket.isActive ())

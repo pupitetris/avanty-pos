@@ -74,7 +74,11 @@
 
 		APP.charp.credentialsSet (null, null, null);
 
-		APP.later (function () { ui.enter_username.focus (); });
+		APP.later (function () {
+			if (ui.section_enter.is (':hidden')) return true;
+			ui.enter_username.focus ();
+		});
+
 		ui.enter_username.val ('');
 		ui.enter_pass.val ('');
 

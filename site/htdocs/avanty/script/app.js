@@ -577,8 +577,13 @@
 		},
 
 		later: function (fn, ms) {
-			if (!ms) ms = 100;
-			window.setTimeout (fn, ms);
+			if (!ms) ms = 50;
+
+			function call_later () {
+				if (fn () === true) // try again.
+					window.setTimeout (call_later, ms);
+			}
+			window.setTimeout (call_later, ms);
 		},
 
 		eleBusy: function (ele, setBusy, append) {

@@ -169,7 +169,10 @@
 		} else
 			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
 
-		APP.later (function () { ui.chpass_orig_pass.focus (); });
+		APP.later (function () {
+			if (ui.section_chpass.is (':hidden')) return true;
+			ui.chpass_orig_pass.focus ();
+		});
 	}
 
 	function cash_chpass_submit (form, evt) {

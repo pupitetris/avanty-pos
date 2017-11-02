@@ -319,7 +319,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 <usertype name="ticket_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="entry,exit,rent"/>
+	<enumeration values="entry,exit,rent,deposit,withdrawal"/>
 </usertype>
 
 <table name="ticket">
@@ -337,12 +337,9 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<column name="type" not-null="true">
 		<type name="av.ticket_type" length="0"/>
 	</column>
-	<column name="expiration_mins" not-null="true">
-		<type name="smallint" length="0"/>
-	</column>
-	<column name="signature" not-null="true">
-		<type name="varchar" length="0"/>
-		<comment><![CDATA[hash that validates the information contained in the ticket]]></comment>
+	<column name="detail">
+		<type name="jsonb" length="0"/>
+		<comment><![CDATA[Documenting data with details printed on the ticket.]]></comment>
 	</column>
 	<constraint name="ticket_pk" type="pk-constr" table="av.ticket">
 		<columns names="ticket_id" ref-type="src-columns"/>
@@ -406,7 +403,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<enumeration values="tender,credit_card,debit_card"/>
 </usertype>
 
-<table name="payment">
+<table name="movement">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<position x="1400" y="320"/>
@@ -417,7 +414,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 		<type name="av.payment_type" length="0"/>
 	</column>
 	<column name="amount" not-null="true">
-		<type name="smallint" length="0"/>
+		<type name="integer" length="0"/>
 		<comment><![CDATA[in cents]]></comment>
 	</column>
 	<column name="change">
@@ -435,7 +432,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="payment_pk" index="1"/>
+		<object name="movement_pk" index="1"/>
 		<object name="rate_fk" index="0"/>
 		<object name="ticket_fk" index="2"/>
 	</customidxs>
@@ -447,7 +444,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#aa0000"
 	 src-table="av.rate"
-	 dst-table="av.payment"
+	 dst-table="av.movement"
 	 src-required="true" dst-required="false"/>
 
 <usertype name="tender_type" configuration="enumeration">
@@ -500,7 +497,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="payment_fk" index="2"/>
+		<object name="movement_fk" index="2"/>
 		<object name="tender_exchange_pk" index="0"/>
 		<object name="tender_fk" index="1"/>
 	</customidxs>
@@ -697,7 +694,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="payment_fk" index="3"/>
+		<object name="movement_fk" index="3"/>
 		<object name="rate_fk" index="2"/>
 		<object name="rent_fk" index="1"/>
 		<object name="rent_operation_uq" index="4"/>
@@ -770,6 +767,10 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
 	<position x="580" y="860"/>
+	<column name="last_event" not-null="true">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[TS of last interactive event, to avoid insertion of events with arbitrary dates]]></comment>
+	</column>
 
 	<customidxs object-type="column">
 		<object name="terminal_id" index="0"/>
@@ -971,7 +972,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
 	 src-table="av.ticket"
-	 dst-table="av.payment"
+	 dst-table="av.movement"
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
@@ -981,7 +982,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.payment"
+	 src-table="av.movement"
 	 dst-table="av.tender_exchange"
 	 src-required="true" dst-required="false"
 	 identifier="true"
@@ -992,7 +993,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
 	 src-fk-pattern="{st}_fk"
 	 custom-color="#83af1f"
-	 src-table="av.payment"
+	 src-table="av.movement"
 	 dst-table="av.rent_operation"
 	 src-required="false" dst-required="false"/>
 
@@ -2069,6 +2070,21 @@ END;]]></definition>
 	<definition><![CDATA[SELECT * FROM terminal WHERE ip_addr = _remote_addr]]></definition>
 </function>
 
+<index name="ticket_uq" table="av.ticket"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[There cannot be two tickets of the same type printed by the same terminal at the same time.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="terminal_id"/>
+		</idxelement>
+		<idxelement use-sorting="true" nulls-first="false" asc-order="true">
+			<column name="&quot;timestamp&quot;"/>
+		</idxelement>
+		<idxelement use-sorting="true" nulls-first="false" asc-order="true">
+			<column name="type"/>
+		</idxelement>
+</index>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>
@@ -2143,5 +2159,15 @@ END;]]></definition>
 	<object name="av.terminal" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true"/>
+</permission>
+<permission>
+	<object name="av.ticket" type="table"/>
+	<roles names="avanty"/>
+	<privileges insert="true"/>
+</permission>
+<permission>
+	<object name="av.terminal_account" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>
 </dbmodel>

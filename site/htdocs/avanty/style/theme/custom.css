@@ -154,6 +154,9 @@
 }
 
 .avanty .ui-tabs .ui-tabs-nav li a {
+	display: inline-block;
+	box-sizing: border-box;
+	width: 100%;
 	padding: 0.5em 0.5em;
 }
 

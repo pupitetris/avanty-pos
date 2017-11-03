@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,592" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -199,7 +199,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[logs login/logout actions from the users for the user report for the supervisor]]></comment>
-	<position x="600" y="1140"/>
+	<position x="600" y="1180"/>
 	<column name="timestamp" not-null="true" default-value="CURRENT_TIMESTAMP">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[when the activity occurred]]></comment>
@@ -343,9 +343,11 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 
 	<customidxs object-type="column">
 		<object name="terminal_id" index="1"/>
+		<object name="user_id" index="2"/>
 	</customidxs>
 
 	<customidxs object-type="constraint">
+		<object name="account_fk" index="2"/>
 		<object name="terminal_fk" index="1"/>
 	</customidxs>
 </table>
@@ -414,7 +416,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 		<comment><![CDATA[in cents]]></comment>
 	</column>
 	<column name="change">
-		<type name="smallint" length="0"/>
+		<type name="integer" length="0"/>
 		<comment><![CDATA[in cents. May be null if does not apply for payment method.]]></comment>
 	</column>
 	<column name="reference">
@@ -765,7 +767,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<position x="1080" y="1120"/>
 	<column name="last_event" not-null="true">
 		<type name="av.ts" length="0"/>
-		<comment><![CDATA[TS of last interactive event, to avoid insertion of events with arbitrary dates]]></comment>
+		<comment><![CDATA[TS of last interactive event, to avoid insertion of events (tickets, movements) with arbitrary dates]]></comment>
 	</column>
 
 	<customidxs object-type="column">
@@ -2028,10 +2030,8 @@ END;]]></definition>
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
 	<definition><![CDATA[BEGIN
-	WITH t AS
-		(SELECT terminal_id FROM terminal 
-			WHERE ip_addr = '127.0.0.1') 
-		INSERT INTO user_activity SELECT _uid, current_timestamp, terminal_id, 'login', NULL FROM t;
+	INSERT INTO user_activity
+		SELECT _uid, current_timestamp, terminal_validate (_remote_addr), 'logout', NULL;
 
 	UPDATE account SET is_first = FALSE 
 		WHERE user_id = _uid AND is_first = TRUE;
@@ -2131,11 +2131,75 @@ END;]]></definition>
 	<parameter name="_remote_addr">
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
-	<definition><![CDATA[WITH t AS
-	(SELECT terminal_id FROM terminal 
-		WHERE ip_addr = '127.0.0.1') 
-	INSERT INTO user_activity
-		SELECT _uid, current_timestamp, terminal_id, 'logout', NULL FROM t;]]></definition>
+	<definition><![CDATA[INSERT INTO user_activity
+	SELECT _uid, current_timestamp, terminal_validate (_remote_addr), 'logout', NULL;]]></definition>
+</function>
+
+<function name="ticket_create"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_timestamp">
+		<type name="av.ts" length="0"/>
+	</parameter>
+	<parameter name="_type">
+		<type name="av.ticket_type" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+END
+]]></definition>
+</function>
+
+<relationship name="account_has_many_ticket" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.account"
+	 dst-table="av.ticket"
+	 src-required="true" dst-required="false"/>
+
+<function name="terminal_validate"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Return terminal_id given the remote address. Raise exception if not found (connecting from unauthorized IP).]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="smallint" length="0"/>
+	</return-type>
+	<parameter name="_remote_addr">
+		<type name="inet" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+BEGIN
+	SELECT terminal_id INTO _terminal_id FROM terminal WHERE ip_addr = _remote_addr;
+	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
+	RETURN _terminal_id;
+END;]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

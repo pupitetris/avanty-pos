@@ -122,6 +122,7 @@
 
 	function login_success (is_first) {
 		mod.is_first = is_first;
+		mod.is_logged_in = true;
 
 		APP.charp.request ('this_terminal_info_get', [],
 						   {
@@ -151,9 +152,22 @@
 						   });
 	}
 
+	function login_reset () {
+		mod.is_first = false;
+		mod.is_logged_in = false;
+		
+		APP.history.setHome (null);
+		APP.history.clear ();
+
+		APP.switchPage (MOD_NAME);
+
+		login_enter ();
+	}
+
 	var mod = {
 		user_types: {},
 		is_first: false,
+		is_logged_in: false,
 
 		passwordHash: function (pass, salt) {
 			if (pass.indexOf (salt) == 0)
@@ -164,7 +178,7 @@
 		loginTry: function (charp, login, clear_pass, success_cb, error_cb) {
 			function auth_try (salt) {
 				set_credentials (charp, login, clear_pass, salt);
-				charp.request ('this_user_is_first', [], 
+				charp.request ('log_in', [], 
 							   { 
 								   success: success_cb,
 								   error: error_cb
@@ -225,10 +239,10 @@
 		},
 
 		reset: function () {
-			APP.history.setHome (null);
-			APP.history.clear ();
-			APP.switchPage (MOD_NAME);
-			login_enter ();
+			if (mod.is_logged_in)
+				APP.charp.request ('log_out', [], login_reset);
+			else
+				login_reset ();
 		}
 	};
 

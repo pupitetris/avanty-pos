@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,585" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,592" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -192,7 +192,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[other activities may be added later]]></comment>
-	<enumeration values="login,logout"/>
+	<enumeration values="login,logout,shift_begin,shift_end"/>
 </usertype>
 
 <table name="user_activity">
@@ -206,10 +206,6 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	</column>
 	<column name="type" not-null="true">
 		<type name="av.user_activity_type" length="0"/>
-	</column>
-	<column name="signature" not-null="true">
-		<type name="varchar" length="0"/>
-		<comment><![CDATA[User activities may be printed as tickets, this is a validation hash for the ticket.]]></comment>
 	</column>
 	<column name="detail">
 		<type name="jsonb" length="0"/>
@@ -1742,29 +1738,12 @@ BEGIN
 END;]]></definition>
 </function>
 
-<function name="this_user_is_first"
-		window-func="false"
-		returns-setof="false"
-		behavior-type="CALLED ON NULL INPUT"
-		function-type="STABLE"
-		security-type="SECURITY INVOKER"
-		execution-cost="1"
-		row-amount="0">
-	<schema name="rp"/>
+<domain name="remote_addr" not-null="false">
+	<schema name="av"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Check if the authenticated user has never begun a session.]]></comment>
-	<language name="plpgsql" sql-disabled="true"/>
-	<return-type>
-	<type name="boolean" length="0"/>
-	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
-	<definition><![CDATA[BEGIN
-	PERFORM 1 FROM account WHERE user_id = _uid AND is_first = TRUE;
-	RETURN FOUND;
-END;]]></definition>
-</function>
+	<comment><![CDATA[Used as parameter to RPs, maps at CHARP level to the address of the web client.]]></comment>
+		<type name="inet" length="0"/>
+</domain>
 
 <function name="supervisor_created"
 		window-func="false"
@@ -1995,8 +1974,7 @@ END;]]></definition>
 BEGIN
 	_salt := pgcrypto.gen_salt ('bf', 8);
 	UPDATE account 
-		SET is_first = FALSE,
-			salt = _salt,
+		SET salt = _salt,
 			password = pgcrypto.crypt (_plain_password, _salt)
 		WHERE user_id = _user_id AND status = 'active'
 		RETURNING login INTO _login;
@@ -2028,12 +2006,38 @@ END;]]></definition>
 END;]]></definition>
 </function>
 
-<domain name="remote_addr" not-null="false">
-	<schema name="av"/>
+<function name="log_in"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Used as parameter to RPs, maps at CHARP level to the address of the web client.]]></comment>
-		<type name="inet" length="0"/>
-</domain>
+	<comment><![CDATA[Check if the authenticated user has never begun a session.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="boolean" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	WITH t AS
+		(SELECT terminal_id FROM terminal 
+			WHERE ip_addr = '127.0.0.1') 
+		INSERT INTO user_activity SELECT _uid, current_timestamp, terminal_id, 'login', NULL FROM t;
+
+	UPDATE account SET is_first = FALSE 
+		WHERE user_id = _uid AND is_first = TRUE;
+	RETURN FOUND;
+END;]]></definition>
+</function>
 
 <function name="this_terminal_info_get"
 		window-func="false"
@@ -2105,6 +2109,34 @@ END;]]></definition>
 	 src-required="true" dst-required="false"
 	 identifier="true"
 />
+
+<function name="log_out"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check if the authenticated user has never begun a session.]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[WITH t AS
+	(SELECT terminal_id FROM terminal 
+		WHERE ip_addr = '127.0.0.1') 
+	INSERT INTO user_activity
+		SELECT _uid, current_timestamp, terminal_id, 'logout', NULL FROM t;]]></definition>
+</function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
@@ -2190,5 +2222,10 @@ END;]]></definition>
 	<object name="av.cashier_shift" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="av.user_activity" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" insert="true"/>
 </permission>
 </dbmodel>

@@ -191,7 +191,7 @@ CHARP.ERRORS = {
 			if (ctx.asAnon)
 				return this.replySuccess (data, status, req, ctx);
 
-			if (req.status == 0 && req.responseText == "")
+			if (req.status == 0 && req.responseText == '')
 				this.handleError (CHARP.ERRORS['HTTP:CONNECT'], ctx);
 			if (status == 'success') {
 				if (data.error)
@@ -247,7 +247,7 @@ CHARP.ERRORS = {
 		},
 
 		credentialsSet: function (login_or_cred, passwd_hash, salt) {
-			if (typeof login_or_cred == "object" && login_or_cred != null) {
+			if (typeof login_or_cred == 'object' && login_or_cred != null) {
 				var cred = login_or_cred;
 				if (('login') in cred) this.cred.login = cred.login;
 				if (('passwd') in cred) this.cred.passwd = cred.passwd;

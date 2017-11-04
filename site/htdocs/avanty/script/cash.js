@@ -66,7 +66,7 @@
 		};
 
 		validator_options.rules = rules;
-		validator_options.ignore = "";
+		validator_options.ignore = '';
 
 		var form = ui[name + '_form'] = section.find ('form');
 		form.attr ('autocomplete', 'off');
@@ -84,11 +84,6 @@
 		}, 'Las contraseñas deben de coincidir.');
 
 		ui.sections_parent = $('#cash-sections');
-		ui.section_main = $('#cash-main');
-		ui.section_main.find ('button').button ();
-
-		ui.main_noshift = $('#cash-main-noshift');
-		ui.main_noshift.on ('click', cash_shift_begin);
 
 		ui.shell = shell = APP.shellCreate (ui.sections_parent);
 
@@ -110,6 +105,30 @@
 
 		shell.ui.username = shell.ui.shell.find ('.username');
 
+		ui.section_main = $('#cash-main');
+		ui.section_main.find ('button').button ();
+
+		ui.main_noshift = $('#cash-main-noshift');
+		ui.main_noshift.on ('click', cash_shift_begin);
+
+		ui.section_shift_begin = $('#cash-shift-begin');
+		ui.section_shift_begin.find ('button').button ();
+		ui.section_shift_begin.find ('input').input ();
+
+		ui.shift_begin_form = ui.section_shift_begin.find ('form');
+		ui.shift_begin_form.validate ({
+			submitHandler: cash_shift_begin_submit,
+			rules: {
+				'shift-begin-amount': { required: true, money: true }
+			},
+			messages: {
+				'shift-begin-amount': { required: 'Escribe 0 (cero) si no hay dotación.' }
+			}
+		});
+
+		ui.shift_begin_amount = ui.section_shift_begin.find ('input[name="shift-begin-amount"]');
+		ui.shift_begin_submit = ui.section_shift_begin.find ('button');
+
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
 		ui.tickets = {};
@@ -127,7 +146,10 @@
 		var desc;
 		var icon;
 		
-		if (APP.history.length () > 0) {
+		if (APP.terminal.shiftUser == APP.charp.credentialsGet ().login) {
+			desc = '<>No has finalizado tu turno.<br /><br />¿Estás seguro que quieres salir?';
+			icon = 'shift';
+		} else if (APP.history.length () > 0) {
 			desc = '<>Parece que dejaste actividades pendientes.<br /><br />¿Estás seguro que quieres salir?';
 			icon = 'warning';
 		} else {
@@ -144,7 +166,8 @@
 					'Sí, salir': cash_do_logout,
 					'Cancelar': null
 				},
-				width: '75%'
+				width: '75%',
+				open: function() { $(this).siblings('.ui-dialog-buttonpane').find('button:eq(1)').focus(); }
 			}
 		});
 	}
@@ -336,6 +359,20 @@
 		APP.mod.devices.print (ui.tickets.entry);
 	}
 
+	function cash_main_reset () {
+		ui.section_main.children ('div').hide ();
+		if (!APP.terminal.shiftUser) {
+			// No shift is started in this terminal. Recommend user to start his shift.
+			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
+			ui.main_noshift.show ();
+		} else if (APP.terminal.shiftUser != APP.charp.credentialsGet ().login) {
+			// There's a shift running for another user. Can't operate nor start shift.
+			ui.shell.ui.user_shift_begin.button ('disable');
+			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
+			ui.main_othershift.show ();
+		}
+	}
+
 	function cash_main () {
 		if (APP.mod.login.is_first) {
 			// This is the first login for the user. Force a password change.
@@ -346,16 +383,54 @@
 		shell.show (true);
 		shell.backShow ();
 
-		if (!APP.terminal.shiftUser) {
-			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
-			ui.main_noshift.show ();
-		}
+		cash_main_reset ();
 
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
 	}
 
 	function cash_shift_begin () {
+		APP.history.go (MOD_NAME, ui.section_shift_begin, 'cash-shift-begin');
+		shell.backShow ();
+
+		APP.later (function () {
+			if (ui.section_shift_begin.is (':hidden')) return true;
+			ui.shift_begin_amount.focus ();
+		});
+	}
+		
+	function cash_shift_begin_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
+
+		ui.shift_begin_submit.button ('disable');
+
+		var amount = ui.shift_begin_amount.val ();
+		APP.charp.request ('cashier_shift_begin', [amount],
+						   {
+							   success: cash_shift_begin_success,
+							   error: cash_shift_begin_error
+						   });
+	}
+
+	function cash_shift_begin_success () {
+		var amount = ui.shift_begin_amount.val ();
+		var suffix = (parseFloat (amount) == 0)? 'sin dotación.': 'con <s/>' + amount + ' de dotación.';
+		APP.toast ('Se inició el turno ' + suffix);
+
+		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
+		cash_main_reset ();
+
+		APP.history.back ();
+		shell.backShow ();
+
+		ui.shift_begin_submit.button ('enable');
+		ui.shift_begin_amount.val ('');
+	}
+
+	function cash_shift_begin_error () {
+		ui.shift_begin_submit.button ('enable');
+		ui.shift_begin_amount.focus ();
+		return true;
 	}
 
 	var mod = {

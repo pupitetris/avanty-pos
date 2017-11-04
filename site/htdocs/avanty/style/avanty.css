@@ -216,6 +216,7 @@ form label.error {
 	text-align: right;
 	font-size: 50%;
 	color: red;
+	letter-spacing: -1px;
 }
 
 .form-hor {
@@ -293,3 +294,21 @@ button.shell-tool img {
 	margin-bottom: 0.75em;
 	border-bottom: 1px solid lightgray;
 }
+
+input[type="text"].money {
+	text-align: right;
+}
+
+/* Used to denote money symbol. */
+s {
+	text-decoration: unset;
+}
+
+s:before {
+	content: '$';
+}
+
+form s:before {
+	padding-right: 0.5em;
+}
+

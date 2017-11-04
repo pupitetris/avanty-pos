@@ -58,10 +58,33 @@
 	  </table>
 	</form>
   </div>
+  <div class="section" id="cash-shift-begin">
+	<form>
+	  <h2>Ingresa la dotación para el cambio e inicia el turno</h2>
+	  <table>
+		<tbody>
+		  <tr>
+			<th><label for="shift-begin-amount">Monto a abonar:</label></th>
+			<td><s/><input class="money" name="shift-begin-amount" type="text" /></td>
+		  </tr>
+		</tbody>
+		<tfoot>
+		  <tr><td colspan="2"><button type="submit">Iniciar turno</button></td></tr>
+		</tfoot>
+	  </table>
+	</form>
+  </div>
   <div class="section" id="cash-main">
 	<div id="cash-main-noshift">
 	  <img src="img/icons/warning.svg" />Advertencia: No has dado inicio a tu turno.
 	  <button>Iniciar turno</button>
+	</div>
+	<div id="cash-main-othershift">
+	  <img src="img/icons/warning.svg" />Advertencia: el turno de <span></span> está sin finalizar.<br />
+	  No podrás realizar operaciones hasta que <span></span><br />
+	  cierre su turno en esta terminal.
+	</div>
+	<div id="cash-main-summary">
 	</div>
   </div>
   <div class="ticket-cont">

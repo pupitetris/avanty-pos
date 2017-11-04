@@ -90,7 +90,7 @@
 	}
 
 	function greeting_click (evt) {
-		ui.greeting_button.button ("disable");
+		ui.greeting_button.button ('disable');
 		mod.requestChallenge (activate_finish);
 	}
 
@@ -109,16 +109,16 @@
 
 	function activate_challenge_get_success (data) {
 		ui.chal_value = data;
-		ui.chal_submit.button ("enable");
-		ui.chal_cancel.button ("enable");
+		ui.chal_submit.button ('enable');
+		ui.chal_cancel.button ('enable');
 		ui.chal_input.focus ();
 		$('#activate-chal-value').text (ui.chal_value);
 	}
 
 	function activate_challenge_submit (evt) {
 		evt.preventDefault ();
-		ui.chal_submit.button ("disable");
-		ui.chal_cancel.button ("disable");
+		ui.chal_submit.button ('disable');
+		ui.chal_cancel.button ('disable');
 		ui.chal_input.focus ();
 
 		var chal = ui.chal_value;
@@ -131,8 +131,8 @@
 								   switch (err.key) {
 								   case 'SQL:EXIT':
 									   if (err.desc == 'BAD_SOLUTION') {
-										   ui.chal_submit.button ("enable");
-										   ui.chal_cancel.button ("enable");
+										   ui.chal_submit.button ('enable');
+										   ui.chal_cancel.button ('enable');
 										   APP.msgDialog ({
 											   icon: 'no',
 											   desc: 'La solución proporcionada no es correcta.',
@@ -143,8 +143,8 @@
 										   return;
 									   }
 								   case 'SQL:NOTFOUND':
-									   ui.chal_submit.button ("enable");
-									   ui.chal_cancel.button ("enable");
+									   ui.chal_submit.button ('enable');
+									   ui.chal_cancel.button ('enable');
 									   APP.msgDialog ({
 										   icon: 'timeout',
 										   desc: 'El reto ha expirado.',
@@ -220,9 +220,9 @@
 		reset: function () {
 			$('#activate-chal-value').text ('--------');
 
-			ui.greeting_button.button ("enable");
-			ui.chal_submit.button ("disable");
-			ui.chal_cancel.button ("disable");
+			ui.greeting_button.button ('enable');
+			ui.chal_submit.button ('disable');
+			ui.chal_cancel.button ('disable');
 			
 			APP.hourglass.disable ();
 			APP.switchPage (MOD_NAME);

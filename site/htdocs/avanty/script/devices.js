@@ -36,7 +36,7 @@
 
 	function chr (num) {
 		if (! (num >= 0 && num <= 255))
-			throw "chr " + num + " out of bounds";
+			throw 'chr ' + num + ' out of bounds';
 		return String.fromCharCode (num);
 	}
 
@@ -211,7 +211,7 @@
 
 	function node_name (node) {
 		if (!node.get (0))
-			return "";
+			return '';
 
 		return node.get (0).nodeName.toUpperCase ();
 	}
@@ -682,29 +682,29 @@
 	var qz_private_key;
 	var qz_certificate;
 
-	function qz_signature_promise (toSign) {
-		return function(resolve, reject) {
+	function qz_signature_promise (to_sign) {
+		return function (resolve, reject) {
 			try {
-				var pk = KEYUTIL.getKey(qz_private_key);
-				var sig = new KJUR.crypto.Signature({"alg": "SHA1withRSA"});
-				sig.init(pk); 
-				sig.updateString(toSign);
-				var hex = sig.sign();
-				resolve(stob64(hextorstr(hex)));
+				var pk = KEYUTIL.getKey (qz_private_key);
+				var sig = new KJUR.crypto.Signature ({ alg: 'SHA1withRSA' });
+				sig.init (pk); 
+				sig.updateString (to_sign);
+				var hex = sig.sign ();
+				resolve (stob64 (hextorstr (hex)));
 			} catch (err) {
-				console.error(err);
-				reject(err);
+				console.error (err);
+				reject (err);
 			}
 		};
 	}
 
 	function qz_certificate_promise (resolve, reject) {
-			try {
-				resolve (qz_certificate);
-			} catch (err) {
-				console.error (err);
-				reject (err);
-			}
+		try {
+			resolve (qz_certificate);
+		} catch (err) {
+			console.error (err);
+			reject (err);
+		}
 	}
 
 	function qz_sha_get_hash (str) {

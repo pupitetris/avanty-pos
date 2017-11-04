@@ -46,7 +46,7 @@
 		};
 
 		validator_options.rules = rules;
-		validator_options.ignore = "";
+		validator_options.ignore = '';
 
 		form.validate (validator_options);
 
@@ -55,11 +55,6 @@
 	}
 
 	function layout_init () {
-		$.validator.addMethod ('validate-login', function (val, ele) { 
-			var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
-			return re.exec (val);
-		}, 'La clave tiene caracteres no válidos.');
-
 		$.validator.addMethod ('validate-pass2', function (val, ele) {
 			var pass_name = ele.name.substring (0, ele.name.length - 1).replace ('-', '_');
 			var pass = ui[pass_name].val ();
@@ -136,7 +131,8 @@
 					'Sí, salir': super_do_logout,
 					'Cancelar': null
 				},
-				width: '75%'
+				width: '75%',
+				open: function() { $(this).siblings('.ui-dialog-buttonpane').find('button:eq(1)').focus(); }
 			}
 		});
 	}
@@ -192,12 +188,12 @@
 	}
 
 	function super_chpass_error (err, login) {
-		ui.super_chpass_submit.button ('enable');
-		ui.super_chpass_cancel.button ('enable');
-
 		// In login chpass mode, user can only afford one error because of the one-time challenge.
 		if (mod.chpass)
 			super_chpass_finish ();
+
+		ui.super_chpass_submit.button ('enable');
+		ui.super_chpass_cancel.button ('enable');
 
 		switch (err.key) {
 		case 'SQL:USERUNK':
@@ -227,6 +223,9 @@
 			APP.history.back ();
 			shell.backShow ();
 		}
+
+		ui.super_chpass_submit.button ('enable');
+		ui.super_chpass_cancel.button ('enable');
 	}
 
 	function super_create_super () {

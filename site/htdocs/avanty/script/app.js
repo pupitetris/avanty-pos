@@ -9,7 +9,7 @@
 	(function ($) {
 		// Extend jQuery so we can theme inputs.
 		$.fn.input = function () {
-			return this.addClass("ui-widget ui-widget-content ui-corner-all");
+			return this.addClass('ui-widget ui-widget-content ui-corner-all');
 		};
 	} (jQuery));
 
@@ -633,7 +633,7 @@
 			if (opts.msg)
 				msg_dialog_append_p (div, opts.msg, 'msg');
 			if (opts.sev)
-				msg_dialog_append_p (div, (typeof opts.sev == "number")?
+				msg_dialog_append_p (div, (typeof opts.sev == 'number')?
 								  CHARP.ERROR_SEV_MSG[opts.sev]: opts.sev.toString (), 'error-sev');
 
 			if (div.parent ().length == 0)
@@ -695,17 +695,27 @@
 			var args = {};
 			var pairs = search.substr (1).split (/[;&]/);
 			for (var i = 0, pair; pair = pairs[i]; i++) {
-				var keyval = pair.split ("=");
+				var keyval = pair.split ('=');
 				args[keyval[0]] = decodeURIComponent (keyval[1]);
 			}
 			return args;
 		},
 
-		title: "",
+		title: '',
 		DEVEL: true,
 		VERSION: '0.5',
 
 		main: function () {
+			$.validator.addMethod ('money', function (val, ele) {
+				var re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
+				return re.exec (val);
+			}, 'Pesos y centavos (opcionales).');
+			
+			$.validator.addMethod ('validate-login', function (val, ele) { 
+				var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
+				return re.exec (val);
+			}, 'La clave tiene caracteres no válidos.');
+
 			APP.toast (false);
 			$('body').show ();
 

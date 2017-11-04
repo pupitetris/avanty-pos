@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,585" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="873,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -443,7 +443,7 @@ GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 	 custom-color="#aa0000"
 	 src-table="av.rate"
 	 dst-table="av.movement"
-	 src-required="true" dst-required="false"/>
+	 src-required="false" dst-required="false"/>
 
 <usertype name="tender_type" configuration="enumeration">
 	<schema name="av"/>
@@ -2301,6 +2301,7 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[DECLARE
 	_terminal_id av.terminal.terminal_id%TYPE;
+	_ticket_id av.ticket.ticket_id%TYPE;
 BEGIN
 	PERFORM user_cashier_assert(_uid);
 	_terminal_id := terminal_validate(_remote_addr);
@@ -2310,6 +2311,11 @@ BEGIN
 
 	INSERT INTO cashier_shift VALUES (_terminal_id, _uid, CURRENT_TIMESTAMP);
 	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_begin', NULL);
+
+	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, 'deposit', NULL)
+		RETURNING ticket_id INTO _ticket_id;
+
+	INSERT INTO movement VALUES (_ticket_id, CURRENT_TIMESTAMP, NULL, 'cash', _deposit_amount, NULL, NULL);
 END;]]></definition>
 </function>
 

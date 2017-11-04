@@ -2307,7 +2307,7 @@ BEGIN
 	PERFORM user_cashier_assert(_uid);
 	_terminal_id := terminal_validate(_remote_addr);
 
-	PERFORM 1 FROM cashier_shift WHERE terminal_id = _terminal_id;
+	PERFORM 1 FROM cashier_shift WHERE terminal_id = _terminal_id OR user_id = _uid;
 	IF FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
 
 	INSERT INTO cashier_shift VALUES (_terminal_id, _uid, CURRENT_TIMESTAMP);

@@ -43,14 +43,14 @@
 		// Challenge screen.
 
 		var chal_cont = $('#activate-chal');
-		chal_cont.find ('form').on ('submit', challenge_submit);
+		chal_cont.find ('form').on ('submit', activate_challenge_submit);
 
 		ui.chal_submit = chal_cont.find ('button[type="submit"]');
 		ui.chal_submit.button ();
 
 		ui.chal_cancel = chal_cont.find ('button[type="button"]');
 		ui.chal_cancel.button ();
-		ui.chal_cancel.on ('click', challenge_cancel);
+		ui.chal_cancel.on ('click', activate_challenge_cancel);
 
 		ui.chal_input = chal_cont.find ('input');
 		ui.chal_input.input ();
@@ -65,16 +65,10 @@
 		return true; // Call default handler to show the error dialog.
 	}
 
-	function activate_set_credentials () {
-		APP.charp.credentialsSet ('supervisor',
-								  '$2a$08$dcVj2sdh6IU5ixUg5m5i2eD1NHClUqXMcvEIFED1dTlQaXI/uztmy',
-								  '$2a$08$dcVj2sdh6IU5ixUg5m5i2e');
-	}
-
 	function activate_load_start () {
-		activate_set_credentials ();
 		APP.charp.request ('system_is_activated', [],
 						   {
+							   asAnon: true,
 							   success: activate_load_is_activated,
 							   error: activate_blank_error
 						   });
@@ -104,10 +98,10 @@
 		ui.chal_input.val ('');
 		if (finalize_cb)
 			activate_challenge_finalize_cb = finalize_cb;
-		// In case we come from outside and super-credentials are not set:
-		activate_set_credentials ();
+
 		APP.charp.request ('activation_challenge_get', [],
 						   {
+							   asAnon: true,
 							   success: activate_challenge_get_success,
 							   error: activate_blank_error
 						   });
@@ -121,14 +115,18 @@
 		$('#activate-chal-value').text (ui.chal_value);
 	}
 
-	function challenge_submit (evt) {
+	function activate_challenge_submit (evt) {
 		evt.preventDefault ();
 		ui.chal_submit.button ("disable");
 		ui.chal_cancel.button ("disable");
 		ui.chal_input.focus ();
-		APP.charp.request ('activation_challenge_check', [ui.chal_value, ui.chal_input.val ()],
+
+		var chal = ui.chal_value;
+		var solution = ui.chal_input.val ();
+		APP.charp.request ('activation_challenge_check', [chal, solution],
 						   {
-							   success: activate_challenge_check_success,
+							   asAnon: true,
+							   success: function () { activate_challenge_check_success (chal, solution) },
 							   error: function (err) {
 								   switch (err.key) {
 								   case 'SQL:EXIT':
@@ -164,15 +162,15 @@
 						   });
 	}
 
-	function challenge_cancel () {
+	function activate_challenge_cancel () {
 		if (APP.mod.login && APP.mod.login.initialized) {
 			APP.loadModule ('login');
 		} else
 			activate_blank_error ();
 	}
 
-	function activate_challenge_check_success (data) {
-		activate_challenge_finalize_cb ();
+	function activate_challenge_check_success (chal, solution) {
+		activate_challenge_finalize_cb (chal, solution);
 	}
 
 	function activate_finish () {

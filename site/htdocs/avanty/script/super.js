@@ -145,22 +145,6 @@
 		APP.loadModule ('login');
 	}
 
-	function super_create_user () {
-		shell.menuCollapse (true);
-		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
-		shell.backShow ();
-
-		ui.newuser_form.validate ().resetForm ();
-		ui.newuser_login.val ('');
-		ui.newuser_pass.val ('');
-		ui.newuser_pass2.val ('');
-		ui.newuser_type.val ('');
-		ui.newuser_type.selectmenu ('refresh');
-		ui.newuser_type_combo.removeClass ('error');
-		ui.newuser_submit.button ('enable');
-		ui.newuser_login.focus ();
-	}
-
 	function super_chpass_user () {
 		if (mod.chpass) {
 			APP.switchSection (ui.section_super_chpass);
@@ -190,17 +174,33 @@
 		var login = ui.super_chpass_login.val ();
 		var pass = ui.super_chpass_pass.val ();
 
-		APP.charp.request ('user_password_change', [login, pass],
+		var args = [login, pass];
+		var as_anon = false;
+		if (mod.chpass) {
+			args.push (mod.chpass_chal, mod.chpass_solution);
+			as_anon = true;
+			delete mod.chpass_chal;
+			delete mod.chpass_solution;
+		}
+
+		APP.charp.request ('user_password_change', args,
 						   {
+							   asAnon: as_anon,
 							   success: function () { super_chpass_success (login); },
-							   error: function (err) { super_chpass_error (err, login); }
+							   error: function (err) { return super_chpass_error (err, login); }
 						   });
 	}
 
 	function super_chpass_error (err, login) {
 		ui.super_chpass_submit.button ('enable');
 		ui.super_chpass_cancel.button ('enable');
+
+		// In login chpass mode, user can only afford one error because of the one-time challenge.
+		if (mod.chpass)
+			super_chpass_finish ();
+
 		switch (err.key) {
+		case 'SQL:USERUNK':
 		case 'SQL:NOTFOUND':
 			APP.msgDialog ({
 				icon: 'no',
@@ -245,6 +245,43 @@
 		ui.newsuper_login.focus ();
 	}
 
+	function super_create_super_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
+
+		ui.newsuper_submit.button ('disable');
+
+		var login = ui.newsuper_login.val ();
+		var pass = ui.newsuper_pass.val ();
+
+		APP.charp.request ('supervisor_create', [login, pass],
+						   {
+							   asAnon: true,
+							   success: function () { super_create_super_success (login); },
+							   error: function () { ui.newsuper_submit.button ('enable'); return true; }
+						   });
+	}
+
+	function super_create_super_success (login) {
+		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
+		APP.loadModule ('login');
+	}
+
+	function super_create_user () {
+		shell.menuCollapse (true);
+		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
+		shell.backShow ();
+
+		ui.newuser_form.validate ().resetForm ();
+		ui.newuser_login.val ('');
+		ui.newuser_pass.val ('');
+		ui.newuser_pass2.val ('');
+		ui.newuser_type.val ('');
+		ui.newuser_type.selectmenu ('refresh');
+		ui.newuser_type_combo.removeClass ('error');
+		ui.newuser_submit.button ('enable');
+		ui.newuser_login.focus ();
+	}
+
 	function super_create_user_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
@@ -256,12 +293,12 @@
 
 		APP.charp.request ('user_create', [login, pass, type],
 						   {
-							   success: function () { super_user_create_user_success (login); },
-							   error: super_user_create_user_error
+							   success: function () { super_create_user_success (login); },
+							   error: super_create_user_error
 						   });
 	}
 
-	function super_user_create_user_error (err, ctx) {
+	function super_create_user_error (err, ctx) {
 		ui.newuser_submit.button ('enable');
 		switch (err.key) {
 		case 'SQL:DATADUP':
@@ -277,37 +314,37 @@
 		return true;
 	}
 
-	function super_user_create_user_success (login) {
+	function super_create_user_success (login) {
 		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
 		APP.history.back ();
 		shell.backShow ();
 	}
 
-	function super_create_super_submit (form, evt) {
-		evt.originalEvent.preventDefault ();
-
-		ui.newsuper_submit.button ('disable');
-
-		var login = ui.newsuper_login.val ();
-		var pass = ui.newsuper_pass.val ();
-
-		APP.charp.request ('user_create', [login, pass, 'supervisor'],
-						   {
-							   success: function () { super_user_create_super_success (login); },
-							   error: function () { ui.newsuper_submit.button ('enable'); return true; }
-						   });
-	}
-
-	function super_user_create_super_success (login) {
-		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
-		if (super_is_first)
-			APP.loadModule ('login');
-		else
-			super_main ();
-	}
-
 	function super_main_message (msg) {
 		ui.super_main_message.html (msg);
+	}
+
+	function super_supervisor_created_success (is_created) {
+		APP.hourglass.enable ();
+		if (!is_created) {
+			// operations supervisor not created. Create one immediately.
+			super_is_first = true;
+			APP.switchPage (MOD_NAME);
+			super_create_super ();
+			return;
+		}
+		
+		// operations supervisor present.
+		
+		if (mod.chpass) {
+			// Login screen is in challenge routine, give the user
+			// a dialog to change the password of an account.
+			super_chpass_user ();
+			return;
+		}
+		
+		// No special mode. Go to login screen.
+		APP.loadModule ('login');
 	}
 
 	function super_main () {
@@ -334,29 +371,11 @@
 			super_is_first = false;
 
 			var cred = APP.charp.credentialsGet ();
-			if (cred.login == 'supervisor') {
+			if (!cred.login) { // we are in activation process
 				APP.charp.request ('supervisor_created', [],
-								   function (is_created) {
-									   APP.hourglass.enable ();
-									   if (!is_created) {
-										   // operations supervisor not created. Create one immediately.
-										   super_is_first = true;
-										   APP.switchPage (MOD_NAME);
-										   super_create_super ();
-										   return;
-									   }
-
-									   // operations supervisor present.
-
-									   if (mod.chpass) {
-										   // Login screen is in challenge routine, give the user
-										   // a dialog to change the password of an account.
-										   super_chpass_user ();
-										   return;
-									   }
-
-									   // No special mode. Go to login screen.
-									   APP.loadModule ('login');
+								   {
+									   asAnon: true,
+									   success: super_supervisor_created_success
 								   });
 				return;
 			}

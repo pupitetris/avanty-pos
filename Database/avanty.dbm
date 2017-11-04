@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,595" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1526,7 +1526,7 @@ END;]]></definition>
 		row-amount="0">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<comment><![CDATA[Get the user id for a given user name, raise USERUNK if not found.]]></comment>
+	<comment><![CDATA[Get the user id for a given user name and status, raise USERUNK if not found. NULL status matches any status.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<type name="integer" length="0"/>
@@ -1548,7 +1548,7 @@ BEGIN
 	   PERFORM charp_raise('USERUNK', _login::text, _status::text);
 	END IF;
 
-	IF _status = _user_status THEN
+	IF _status IS NULL OR _status = _user_status THEN
 		RETURN _id;
 	END IF;
 
@@ -1556,13 +1556,12 @@ BEGIN
 	   PERFORM charp_raise('-USERDIS', _login::text);
 	END IF;
 
-	IF _user_status = 'deleted' THEN
-	   PERFORM charp_raise('USERUNK', _login::text, _status::text);
-	END IF;
+	-- user_status is deleted, probably.
+	PERFORM charp_raise('USERUNK', _login::text, _status::text);
 END;]]></definition>
 </function>
 
-<function name="system_is_activated"
+<function name="anon_system_is_activated"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1573,22 +1572,14 @@ END;]]></definition>
 	<schema name="rp"/>
 	<role name="postgres"/>
 	<comment><![CDATA[check if the system has already been activated: you need a non-first supervisor account and a correctly signed challenge.]]></comment>
-	<language name="plpgsql" sql-disabled="true"/>
+	<language name="sql" sql-disabled="true"/>
 	<return-type>
 	<type name="boolean" length="0"/>
 	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
-	<definition><![CDATA[BEGIN
-	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
-
-	PERFORM 1 FROM supervisor_challenge 
-		WHERE user_id = _uid 
-			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
-			AND activation_solve_challenge (string) = solution;
-	RETURN FOUND;
-END;]]></definition>
+	<definition><![CDATA[SELECT COUNT(*) > 0 FROM supervisor_challenge 
+	WHERE user_id = 1::uid 
+		AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
+		AND activation_solve_challenge (string) = solution;]]></definition>
 </function>
 
 <function name="activation_solve_challenge"
@@ -1626,7 +1617,7 @@ END;]]></definition>
 	'')]]></definition>
 </function>
 
-<function name="activation_challenge_get"
+<function name="anon_activation_challenge_get"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1641,23 +1632,18 @@ END;]]></definition>
 	<return-type>
 	<type name="varchar" length="0"/>
 	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
 	<definition><![CDATA[DECLARE
 	_string av.supervisor_challenge.string%TYPE;
 BEGIN
-	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
-
 	SELECT string INTO _string
 		FROM supervisor_challenge 
-		WHERE user_id = _uid 
+		WHERE user_id = 1::uid
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
 			AND solution IS NULL;
 
 	IF NOT FOUND THEN
 		INSERT INTO supervisor_challenge 
-			VALUES (activation_challenge_gen (), _uid, CURRENT_TIMESTAMP + '15 minutes', NULL)
+			VALUES (activation_challenge_gen (), 1::uid, CURRENT_TIMESTAMP + '15 minutes', NULL)
 			RETURNING string INTO _string;
 	END IF;
 
@@ -1695,7 +1681,7 @@ END;]]></definition>
 	 dst-table="av.supervisor_challenge"
 	 src-required="false" dst-required="false"/>
 
-<function name="activation_challenge_check"
+<function name="anon_activation_challenge_check"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1710,9 +1696,6 @@ END;]]></definition>
 	<return-type>
 	<type name="boolean" length="0"/>
 	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
 	<parameter name="_chal">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -1722,7 +1705,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_old_chal av.supervisor_challenge.string%TYPE;
 BEGIN
-	_old_chal := rp.activation_challenge_get(_uid);
+	_old_chal := rp.anon_activation_challenge_get();
 
 	IF _old_chal <> _chal THEN
 		PERFORM charp_raise ('NOTFOUND');
@@ -1734,7 +1717,7 @@ BEGIN
 
 	UPDATE supervisor_challenge 
 		SET solution = _solution, expiration = NULL
-		WHERE string = _chal AND user_id = _uid;
+		WHERE string = _chal AND user_id = 1::uid;
 
 	RETURN TRUE;
 END;]]></definition>
@@ -1747,7 +1730,7 @@ END;]]></definition>
 		<type name="inet" length="0"/>
 </domain>
 
-<function name="supervisor_created"
+<function name="anon_supervisor_created"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -1758,20 +1741,11 @@ END;]]></definition>
 	<schema name="rp"/>
 	<role name="postgres"/>
 	<comment><![CDATA[Check if the system requires an operations supervisor to be created.]]></comment>
-	<language name="plpgsql" sql-disabled="true"/>
+	<language name="sql" sql-disabled="true"/>
 	<return-type>
 	<type name="boolean" length="0"/>
 	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
-	<definition><![CDATA[BEGIN
-	IF _uid <> 1 THEN PERFORM charp_raise('USERPERM'); END IF;
-
-	PERFORM 1 FROM user_supervisor WHERE user_id <> 1;
-
-	RETURN FOUND;
-END;]]></definition>
+	<definition><![CDATA[SELECT COUNT(*) > 0 FROM user_supervisor WHERE user_id <> 1;]]></definition>
 </function>
 
 <function name="user_create"
@@ -1804,8 +1778,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_new_user_id av.account.user_id%TYPE;
 BEGIN
-	PERFORM 1 FROM user_supervisor WHERE user_id = _uid;
-	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
+	PERFORM user_supervisor_assert(_uid);
 
 	_new_user_id := user_create (_uid, _login, _password, NULL);
 	PERFORM user_role_add (_new_user_id, _role);
@@ -1939,8 +1912,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_user_id av.account.user_id%TYPE;
 BEGIN
-	PERFORM 1 FROM user_supervisor WHERE user_id = _uid;
-	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
+	PERFORM user_supervisor_assert(_uid);
 
 	SELECT user_id INTO _user_id FROM account WHERE login = _login;
 	IF NOT FOUND THEN PERFORM charp_raise('NOTFOUND'); END IF;
@@ -2202,6 +2174,109 @@ BEGIN
 END;]]></definition>
 </function>
 
+<function name="anon_supervisor_create"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Create a supervisor user IF there are no supervisors already. For activatioin only.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_password">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_new_user_id av.account.user_id%TYPE;
+BEGIN
+	IF NOT rp.anon_system_is_activated() OR rp.anon_supervisor_created() THEN
+		PERFORM charp_raise ('USERPERM');
+	END IF;
+
+	_new_user_id := user_create (1::uid, _login, _password, NULL);
+	PERFORM user_role_add (_new_user_id, 'supervisor');
+END;]]></definition>
+</function>
+
+<function name="anon_user_password_change"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Change a user's password using a one-time support challenge.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_plain_password">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_chal">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_solution">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_user_id av.account.user_id%TYPE;
+BEGIN
+	PERFORM 1 FROM supervisor_challenge WHERE string = _chal AND user_id = 1::uid;
+	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
+
+	-- one-time challenge. Discard.
+	DELETE FROM supervisor_challenge WHERE string = _chal;
+
+	IF _solution IS NULL OR _solution <> activation_solve_challenge (_chal) THEN
+		PERFORM charp_raise ('EXIT', 'BAD_SOLUTION');
+	END IF;	
+
+	_user_id := charp_account_get_id_by_login_status (_login, 'active');
+
+	PERFORM av.user_password_change (_user_id, _plain_password);
+END;]]></definition>
+</function>
+
+<function name="user_supervisor_assert"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check that the given uid is from a supervisor. If not, raise exception.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_user_id">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM 1 FROM user_supervisor WHERE user_id = _user_id;
+	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
+END;]]></definition>
+</function>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>
@@ -2268,11 +2343,6 @@ END;]]></definition>
 	<privileges select="true" delete="true" insert="true"/>
 </permission>
 <permission>
-	<object name="av.supervisor_challenge" type="table"/>
-	<roles names="avanty"/>
-	<privileges select="true" insert="true" update="true"/>
-</permission>
-<permission>
 	<object name="av.terminal" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true"/>
@@ -2291,5 +2361,10 @@ END;]]></definition>
 	<object name="av.user_activity" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" insert="true"/>
+</permission>
+<permission>
+	<object name="av.supervisor_challenge" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" delete="true" insert="true" update="true"/>
 </permission>
 </dbmodel>

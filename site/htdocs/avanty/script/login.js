@@ -59,12 +59,18 @@
 		APP.mod.activate.requestChallenge (request_challenge_success);
 	}
 
-	function request_challenge_success () {
+	function request_challenge_success (chal, solution) {
+		function super_set_chpass (mod) {
+			mod.chpass = true;
+			mod.chpass_chal = chal;
+			mod.chpass_solution = solution;
+		}
+
 		var mod_super = APP.mod['super'];
-		if (!mod_super) {
-			APP.loadModule ('super', function (mod_super) { mod_super.chpass = true; });
-		} else {
-			mod_super.chpass = true;
+		if (!mod_super)
+			APP.loadModule ('super', super_set_chpass);
+		else {
+			super_set_chpass (mod_super);
 			mod_super.reset ();
 		}
 	}

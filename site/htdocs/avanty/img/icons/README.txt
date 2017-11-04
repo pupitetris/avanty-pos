@@ -1,1 +1,1 @@
-Fuente: nuoveXT-2.2_KDE 64x64
+Fuente: Paper Project https://snwh.org/paper

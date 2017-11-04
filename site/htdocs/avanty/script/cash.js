@@ -322,14 +322,14 @@
 
 	function cash_park_entry () {
 		var ticket = {
-			terminalId: APP.terminalId,
+			terminalId: APP.terminal.id,
 			entryDate: new Date ()
 		}
 
 		var barcode = barcode_get (ticket);
 
 		ui.tickets.entry_time.text (ticket.entryDate.toLocaleString ());
-		ui.tickets.entry_terminal.text (APP.terminalName);
+		ui.tickets.entry_terminal.text (APP.terminal.name);
 		ui.tickets.entry_barcode.attr ('data-chars', barcode);
 
 		APP.mod.devices.escposTicketLayout (ui.tickets.entry);

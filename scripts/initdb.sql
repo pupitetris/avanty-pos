@@ -78,5 +78,24 @@ qyggkrzF8BoHCRCvSRMUDmipczEsLDh93H+p8R/K8Ob7qtct0sZthwWBU2ZJXvhX
 zozCzYdSCBfnRztD8A==
 -----END CERTIFICATE-----
 ');
+
+    DELETE FROM tender;
+    ALTER SEQUENCE tender_tender_id_seq RESTART;
+	INSERT INTO tender VALUES
+		   (DEFAULT,      5, 'coin'),
+		   (DEFAULT,     10, 'coin'),
+		   (DEFAULT,     20, 'coin'),
+		   (DEFAULT,     50, 'coin'),
+		   (DEFAULT,    100, 'coin'),
+		   (DEFAULT,    200, 'coin'),
+		   (DEFAULT,    500, 'coin'),
+		   (DEFAULT,   1000, 'coin'),
+		   (DEFAULT,   2000, 'coin'),
+		   (DEFAULT,   2000, 'bill'),
+		   (DEFAULT,   5000, 'bill'),
+		   (DEFAULT,  10000, 'bill'),
+		   (DEFAULT,  20000, 'bill'),
+		   (DEFAULT,  50000, 'bill'),
+		   (DEFAULT, 100000, 'bill');
     
 COMMIT TRANSACTION;

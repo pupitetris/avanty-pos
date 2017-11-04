@@ -95,6 +95,10 @@
 									  that.menuCollapse (true);
 							  });
 			}
+
+			var status = ui.shell.find ('.shell-status');
+			if (status.length > 0)
+				ui.status = status;
 		}
 
 		Shell.prototype = {

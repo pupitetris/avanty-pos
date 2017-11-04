@@ -85,7 +85,7 @@
 
 		ui.sections_parent = $('#cash-sections');
 
-		ui.shell = shell = APP.shellCreate (ui.sections_parent);
+		shell = APP.shellCreate (ui.sections_parent);
 
 		shell.ui.logout.on ('click', cash_logout);
 
@@ -360,19 +360,28 @@
 	}
 
 	function cash_main_reset () {
+		shell.ui.status.text ('');
 		ui.section_main.children ('div').hide ();
 		if (!APP.terminal.shiftUser) {
 			// No shift is started in this terminal. Recommend user to start his shift.
-			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
+			shell.ui.user_shift_begin.button ('enable');
+			shell.ui.shell.find ('button.requires-shift').button ('disable');
 			ui.main_noshift.show ();
 		} else if (APP.terminal.shiftUser != APP.charp.credentialsGet ().login) {
 			// There's a shift running for another user. Can't operate nor start shift.
-			ui.shell.ui.user_shift_begin.button ('disable');
-			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
+			shell.ui.user_shift_begin.button ('disable');
+			shell.ui.shell.find ('button.requires-shift').button ('disable');
 			ui.main_othershift.show ();
-		} else
-			// Our shift is running. Can't begin it again, right?
-			ui.shell.ui.user_shift_begin.button ('disable');
+		} else {
+			// Our shift is running.
+			shell.ui.status.text ('Turno iniciado.');
+
+			// Can't begin it again, right?
+			shell.ui.user_shift_begin.button ('disable');
+
+			// Enable shift-dependent actions.
+			shell.ui.shell.find ('button.requires-shift').button ('enable');
+		}
 	}
 
 	function cash_main () {
@@ -406,7 +415,7 @@
 
 		ui.shift_begin_submit.button ('disable');
 
-		var amount = ui.shift_begin_amount.val ();
+		var amount = Math.floor (ui.shift_begin_amount.val () * 100);
 		APP.charp.request ('cashier_shift_begin', [amount],
 						   {
 							   success: cash_shift_begin_success,

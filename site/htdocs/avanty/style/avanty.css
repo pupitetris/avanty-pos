@@ -295,6 +295,14 @@ button.shell-tool img {
 	border-bottom: 1px solid lightgray;
 }
 
+.shell-status {
+	position: absolute;
+	top: 66px;
+	left: 0.5em;
+	width: calc(100% - 1em);
+	font-size: 75%;
+}
+
 input[type="text"].money {
 	text-align: right;
 }

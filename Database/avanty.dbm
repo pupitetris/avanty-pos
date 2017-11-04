@@ -17,6 +17,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<appended-sql><![CDATA[ALTER DATABASE avanty SET search_path TO av,public;
 
 GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
+GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 ]]></appended-sql>
 </database>
 
@@ -2315,7 +2316,7 @@ BEGIN
 	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, 'deposit', NULL)
 		RETURNING ticket_id INTO _ticket_id;
 
-	INSERT INTO movement VALUES (_ticket_id, CURRENT_TIMESTAMP, NULL, 'cash', _deposit_amount, NULL, NULL);
+	INSERT INTO movement VALUES (_ticket_id, CURRENT_TIMESTAMP, NULL, 'tender', _deposit_amount, NULL, NULL);
 END;]]></definition>
 </function>
 
@@ -2416,7 +2417,7 @@ END;]]></definition>
 <permission>
 	<object name="av.ticket" type="table"/>
 	<roles names="avanty"/>
-	<privileges insert="true"/>
+	<privileges select="true" insert="true"/>
 </permission>
 <permission>
 	<object name="av.cashier_shift" type="table"/>
@@ -2432,5 +2433,10 @@ END;]]></definition>
 	<object name="av.supervisor_challenge" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" delete="true" insert="true" update="true"/>
+</permission>
+<permission>
+	<object name="av.movement" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true" insert="true"/>
 </permission>
 </dbmodel>

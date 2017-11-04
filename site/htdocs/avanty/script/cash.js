@@ -370,7 +370,9 @@
 			ui.shell.ui.user_shift_begin.button ('disable');
 			ui.shell.ui.shell.find ('button.requires-shift').button ('disable');
 			ui.main_othershift.show ();
-		}
+		} else
+			// Our shift is running. Can't begin it again, right?
+			ui.shell.ui.user_shift_begin.button ('disable');
 	}
 
 	function cash_main () {

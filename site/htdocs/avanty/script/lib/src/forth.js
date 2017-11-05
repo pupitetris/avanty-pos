@@ -5,23 +5,96 @@
 // Derechos Reservados (R) 2017 Microsafe, S.A. de C.V.
 
 (function () {
-	var mod = require ('js-forth');
 
-	mod.init = function () {
-		mod.initialized = true;
-	};
+	var forth;
+	var Forth;
+	var cache = {};
 
-	mod.onLoad = function () {
-		if (!mod.loaded)
+	function forth_new_res () {
+		var res = {
+			errors: [],
+			output: [],
+			run: function (str) { return mod.run (str, res); }
+		};
+		return res;
+	}
+
+	function forth_run (str, res) {
+		if (!res)
+			res = forth_new_res ();
+
+		function onForthOutput (error, output) {
+			res.errors.push (error);
+			res.output.push (output);
+		}
+
+		forth.run (str, onForthOutput);
+		return res;
+	}
+
+	function forth_load (url, cb, res) {
+		function success (data, status) {
+			switch (status) {
+			case 'success':
+				cache[url] = data;
+			case 'cached':
+				var res = forth_run (data, res);
+				if (cb)	cb (res);
+			}
+		}
+			
+		if (cache[url]) {
+			success (cache[url], 'cached');
 			return;
+		}
 
-		mod.reset ();
-	};
+		$.ajax ({
+				type: 'GET',
+				 url: url,
+			   cache: true,
+			dataType: 'json',
+			  global: false,
+			 success: success
+		});
+	}
 
-	mod.reset = function () {
-	};
+	function forth_reset (cb) {
+		forth = Forth ();
+		var res = forth_load ('forth/standard.fth', cb);
+		return forth_load ('forth/avanty.fth', cb, res);
+	}
 
+	var is_first = true;
+
+	var mod = {
+		init: function () {
+			mod.initialized = true;
+			Forth = require ('js-forth');
+			forth_reset (function () { mod.loaded = true; mod.onLoad (); });
+		},
+		
+		onLoad: function () {
+			if (mod.loaded)
+				mod.reset ()
+		},
+		
+		reset: function (cb) {
+			if (is_first) {
+				is_first = false;
+				return;
+			}
+
+			return forth_reset (cb);
+		},
+
+		// if res is not defined, a new one will be created.
+		run: function (str, res) {
+			return forth_run (str, res);
+		}
+	}
+	
 	APP.addModule ('forth', mod);
+
 }) ();
 
 },{"js-forth":6}],2:[function(require,module,exports){

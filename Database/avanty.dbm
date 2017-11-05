@@ -778,6 +778,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 
 	<customidxs object-type="constraint">
 		<object name="cashier_shift_pk" index="0"/>
+		<object name="cashier_shift_uq" index="3"/>
 		<object name="terminal_fk" index="1"/>
 		<object name="user_cashier_fk" index="2"/>
 	</customidxs>
@@ -2343,6 +2344,15 @@ END;]]></definition>
 	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
 END;]]></definition>
 </function>
+
+<index name="cashier_shift_user_uq" table="av.cashier_shift"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[A cashier can only have one shift begun at a given time.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="user_id"/>
+		</idxelement>
+</index>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">

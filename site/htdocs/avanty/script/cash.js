@@ -108,6 +108,7 @@
 		shell.ui.username = shell.ui.shell.find ('.username');
 
 		ui.section_main = $('#cash-main');
+		ui.section_main.on ('avanty:switchSectionEnter', cash_main_reset);
 		ui.section_main.find ('button').button ();
 
 		ui.main_noshift = $('#cash-main-noshift');
@@ -157,6 +158,8 @@
 		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
 		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
 		APP.later (function () { APP.mod.devices.escposTicketLayout (ui.tickets.entry); });
+
+		$(document).on ('avanty:HID', cash_park_exit_hid);
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -281,14 +284,33 @@
 		APP.history.go (MOD_NAME, ui.section_park_exit, 'cash-park-exit');
 		shell.backShow ();
 
+		ui.park_exit_form.validate ().resetForm ();
+		ui.park_exit_barcode.val ('');
+		ui.park_exit_submit.button ('enable');
+
 		APP.later (function () {
 			if (ui.section_park_exit.is (':hidden')) return true;
 			ui.park_exit_barcode.focus ();
 		});
 	}
 
+	function cash_park_exit_hid (evt, str) {
+		cash_park_exit ();
+
+		APP.later (function () {
+			if (ui.section_park_exit.is (':hidden')) return true;
+
+			if (str.substr (str.length - 1, 1) == '\r') {
+				str = str.substr (0, str.length - 1);
+				ui.park_exit_barcode.val (str);
+				ui.park_exit_form.trigger ('submit');
+			} else
+				ui.park_exit_barcode.val (str);
+		});
+	}
+
 	function cash_park_exit_submit (form, evt) {
-		evt.originalEvent.preventDefault ();
+		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
 		ui.park_exit_submit.button ('disable');
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
@@ -321,6 +343,9 @@
 
 			// Open the menu to save the user from this chore.
 			shell.menuCollapse (false);
+
+			// Listen to any keyboard input sent from HID devices:
+			APP.hidHandlerStart ();
 		}
 	}
 
@@ -334,10 +359,10 @@
 		shell.show (true);
 		shell.backShow ();
 
-		cash_main_reset ();
-
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
+
+		cash_main_reset ();
 	}
 
 	function cash_shift_begin () {

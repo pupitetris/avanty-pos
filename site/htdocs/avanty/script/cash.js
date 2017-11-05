@@ -413,6 +413,7 @@
 		init: function () {
 			mod.initialized = true;
 			APP.loadModule ('barcode');
+			APP.loadModule ('forth');
 			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);
 		},
 

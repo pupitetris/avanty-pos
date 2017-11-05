@@ -24,24 +24,14 @@
 	// 1px is 1/96 in
 	var PX_PER_IN = 96;
 	
-	function obj_get (key, def, obj) {
-		var res = obj[key];
-		return (res === null || res === undefined)? obj[def]: res;
-	}
-
-	function map_replace (str, map) {
-		var re = new RegExp (Object.keys (map).join ('|'), 'gi');
-		return str.replace (re, function (m) { return map[m]; });	
+	function px2int (px) {
+		return parseInt (px.replace ('px', ''));
 	}
 
 	function chr (num) {
 		if (! (num >= 0 && num <= 255))
 			throw 'chr ' + num + ' out of bounds';
 		return String.fromCharCode (num);
-	}
-
-	function px2int (px) {
-		return parseInt (px.replace ('px', ''));
 	}
 
 	function css_font_weight (weight) {
@@ -347,7 +337,7 @@
 		new_state.char_spacing = escpos_horizontal_pixels_to_units (state, css.letter_spacing);
 
 		new_state.underline = (css.text_decoration_line == 'none')? 0:
-			obj_get (css.text_decoration_style, 'double', { solid: 1, double: 2 });
+			APP.Util.objGet (css.text_decoration_style, 'double', { solid: 1, double: 2 });
 		
 		new_state.emphasis = (css.font_style == 'italic')? 1: 0;
 
@@ -367,7 +357,7 @@
 		new_state.color = (css[(new_state.reverse)? 'background_color' : 'color'] == reset.css.color)?
 			0: 1;
 
-		new_state.standard.justification = obj_get (css.text_align, 'left', { left: 0, center: 1, right: 2 });
+		new_state.standard.justification = APP.Util.objGet (css.text_align, 'left', { left: 0, center: 1, right: 2 });
 
 		return new_state;
 	}
@@ -465,7 +455,7 @@
 			decodeURIComponent (data_chars);
 
 		// Barcode system
-		var m = obj_get (config.system, null,
+		var m = APP.Util.objGet (config.system, null,
 			{
 				UPCA	: 'A',
 				UPCE	: 'B',
@@ -482,7 +472,7 @@
 			});
 
 		// Number of characters
-		var n = obj_get (config.system, null,
+		var n = APP.Util.objGet (config.system, null,
 			{
 				UPCA	: 12,
 				UPCE	: 12,
@@ -632,7 +622,7 @@
 								return '{';
 							if (m[0] == '%') { // This works for CODE C, need for A & B at least.
 								var n = parseInt (m.substr (1), 16);
-								return APP.String.padZeroes (n, 2);
+								return APP.Util.padZeroes (n, 2);
 							}
 							return ' ';
 						});
@@ -676,7 +666,7 @@
 			'%5D': ']'
 		};
 			
-		return map_replace (encodeURIComponent (str), map);
+		return APP.Util.mapReplace (encodeURIComponent (str), map);
 	}
 
 	var qz_private_key;

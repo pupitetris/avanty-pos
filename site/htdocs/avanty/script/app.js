@@ -233,15 +233,15 @@
 			var d = new Date ();
 
 			var new_time =
-				APP.String.padZeroes (d.getHours (), 2) + ':' +
-				APP.String.padZeroes (d.getMinutes (), 2);
+				APP.Util.padZeroes (d.getHours (), 2) + ':' +
+				APP.Util.padZeroes (d.getMinutes (), 2);
 			if (this.useSeconds)
-				new_time += ':' + APP.String.padZeroes (d.getSeconds (), 2);
+				new_time += ':' + APP.Util.padZeroes (d.getSeconds (), 2);
 
 			var new_date =
 				d.getFullYear () + '/' +
-				APP.String.padZeroes (d.getMonth() + 1, 2) + '/' +
-				APP.String.padZeroes (d.getDate (), 2)
+				APP.Util.padZeroes (d.getMonth() + 1, 2) + '/' +
+				APP.Util.padZeroes (d.getDate (), 2)
 
 			if (display_time) {
 				if (display_time == new_time)
@@ -439,11 +439,18 @@
 		APP.hourglass.setShowing (busy);
 	}
 	
-	var current_page;
-
-	var string = {
+	var util = {
+		// Pad with zeroes to the left to the given width.
+		// width < 0 pads to the right to abs(width) width.
 		padZeroes: function (num, width) {
 			var num_str = num.toString ();
+
+			var to_the_right;
+			if (width < 0) {
+				to_the_right = true;
+				width = -width;
+			} else
+				to_the_right = false;
 
 			if (num_str.length > width)
 				throw 'Number ' + num_str + ' too wide (' + width + ').';
@@ -451,9 +458,22 @@
 			var str = '';
 			for (var i = num_str.length; i < width; i++)
 				str += '0';
-			return str + num_str;
+
+			return (to_the_right)? num_str + str: str + num_str;
+		},
+
+		objGet: function (key, def, obj) {
+			var res = obj[key];
+			return (res === null || res === undefined)? obj[def]: res;
+		},
+
+		mapReplace: function (str, map) {
+			var re = new RegExp (Object.keys (map).join ('|'), 'gi');
+			return str.replace (re, function (m) { return map[m]; });	
 		}
 	}
+
+	var current_page;
 
 	// Public functions
 	window.APP = {
@@ -465,8 +485,8 @@
 		hourglass: new Hourglass ().init (),
 			clock: new     Clock ().init ({useSeconds: true}),
 		  history: new   History ().init (),
-		 terminal: {},     // Terminal info. See login_configure_terminal.
-		   String: string, // Our string-related utility functions.
+		 terminal: {},   // Terminal info. See login_configure_terminal.
+			 Util: util, // Our string-related utility functions.
 
 		shellCreate: function (sections_parent) {
 			return new Shell ().init (sections_parent);

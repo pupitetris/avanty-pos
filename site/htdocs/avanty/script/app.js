@@ -473,6 +473,55 @@
 		}
 	}
 
+	var hid_handler;
+
+	function hid_handler_send () {
+		if (hid_handler.str.length > 0)
+			$(document).trigger ('avanty:HID', [ hid_handler.str ]);
+		
+		hid_handler.str = '';
+		hid_handler.timeoutH = undefined;
+	}
+
+	function hid_handler_keypress (evt) {
+		var c = String.fromCharCode (evt.which);
+		hid_handler.str += c;
+
+		if (c == '\r') {
+			if (hid_handler.timeoutH)
+				window.clearTimeout (hid_handler.timeoutH);
+			hid_handler_send ();
+			return;
+		}
+		
+		if (!hid_handler.timeoutH)
+			hid_handler.timeoutH = window.setTimeout (hid_handler_send, hid_handler.timeout);
+	}
+
+	function hid_handler_start (start) {
+		if (start === false) {
+			if (hid_handler) {
+				hid_handler.active = false;
+				if (hid_handler.timeoutH)
+					window.clearTimeout (hid_handler.timeoutH);
+				$(document).off ('keypress.hidHandler');
+			}
+			return;
+		}
+		
+		if (hid_handler && hid_handler.active)
+			return;
+		
+		hid_handler = {
+			active: true,
+			str: '',
+			timeout: 250,
+			timeoutH: undefined
+		};
+		
+		$(document).on ('keypress.hidHandler', hid_handler_keypress);
+	}
+
 	var current_page;
 
 	// Public functions
@@ -576,6 +625,8 @@
 		},
 
 		switchPage: function (page) {	
+			APP.hidHandlerStart (false);
+
 			if (current_page == page)
 				return;
 
@@ -589,8 +640,12 @@
 		},
 
 		switchSection: function (div) {
+			APP.hidHandlerStart (false);
+
 			div.parent ().find ('> .section').hide ();
 			div.show ();
+
+			div.trigger ('avanty:switchSectionEnter');
 		},
 
 		setTitle: function (text) {
@@ -713,6 +768,9 @@
 			div.dialog ('close');
 			div.remove ();
 		},
+
+		// attach to avanty:HID event on document to get notifications.
+		hidHandlerStart: hid_handler_start,
 
 		argsParse: function () {
 			var search = window.location.search;

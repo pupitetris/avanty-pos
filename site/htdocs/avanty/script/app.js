@@ -441,6 +441,8 @@
 	function show_hourglass (busy) {
 		APP.hourglass.setShowing (busy);
 	}
+
+	var util_money_re = new RegExp ('(-?[0-9]*)\.?([0-9]{0,2})');
 	
 	var util = {
 		// Pad with zeroes to the left to the given width.
@@ -468,6 +470,18 @@
 		// num is an integer representing money in cents.
 		asMoney: function (num) {
 			return Math.floor (num / 100).toString () + '.' + util.padZeroes (num % 100, 2);
+		},
+
+		// parse a string containing pesos / cents representation and return integer in cents.
+		parseMoney: function (str) {
+			var match = str.match (util_money_re);
+			if (!match)
+				return 0;
+
+			var num = parseInt (match[1] + match[2]) * Math.pow (10, 2 - match[2].length);
+			if (isNaN (num))
+				return 0;
+			return num;
 		},
 
 		objGet: function (key, def, obj) {

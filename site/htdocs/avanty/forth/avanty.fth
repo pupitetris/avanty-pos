@@ -31,5 +31,5 @@ define horas 1hr * ;
 define registra type " | " type . " | " type . #10 emit ;
 
 // Cancel all previous items
-define _desc_cancel " CANCEL " ;
+define _desc_cancel " __CANCEL__ " ;
 define cancela_anteriores 0 0 _desc_cancel registra ;

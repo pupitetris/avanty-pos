@@ -10,7 +10,8 @@
 
 	var forth;
 	var Forth;
-	var cache = {};
+	var file_cache = {};
+	var has_run = 0;
 
 	function forth_new_res () {
 		var res = {
@@ -34,39 +35,73 @@
 		return res;
 	}
 
-	function forth_load (url, cb, res) {
-		function success (data, status) {
-			switch (status) {
-			case 'success':
-				cache[url] = data;
-			case 'cached':
-				var res = forth_run (data, res);
-				if (cb)	cb (res);
-			}
-		}
-			
-		if (cache[url]) {
-			success (cache[url], 'cached');
-			return;
+	var include_re = new RegExp ('(?:^ *|\n| +)(incluir +([^ \n]+))');
+	
+	// Sanitize, deal with "incluir" directives and other preprocessing.
+	function forth_preprocess (data, cb, error_cb) {
+		data = data.replace (/\r\n/g, '\n').replace (/\t/g, '    ');
+
+		var match = data.match (include_re);
+		if (!match)
+			return data;
+
+		function match_replace (loaded_data) {
+			var start = match.index + match[0].indexOf (match[1]);
+			var replaced = data.substr (0, start) + loaded_data + data.substr (start + match[1].length);
+
+			if (!cb) return replaced;
+			cb (replaced);
 		}
 
+		var script_name = match[2].replace (/\.+\/+/g, '');
+		var load = forth_load (script_name, match_replace, error_cb);
+		if (!load) // Cache miss: async loading.
+			return;
+
+		cb = undefined;
+		return match_replace (load);
+	}
+
+	function forth_load (script_name, cb, error_cb) {
+		if (file_cache[script_name])
+			return file_cache[script_name];
+
+		function success (data, status) {
+//			if (status != 'success')
+				// Throw error.
+//				return;
+
+			data = forth_preprocess (data, success, error_cb);
+			if (!data) // Async loading due to includes.
+				return;
+
+			file_cache[script_name] = data;
+			if (cb) cb (data);
+		}
+			
 		$.ajax ({
 				type: 'GET',
-				 url: url,
+				 url: 'forth/' + script_name,
 			   cache: true,
-			dataType: 'json',
+			dataType: 'text',
 			  global: false,
-			 success: success
+			 success: success,
+			   error: error_cb
 		});
 	}
 
-	function forth_reset (cb) {
+	function forth_reset (cb, error_cb) {
+		has_run = 0;
 		forth = Forth ();
-		var res = forth_load ('forth/standard.fth', cb);
-		return forth_load ('forth/avanty.fth', cb, res);
-	}
+		
+		function run (script) {
+			forth_run (script);
+			if (cb) cb ();
+		}
 
-	var is_first = true;
+		var script = forth_load ('avanty.fth', run, error_cb);
+		if (script)	run (script);
+	}
 
 	var mod = {
 		init: function () {
@@ -74,23 +109,34 @@
 			Forth = t('js-forth');
 			forth_reset (function () { mod.loaded = true; mod.onLoad (); });
 		},
-		
+
 		onLoad: function () {
 			if (mod.loaded)
 				mod.reset ()
 		},
 		
 		reset: function (cb) {
-			if (is_first) {
-				is_first = false;
+			if (!has_run)
 				return;
-			}
 
 			return forth_reset (cb);
 		},
 
+		// Define a set of key-value constants in the interpreter.
+		setConstants: function (values, res) {
+			var cons = [];
+			for (var key of Object.keys (values))
+				cons.push (values[key] + ' constant ' + key);
+			return mod.run (cons.join (' '), res);
+		},
+
+		load: function (script_name, cb, error_cb) {
+			return forth_load ('usr/' + script_name, cb, error_cb);
+		},
+
 		// if res is not defined, a new one will be created.
 		run: function (str, res) {
+			has_run ++;
 			return forth_run (str, res);
 		}
 	}

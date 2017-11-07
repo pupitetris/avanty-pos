@@ -6,6 +6,13 @@ variable total      // El total, para ver si nos pasamos de la tarifa diara máx
 
 define calcular
 
+// Checa la existencia de la constante "extraviado" y si es así, se cobra el concepto
+// de boleto extraviado y termina.
+si está extraviado entonces
+	1 costo_extraviado desc_extraviado registra
+	salir
+fin
+
 // Se cobra la primer hora o fracción:
 1 costo_primera_hora desc_primera_hora registra
 
@@ -35,10 +42,6 @@ fracciones valor costo_fracción * costo_primera_hora + total guarda
 si total valor tarifa_diaria_máxima > entonces
 	cancela_anteriores
 	1 tarifa_diaria_máxima desc_tarifa_diaria_máxima registra
-fin
-
-si está extraviado entonces
-	1 costo_extraviado desc_extraviado registra
 fin
 
 ;

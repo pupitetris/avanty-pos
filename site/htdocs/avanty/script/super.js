@@ -266,9 +266,9 @@
 	}
 
 	function super_create_user () {
-		shell.menuCollapse (true);
 		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
 		shell.backShow ();
+		shell.menuCollapse ();
 
 		ui.newuser_form.validate ().resetForm ();
 		ui.newuser_login.val ('');

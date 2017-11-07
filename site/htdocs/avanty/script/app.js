@@ -92,7 +92,7 @@
 								  if (that.ui.menu.is (':hidden'))
 									  return;
 								  if ($(evt.target).closest (that.ui.menu).length < 1)
-									  that.menuCollapse (true);
+									  that.menuCollapse ();
 							  });
 			}
 
@@ -124,17 +124,20 @@
 				if (!this.ui.menu)
 					return;
 
+				if (collapse === undefined)
+					collapse = true;
+
 				if (this._menu_collapsed == collapse)
 					return;
 
 				this._menu_collapsed = collapse;
 				
-				if (collapse === true)
+				if (collapse)
 					this._menu_selected = this.ui.menu.tabs ('option', 'active');
 
 				this.ui.menu.tabs ('option', 'active',
-								   (collapse === false)?
-								   this._menu_selected: false);
+								   (collapse)?
+								   false: this._menu_selected);
 			},
 
 			backShow: function () {
@@ -233,15 +236,15 @@
 			var d = new Date ();
 
 			var new_time =
-				APP.Util.padZeroes (d.getHours (), 2) + ':' +
-				APP.Util.padZeroes (d.getMinutes (), 2);
+				util.padZeroes (d.getHours (), 2) + ':' +
+				util.padZeroes (d.getMinutes (), 2);
 			if (this.useSeconds)
-				new_time += ':' + APP.Util.padZeroes (d.getSeconds (), 2);
+				new_time += ':' + util.padZeroes (d.getSeconds (), 2);
 
 			var new_date =
 				d.getFullYear () + '/' +
-				APP.Util.padZeroes (d.getMonth() + 1, 2) + '/' +
-				APP.Util.padZeroes (d.getDate (), 2)
+				util.padZeroes (d.getMonth() + 1, 2) + '/' +
+				util.padZeroes (d.getDate (), 2)
 
 			if (display_time) {
 				if (display_time == new_time)
@@ -460,6 +463,11 @@
 				str += '0';
 
 			return (to_the_right)? num_str + str: str + num_str;
+		},
+
+		// num is an integer representing money in cents.
+		asMoney: function (num) {
+			return Math.floor (num / 100).toString () + '.' + util.padZeroes (num % 100, 2);
 		},
 
 		objGet: function (key, def, obj) {

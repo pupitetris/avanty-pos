@@ -11,13 +11,14 @@
 	var forth;
 	var Forth;
 	var file_cache = {};
-	var has_run = 0;
+	var has_run;
+	var forth_base = '';
 
 	function forth_new_res () {
 		var res = {
 			errors: [],
 			output: [],
-			run: function (str) { return mod.run (str, res); }
+			run: function (str, error_cb) { return mod.run (str, error_cb, res); }
 		};
 		return res;
 	}
@@ -63,25 +64,22 @@
 	}
 
 	function forth_load (script_name, cb, error_cb) {
-		if (file_cache[script_name])
-			return file_cache[script_name];
+		var fullname = forth_base + script_name;
+		if (file_cache[fullname])
+			return file_cache[fullname];
 
 		function success (data, status) {
-//			if (status != 'success')
-				// Throw error.
-//				return;
-
 			data = forth_preprocess (data, success, error_cb);
 			if (!data) // Async loading due to includes.
 				return;
 
-			file_cache[script_name] = data;
+			file_cache[fullname] = data;
 			if (cb) cb (data);
 		}
 			
 		$.ajax ({
 				type: 'GET',
-				 url: 'forth/' + script_name,
+				 url: 'forth/' + fullname,
 			   cache: true,
 			dataType: 'text',
 			  global: false,
@@ -91,7 +89,12 @@
 	}
 
 	function forth_reset (cb, error_cb) {
+		if (!has_run) {
+			if (cb) cb ();
+			return;
+		}
 		has_run = 0;
+
 		forth = Forth ();
 		
 		function run (script) {
@@ -107,6 +110,7 @@
 		init: function () {
 			mod.initialized = true;
 			Forth = t('js-forth');
+			has_run = 1; // force reset.
 			forth_reset (function () { mod.loaded = true; mod.onLoad (); });
 		},
 
@@ -115,29 +119,35 @@
 				mod.reset ()
 		},
 		
-		reset: function (cb) {
-			if (!has_run)
-				return;
-
-			return forth_reset (cb);
+		reset: function (cb, error_cb) {
+			forth_base = '';
+			forth_reset (cb, error_cb);
 		},
 
 		// Define a set of key-value constants in the interpreter.
-		setConstants: function (values, res) {
+		setConstants: function (values, error_cb, res) {
 			var cons = [];
 			for (var key of Object.keys (values))
 				cons.push (values[key] + ' constant ' + key);
-			return mod.run (cons.join (' '), res);
+
+			return mod.run (cons.join ('\n'), error_cb, res);
 		},
 
 		load: function (script_name, cb, error_cb) {
-			return forth_load ('usr/' + script_name, cb, error_cb);
+			forth_base = 'usr/';
+			var script = forth_load (script_name, cb, error_cb);
+			if (script) cb (script);
 		},
 
 		// if res is not defined, a new one will be created.
-		run: function (str, res) {
+		run: function (str, error_cb, res) {
 			has_run ++;
-			return forth_run (str, res);
+			try
+				res = forth_run (str, res);
+			catch (e)
+				if (error_cb) error_cb (e);
+
+			return res;
 		}
 	}
 	

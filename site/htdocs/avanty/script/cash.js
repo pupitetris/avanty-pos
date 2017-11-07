@@ -8,6 +8,7 @@
 
 	var ui = {};
 	var shell;
+	var forth;
 
 	function obj_search (obj, path) {
 		if (!path)
@@ -133,6 +134,7 @@
 		ui.shift_begin_submit = ui.section_shift_begin.find ('button');
 
 		ui.section_park_exit = $('#cash-park-exit');
+		ui.section_park_exit.on ('avanty:switchSectionEnter', cash_park_exit_reset);
 		ui.section_park_exit.find ('button').button ();
 		ui.section_park_exit.find ('input').input ();
 
@@ -149,6 +151,29 @@
 
 		ui.park_exit_barcode = ui.section_park_exit.find ('input[name="cash-park-exit-barcode"]');
 		ui.park_exit_submit = ui.section_park_exit.find ('button');
+
+		ui.section_park_exit_charge = $('#cash-park-exit-charge');
+		ui.section_park_exit_charge.on ('avanty:switchSectionEnter', cash_park_exit_charge_reset);
+		ui.section_park_exit_charge.find ('button').button ();
+		ui.section_park_exit_charge.find ('input').input ();
+
+		ui.park_exit_charge_form = ui.section_park_exit_charge.find ('form');
+		ui.park_exit_charge_form.validate ({
+			submitHandler: cash_park_exit_charge_submit,
+			rules: {
+				'cash-park-exit-charge-amount': { required: true, maxlength: 8 }
+			}
+		});
+
+		ui.park_exit_charge_table = ui.park_exit_charge_form.find ('tbody');
+		ui.park_exit_charge_total = ui.park_exit_charge_form.find ('.total');
+		ui.park_exit_charge_change = ui.park_exit_charge_form.find ('.change');
+
+		ui.park_exit_charge_amount = ui.park_exit_charge_form.find ('input[name="cash-park-exit-charge-amount"]');
+		ui.park_exit_charge_amount.on ('input', cash_park_exit_charge_amount_input);
+		ui.park_exit_charge_amount.on ('change', cash_park_exit_charge_amount_change);
+
+		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button');
 
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
@@ -281,12 +306,17 @@
 	}
 
 	function cash_park_exit () {
+		ui.park_exit_barcode.val ('');
+
 		APP.history.go (MOD_NAME, ui.section_park_exit, 'cash-park-exit');
 		shell.backShow ();
+		shell.menuCollapse ();
+	}
 
+	function cash_park_exit_reset () {
 		ui.park_exit_form.validate ().resetForm ();
-		ui.park_exit_barcode.val ('');
-		ui.park_exit_submit.button ('enable');
+		if (ui.park_exit_barcode.val () != '')
+			ui.park_exit_barcode.select ();
 
 		APP.later (function () {
 			if (ui.section_park_exit.is (':hidden')) return true;
@@ -309,13 +339,111 @@
 		});
 	}
 
+	function cash_forth_error (res, status, error) {
+		console.error (status + ' ' + error);
+	}
+
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
-		ui.park_exit_submit.button ('disable');
+		forth.reset (cash_park_exit_charge);
+	}
+
+	function cash_park_exit_charge () {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
-		// aplicar tarifa.
-		1;
+
+		var charge_date = new Date ();
+		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (barcode_fields.entryDate);
+
+		var cons = {
+			'tiempo_registrado': delta_secs,
+			'extraviado': 1
+		};
+
+		forth.reset (undefined, cash_forth_error);
+		var res = forth.setConstants (cons);
+		forth.load ('test.fth', cash_park_exit_charge_rate, cash_forth_error);
+	}
+
+	function cash_park_exit_charge_rate (script) {
+		// Run script and Update rate stuff
+		var res = forth.run (script);
+
+		// convert to 2D array.
+		var records = res.output.join ('').replace (/\n$/, '').split ('\n')
+			.map (function (s) {
+				return s.split (/ *\| */)
+					.map (function (e, i) {
+						return (i==0)? e: parseInt (e);
+					})});
+
+		// Manage CANCEL directive.
+		for (var i = 0; i < records.length; i++)
+			if (records[i][0] == '__CANCEL__') {
+				records.splice (0, i + 1);
+				i = -1;
+			}
+		
+		ui.park_exit_charge_table.empty ();
+		var total = 0;
+		for (var rec of records) {
+			var subtotal = rec[1] * rec[2];
+			total += subtotal;
+			ui.park_exit_charge_table.append ($('<tr>' +
+												'<th><span>' + rec[0] + '</span></th>' +
+												'<td><s/></td><td class="money">' + APP.Util.asMoney (rec[1]) + '</td>' +
+												'<td class="qty">' + rec[2] + '</td>' +
+												'<td><s/></td><td class="money"><span>' + APP.Util.asMoney (subtotal) + '</span></td>' +
+												'</tr>'));
+		}
+		ui.park_exit_charge_total.text (APP.Util.asMoney (total));
+
+		ui.park_exit_charge_amount.val ('');
+
+		APP.history.go (MOD_NAME, ui.section_park_exit_charge, 'cash-park-exit');
+		shell.backShow ();
+	}
+
+	// Canonize value to include cents if none were introduced.
+	function cash_park_exit_charge_amount_change () {
+		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
+		ui.park_exit_charge_amount.val (APP.Util.asMoney (amount));
+	}
+
+	function cash_park_exit_charge_amount_input () {
+		var total = APP.Util.parseMoney (ui.park_exit_charge_total.text ());
+		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
+		var change = amount - total;
+		ui.park_exit_charge_change.text ((change < 0)? '': APP.Util.asMoney (change));
+	}
+
+	function cash_park_exit_charge_reset () {
+		ui.park_exit_charge_submit.button ('enable');
+
+		APP.later (function () {
+			if (ui.section_park_exit_charge.is (':hidden')) return true;
+			ui.park_exit_charge_amount.focus ();
+		});
+	}
+
+	function cash_park_exit_charge_submit (form, evt) {
+		evt.originalEvent.preventDefault ();
+
+		ui.park_exit_charge_submit.button ('disable');
+	}
+
+	function cash_main () {
+		if (APP.mod.login.is_first) {
+			// This is the first login for the user. Force a password change.
+			cash_chpass_request ();
+			return;
+		}
+
+		shell.show (true);
+		shell.backShow ();
+
+		APP.history.setHome (MOD_NAME, ui.section_main);
+		APP.switchSection (ui.section_main);
 	}
 
 	function cash_main_reset () {
@@ -347,22 +475,6 @@
 			// Listen to any keyboard input sent from HID devices:
 			APP.hidHandlerStart ();
 		}
-	}
-
-	function cash_main () {
-		if (APP.mod.login.is_first) {
-			// This is the first login for the user. Force a password change.
-			cash_chpass_request ();
-			return;
-		}
-
-		shell.show (true);
-		shell.backShow ();
-
-		APP.history.setHome (MOD_NAME, ui.section_main);
-		APP.switchSection (ui.section_main);
-
-		cash_main_reset ();
 	}
 
 	function cash_shift_begin () {
@@ -413,7 +525,7 @@
 		init: function () {
 			mod.initialized = true;
 			APP.loadModule ('barcode');
-			APP.loadModule ('forth');
+			APP.loadModule ('forth', function (mod) { forth = mod; });
 			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);
 		},
 

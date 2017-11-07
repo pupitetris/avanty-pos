@@ -95,11 +95,39 @@
 		<tbody>
 		  <tr>
 			<th><label for="cash-park-exit-barcode">Dígitos:</label></th>
-			<td><input name="cash-park-exit-barcode" type="text" maxlength="20" /></td>
+			<td><input class="numbers" name="cash-park-exit-barcode" type="text" maxlength="20" /></td>
 		  </tr>
 		</tbody>
 		<tfoot>
 		  <tr><td colspan="2"><button type="submit">Cobrar</button></td></tr>
+		</tfoot>
+	  </table>
+	</form>
+  </div>
+  <div class="section section-small" id="cash-park-exit-charge">
+	<form>
+	  <table>
+		<thead>
+		  <tr>
+			<th></th><th colspan="2">Costo unitario</th><th>Cant.</th><th colspan="2">Subtotal</th>
+		  </tr>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+		  <tr>
+			<th>Total:</th>
+			<td colspan="4"><s/></td><td class="money"><span class="total"></span></th>
+		  </tr>
+		  <tr>
+			<th>Monto recibido:</th>
+			<td colspan="4"><s/></td><td><input class="money" maxlength="8" name="cash-park-exit-charge-amount" type="text" /></td>
+		  </tr>
+		  <tr>
+			<th>Cambio:</th>
+			<td colspan="4"><s/></td><td class="money"><span class="change"></span></td>
+		  </tr>
+		  <tr><td colspan="6"><button type="submit">Abrir caja</button></td></tr>
 		</tfoot>
 	  </table>
 	</form>

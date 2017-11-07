@@ -35,8 +35,9 @@ h1 {
     -webkit-user-select: none;
 }
 
-.numbers {
+.numbers, .money {
 	font-family: 'Ubuntu Mono Regular', sans-serif !important;
+	font-size: 120% !important;
 }
 
 /* for visual reference: */
@@ -310,6 +311,7 @@ input[type="text"].money {
 /* Used to denote money symbol. */
 s {
 	text-decoration: unset;
+	font-family: 'Open Sans', sans-serif;
 }
 
 s:before {

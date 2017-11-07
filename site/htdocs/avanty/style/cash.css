@@ -42,3 +42,64 @@
 input[name="shift-begin-amount"] {
 	width: 8ex;
 }
+
+#cash-park-exit-charge table {
+	border-spacing: 0;
+}
+
+#cash-park-exit-charge th {
+	padding: 0;
+	white-space: nowrap;
+}
+
+#cash-park-exit-charge thead th {
+	padding-left: 0.25em;
+	padding-right: 0.25em;
+}
+
+#cash-park-exit-charge tbody td, #cash-park-exit-charge tfoot td {
+	position: relative;
+	padding: 0;
+	text-align: right;
+}
+
+#cash-park-exit-charge table .money {
+	width: 9ex;
+}
+
+#cash-park-exit-charge tbody th, #cash-park-exit-charge tfoot th {
+	padding-top: 0.5em;
+	text-align: right;
+}
+
+#cash-park-exit-charge tbody th span:after {
+	content: ':';
+}
+
+#cash-park-exit-charge tbody td.qty {
+	text-align: center;
+}
+
+#cash-park-exit-charge table .money span {
+	display: inline-block;
+	width: 9ex;
+	padding-left: 8px;
+	padding-right: 8px;
+}
+
+#cash-park-exit-charge table input {
+	line-height: 1.5em;
+}
+
+#cash-park-exit-charge tbody tr:last-child > * {
+	padding-bottom: 0.5em;
+}
+
+#cash-park-exit-charge tfoot tr:first-child > * {
+	border-top: 1px solid black;
+}
+
+#cash-park-exit-charge tfoot td[colspan="6"] {
+	padding-top: 1.5em;
+	text-align: right;
+}

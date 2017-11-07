@@ -9,6 +9,7 @@ incluir standard.fth
 : entonces ['] jumpIfFalse compile, here 0 , ; immediate
 : fin dup here swap - swap ! ; immediate
 : si_no postpone ahead 1 cs-roll postpone fin ; immediate
+: si ; // a NOP for syntactic sugar.
 : salir quit ;
 : guarda ! ;
 : valor @ ;

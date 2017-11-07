@@ -10,7 +10,9 @@ define calcular
 1 costo_primera_hora desc_primera_hora registra
 
 // Si el tiempo registrado es menor a una hora, terminamos.
-tiempo_registrado 1hr <= entonces salir fin
+si tiempo_registrado 1hr <= entonces
+	salir
+fin
 
 // El tiempo restante es el tiempo registrado menos una hora.
 tiempo_registrado 1hr - restante guarda
@@ -19,8 +21,8 @@ tiempo_registrado 1hr - restante guarda
 restante valor duración_fracción / fracciones guarda
 
 // Si no se registró la salida en el minuto exacto de la última fracción, sumar una fracción adicional.
-restante valor duración_fracción residuo 0 > entonces
-    fracciones incrementa
+si restante valor duración_fracción residuo 0 > entonces
+	fracciones incrementa
 fin
 
 fracciones valor costo_fracción desc_fracción registra
@@ -30,13 +32,13 @@ fracciones valor costo_fracción * costo_primera_hora + total guarda
 
 // Si el total obtenido es mayor a la tarifa máxima diaria, marcamos lo ya reportado como cancelado
 // y reportamos la tarifa máxima
-total valor tarifa_diaria_máxima > entonces
-    cancela_anteriores
-    1 tarifa_diaria_máxima desc_tarifa_diaria_máxima registra
+si total valor tarifa_diaria_máxima > entonces
+	cancela_anteriores
+	1 tarifa_diaria_máxima desc_tarifa_diaria_máxima registra
 fin
 
-está extraviado entonces
-    1 costo_extraviado desc_extraviado registra
+si está extraviado entonces
+	1 costo_extraviado desc_extraviado registra
 fin
 
 ;

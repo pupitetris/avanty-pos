@@ -182,10 +182,10 @@
 	var mod = {
 		init: function () {
 			mod.initialized = true;
+			$.validator.addMethod ('barcode', barcode_validate, 'El código ingresado no es válido.');
 		},
 
 		onLoad: function () {
-			$.validator.addMethod ('barcode', barcode_validate, 'El código ingresado no es válido.');
 		},
 
 		generate: function (fields) {

@@ -142,10 +142,11 @@
 		// if res is not defined, a new one will be created.
 		run: function (str, error_cb, res) {
 			has_run ++;
-			try
+			try {
 				res = forth_run (str, res);
-			catch (e)
+			} catch (e) {
 				if (error_cb) error_cb (e);
+			}
 
 			return res;
 		}

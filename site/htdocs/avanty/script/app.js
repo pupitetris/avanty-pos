@@ -470,6 +470,11 @@
 		mapReplace: function (str, map) {
 			var re = new RegExp (Object.keys (map).join ('|'), 'gi');
 			return str.replace (re, function (m) { return map[m]; });	
+		},
+
+		getTimeSecs: function (date) {
+			if (!date) date = new Date ();
+			return Math.floor (date.getTime () / 1000);
 		}
 	}
 

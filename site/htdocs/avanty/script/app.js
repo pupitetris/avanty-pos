@@ -816,8 +816,9 @@
 
 		main: function () {
 			APP.config = {
+				defaultRateName: 'test',
 				barcodeSecret: 'secret',
-				maxTender: 50000 // Biggest tender that can be received by the POS.
+				maxTender: 100000 // Biggest tender (in cents) that can be received by the POS.
 			};
 
 			$.validator.addMethod ('money', function (val, ele) {

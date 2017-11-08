@@ -847,8 +847,6 @@
 
 			APP.charp.setBusyCB (show_hourglass);
 
-			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
-
 			var dev_conf = {
 				qz_connect: {
 					host: 'localhost',
@@ -874,6 +872,8 @@
 					}
 				}
 			};
+
+			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
 
 			APP.loadModule ('devices', // Printer and HIDs.
 							function (mod) { mod.configure (dev_conf) });

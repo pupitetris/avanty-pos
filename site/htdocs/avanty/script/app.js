@@ -71,6 +71,13 @@
 				ui.back.on ('click.shell', function () { that.backGo (); });
 			}
 
+			var forward = ui.shell.find ('.shell-forward');
+			if (forward.length > 0) {
+				ui.forward = forward;
+				var that = this;
+				ui.forward.on ('click.shell', function () { that.forwardGo (); });
+			}
+
 			var menu = ui.shell.find ('.shell-menu');
 			if (menu.length > 0) {
 				var that = this;
@@ -140,14 +147,20 @@
 								   false: this._menu_selected);
 			},
 
-			backShow: function () {
-				if (!this.ui.back)
-					return;
-				
-				if (APP.history.length () == 0)
-					this.ui.back.hide ();
-				else
-					this.ui.back.show ();
+			navShow: function () {
+				if (this.ui.back) {
+					if (APP.history.length () == 0)
+						this.ui.back.hide ();
+					else
+						this.ui.back.show ();
+				}
+
+				if (this.ui.forward) {
+					if (APP.history.pos () == 0)
+						this.ui.forward.hide ();
+					else
+						this.ui.forward.show ();
+				}
 			},
 
 			backGo: function () {
@@ -155,7 +168,16 @@
 				var that = this;
 				APP.later (function () {
 					APP.history.back ();
-					that.backShow ();
+					that.navShow ();
+				});
+			},
+
+			forwardGo: function () {
+				// deferr to allow for the button to gain focus and the keyboard to hide.
+				var that = this;
+				APP.later (function () {
+					APP.history.forward ();
+					that.navShow ();
 				});
 			}
 		}
@@ -351,6 +373,17 @@
 			return idx;
 		}
 
+		function index_of_forward (process) {
+			if (!process)
+				return this._curr;
+
+			var idx;
+			for (idx = this._curr; idx >= 0; idx--)
+				if (this._hist[idx].process == process)
+					break;
+			return idx;
+		}
+
 		History.prototype = {
 			// process is a string identifying the process that is changing page.
 			// page is a string, usually the id of the module's page.
@@ -364,9 +397,18 @@
 			// Returns undefined if you can't pop for that process, or in general, any more.
 			pop: function (process) {
 				var idx = index_of.call (this, process);
-				if (this._curr < this._hist.length)
+				if (idx < this._hist.length)
 					this._curr = idx + 1;
-				return this._hist[idx];
+				return this._hist[idx]; // with idx >= length, it's undefined.
+			},
+
+			// Undoes pop.
+			// Returns undefined if you can't unpop for that process, or in general, any more.
+			unpop: function (process) {
+				var idx = index_of_forward.call (this, process);
+				if (idx >= 0)
+					this._curr = idx - 1;
+				return this._hist[idx]; // with idx < 0, it's undefined.
 			},
 
 			// Clear history of matching process or all of it.
@@ -390,8 +432,18 @@
 				return this._hist[idx];
 			},
 
+			pos: function (process) {
+				return index_of.call (this, process);
+			},
+
+			// Number of items available backwards.
 			length: function () {
 				return this._hist.length - this._curr;
+			},
+
+			// Number of items available.
+			size: function () {
+				return this._hist.length;
 			},
 
 			setHome: function (page, section) {
@@ -421,6 +473,18 @@
 					slot = this._home;
 				}
 
+				if (!slot)
+					return false;
+
+				APP.switchPage (slot.page);
+				APP.switchSection (slot.section);
+				return true;
+			},
+
+			// Returns true if history was able to change location.
+			forward: function (process) {
+				this.unpop (process);
+				var slot = this.get (process);
 				if (!slot)
 					return false;
 

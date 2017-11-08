@@ -93,14 +93,16 @@ h1 {
 
 /* clock showing the date/time */
 #clock {
+	display: flex;
 	position: absolute;
 	top: 0;
-	left: calc((50px + 8px) + 8px);
-	z-index: 10000;
+	/*         pad   back   pad */
+	left: calc(8px + 50px + 8px);
+	width: 75px;
 	height: 50px;
-	display: flex;
 	flex-direction: column;
 	justify-content: center;
+	z-index: 10000;
 }
 
 #clock span {
@@ -279,6 +281,11 @@ button.shell-tool img {
 
 .shell-back {
 	left: 8px; /* 8px is the distance between elements. */
+}
+
+.shell-forward {
+	/*         pad   back   pad   clock  pad */
+	left: calc(8px + 50px + 8px + 75px + 8px); /* 8px is the distance between elements. */
 }
 
 .avanty button.shell-tool.button-icon {

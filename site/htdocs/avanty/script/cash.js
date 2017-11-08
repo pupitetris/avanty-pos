@@ -252,7 +252,7 @@
 			ui.chpass_submit.button ('enable');
 
 			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
-			shell.backShow ();
+			shell.navShow ();
 			shell.menuCollapse ();
 		}
 	}
@@ -309,10 +309,8 @@
 			APP.mod.login.isFirst = false;
 			ui.chpass_title.text (chpass_title);
 			cash_main ();
-		} else {
-			APP.history.back ();
-			shell.backShow ();
-		}
+		} else
+			shell.backGo ();
 	}
 
 	function cash_park_entry () {
@@ -335,7 +333,7 @@
 		ui.park_exit_barcode.val ('');
 
 		APP.history.go (MOD_NAME, ui.section_park_exit, 'cash-park-exit');
-		shell.backShow ();
+		shell.navShow ();
 		shell.menuCollapse ();
 	}
 
@@ -452,7 +450,7 @@
 		ui.park_exit_charge_amount.val ('');
 
 		APP.history.go (MOD_NAME, ui.section_park_exit_charge, 'cash-park-exit');
-		shell.backShow ();
+		shell.navShow ();
 	}
 
 	// Canonize value to include cents if none were introduced.
@@ -504,7 +502,7 @@
 		}
 
 		shell.show (true);
-		shell.backShow ();
+		shell.navShow ();
 
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
@@ -543,7 +541,7 @@
 
 	function cash_shift_begin () {
 		APP.history.go (MOD_NAME, ui.section_shift_begin, 'cash-shift-begin');
-		shell.backShow ();
+		shell.navShow ();
 
 		APP.later (function () {
 			if (ui.section_shift_begin.is (':hidden')) return true;
@@ -572,8 +570,7 @@
 		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
 		cash_main_reset ();
 
-		APP.history.back ();
-		shell.backShow ();
+		shell.backGo ();
 
 		ui.shift_begin_submit.button ('enable');
 		ui.shift_begin_amount.val ('');

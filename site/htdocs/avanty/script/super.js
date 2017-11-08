@@ -139,7 +139,7 @@
 			shell.show (false);
 		} else {
 			APP.history.go (MOD_NAME, ui.section_super_chpass, 'super-chpass-user');
-			shell.backShow ();
+			shell.navShow ();
 			shell.show (true);
 		}
 
@@ -210,10 +210,8 @@
 		if (mod.chpass) {
 			mod.chpass = false;
 			APP.loadModule ('login');
-		} else {
-			APP.history.back ();
-			shell.backShow ();
-		}
+		} else
+			shell.backGo ();
 
 		ui.super_chpass_submit.button ('enable');
 		ui.super_chpass_cancel.button ('enable');
@@ -258,7 +256,7 @@
 
 	function super_create_user () {
 		APP.history.go (MOD_NAME, ui.section_newuser, 'super-create-user');
-		shell.backShow ();
+		shell.navShow ();
 		shell.menuCollapse ();
 
 		ui.newuser_form.validate ().resetForm ();
@@ -306,8 +304,7 @@
 
 	function super_create_user_success (login) {
 		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
-		APP.history.back ();
-		shell.backShow ();
+		shell.backGo ();
 	}
 
 	function super_main_message (msg) {
@@ -339,7 +336,7 @@
 
 	function super_main () {
 		shell.show (true);
-		shell.backShow ();
+		shell.navShow ();
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
 	}

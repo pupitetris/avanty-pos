@@ -76,6 +76,11 @@
 			file_cache[fullname] = data;
 			if (cb) cb (data);
 		}
+
+		function error (res, status, error) {
+			if (error_cb)
+				error_cb ('Ajax(' + status + '): ' + error);
+		}
 			
 		$.ajax ({
 				type: 'GET',
@@ -84,7 +89,7 @@
 			dataType: 'text',
 			  global: false,
 			 success: success,
-			   error: error_cb
+			   error: error
 		});
 	}
 
@@ -98,8 +103,16 @@
 		forth = Forth ();
 		
 		function run (script) {
-			forth_run (script);
-			if (cb) cb ();
+			var res;
+			try {
+				res = forth_run (script);
+			} catch (e) {
+				if (error_cb)
+					error_cb ('Reset run: ' + e.toString ());
+				if (res)
+					res.exception = e;
+			}
+			if (cb) cb (res);
 		}
 
 		var script = forth_load ('avanty.fth', run, error_cb);
@@ -145,7 +158,10 @@
 			try {
 				res = forth_run (str, res);
 			} catch (e) {
-				if (error_cb) error_cb (e);
+				if (error_cb)
+					error_cb ('Run: ' + e.toString ());
+				if (res)
+					res.exception = e;
 			}
 
 			return res;

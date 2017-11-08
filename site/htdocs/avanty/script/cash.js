@@ -363,14 +363,23 @@
 		});
 	}
 
-	function cash_forth_error (res, status, error) {
-		console.error (status + ' ' + error);
+	function cash_forth_error (error) {
+		console.error (error);
+
+		APP.msgDialog ({
+			icon: 'error',
+			desc: 'Falla interna al evaluar tarifa.',
+			msg: error,
+			sev: CHARP.ERROR_SEV['INTERNAL'],
+			title: 'Falla en tarifa',
+			opts: { width: '75%' }
+		});
 	}
 
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
-		forth.reset (cash_park_exit_charge);
+		forth.reset (cash_park_exit_charge, cash_forth_error);
 	}
 
 	var cash_charge_date;
@@ -410,13 +419,16 @@
 		};
 
 		forth.reset (undefined, cash_forth_error);
-		var res = forth.setConstants (cons);
+		forth.setConstants (cons, cash_forth_error);
 		forth.load ('test.fth', cash_park_exit_charge_rate, cash_forth_error);
 	}
 
 	function cash_park_exit_charge_rate (script) {
 		// Run script and Update rate stuff
-		var res = forth.run (script);
+		var res = forth.run (script, cash_forth_error);
+
+		if (!res)
+			return;
 
 		// convert to 2D array.
 		var records = res.output.join ('').replace (/\n$/, '').split ('\n')

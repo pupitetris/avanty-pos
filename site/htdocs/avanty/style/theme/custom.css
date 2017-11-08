@@ -122,6 +122,18 @@
 	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
+.avanty .ui-button.ui-state-disabled {
+	background-color: white;
+	border-color: #e8e8e8;
+	box-shadow: none;
+	color: lightgray;
+	opacity: 1;
+}
+
+.avanty .ui-button.ui-state-disabled img {
+	opacity: 0.35;
+}
+
 .avanty .ui-datepicker-trigger {
     padding-left: 4px;
     vertical-align: top;

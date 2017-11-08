@@ -103,3 +103,30 @@ input[name="shift-begin-amount"] {
 	padding-top: 1.5em;
 	text-align: right;
 }
+
+#cash-park-exit-charge h4 {
+	width: 95%;
+	height: 3em;
+	line-height: 4.5em;
+	margin-bottom: 0;
+	text-align: left;
+	border-bottom: 1px solid lightgray;
+}
+
+#cash-park-exit-charge > table {
+	
+}
+
+#cash-park-exit-charge > table td {
+	text-align: left;
+	vertical-align: bottom;
+}
+
+#cash-park-exit-charge > table th {
+	padding-left: 2ex;
+	padding-right: 1ex;
+}
+
+#cash-park-exit-charge > table th::first-child {
+	padding-left: 0;
+}

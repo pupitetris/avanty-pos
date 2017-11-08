@@ -173,6 +173,10 @@
 
 		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button');
 
+		ui.park_exit_entry_date = $('#cash-park-exit-entry-date');
+		ui.park_exit_charge_date = $('#cash-park-exit-charge-date');
+		ui.park_exit_duration = $('#cash-park-exit-duration');
+
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 
 		ui.tickets = {};
@@ -288,14 +292,14 @@
 	}
 
 	function cash_park_entry () {
-		var ticket = {
+		var barcode_fields = {
 			terminalId: APP.terminal.id,
 			entryDate: new Date ()
 		}
 
-		var barcode = APP.mod.barcode.generate (ticket);
+		var barcode = APP.mod.barcode.generate (barcode_fields);
 
-		ui.tickets.entry_time.text (ticket.entryDate.toLocaleString ());
+		ui.tickets.entry_time.text (barcode_fields.entryDate.toLocaleString ());
 		ui.tickets.entry_terminal.text (APP.terminal.name);
 		ui.tickets.entry_barcode.attr ('data-chars', barcode);
 
@@ -352,6 +356,28 @@
 
 		var charge_date = new Date ();
 		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (barcode_fields.entryDate);
+
+		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
+		ui.park_exit_charge_date.text (charge_date.toLocaleString ());
+
+		var duration = delta_secs;
+		var segs = duration % 60;
+		duration = (duration - segs) / 60;
+		var mins = duration % 60;
+		duration = (duration - mins) / 60;
+		var hrs = duration % 24;
+		duration = (duration - hrs) / 24;
+		var days = duration % 7;
+		var weeks = (duration - days) / 7;
+
+		duration =
+			((weeks > 0)? weeks + ' semanas ': '') +
+			((days > 0)? days + ' días ': '') +
+			((hrs > 0)? hrs + ' hr. ': '') +
+			mins + ' mins. ' + segs + ' seg.';
+
+		ui.park_exit_duration.text (duration);
+
 
 		var cons = {
 			'tiempo_registrado': delta_secs,

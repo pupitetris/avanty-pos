@@ -911,7 +911,10 @@
 			APP.toast (false);
 			$('body').show ();
 
+			// Set up automatic hourglass display.
 			APP.charp.setBusyCB (show_hourglass);
+			$(document).ajaxStart (function () { show_hourglass (true); });
+			$(document).ajaxStop (function () { show_hourglass (false); });
 
 			var dev_conf = {
 				qz_connect: {

@@ -24,6 +24,7 @@
 -->
 	  <div id="cash-tab-user">
 		<div>
+		  <button id="cash-tab-user-chpass">Cambiar contraseña</button>
 		  <h4>Turno</h4>
 		  <button id="cash-tab-user-shift-begin">Iniciar</button>
 		  <button class="requires-shift" id="cash-tab-user-shift-end">Finalizar</button>
@@ -127,7 +128,12 @@
 			<th>Cambio:</th>
 			<td colspan="4"><s/></td><td class="money"><span class="change"></span></td>
 		  </tr>
-		  <tr><td colspan="6"><button type="submit">Abrir caja</button></td></tr>
+		  <tr>
+			<td colspan="6">
+			  <button id="cash-park-exit-charge-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
+			  <button class="button-icon" type="submit"><img src="img/symbolic/yes.svg" />Abrir caja</button>
+			</td>
+		  </tr>
 		</tfoot>
 	  </table>
 	</form>

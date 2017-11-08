@@ -92,6 +92,9 @@
 		shell.ui.rent_search = $('#cash-tab-rent-search');
 		shell.ui.rent_create = $('#cash-tab-rent-create');
 
+		shell.ui.user_chpass = $('#cash-tab-user-chpass');
+		shell.ui.user_chpass.on ('click', cash_chpass);
+
 		shell.ui.user_shift_begin = $('#cash-tab-user-shift-begin');
 		shell.ui.user_shift_begin.on ('click', cash_shift_begin);
 
@@ -171,13 +174,16 @@
 		ui.park_exit_charge_amount.on ('input', cash_park_exit_charge_amount_input);
 		ui.park_exit_charge_amount.on ('change', cash_park_exit_charge_amount_change);
 
+		ui.park_exit_charge_print = $('#cash-park-exit-charge-print');
 		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button');
 
 		ui.park_exit_entry_date = $('#cash-park-exit-entry-date');
 		ui.park_exit_charge_date = $('#cash-park-exit-charge-date');
 		ui.park_exit_duration = $('#cash-park-exit-duration');
 
+		// ui.section_chpass is defined inside here:
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
+		ui.section_chpass.on ('avanty:switchSectionEnter', cash_chpass_reset);
 
 		ui.tickets = {};
 		ui.tickets.entry = $('#cash-ticket-entry');
@@ -232,16 +238,28 @@
 
 	var chpass_title;
 
-	function cash_chpass_request () {
-		if (APP.mod.login.is_first) {
+	function cash_chpass () {
+		if (APP.mod.login.isFirst) {
 			// This is the first login for the user. Setup page accordingly.
 			chpass_title = ui.chpass_title.text ();
 			ui.chpass_title.text ('Establece una contraseña propia');
 			shell.show (false);
 			APP.switchSection (ui.section_chpass);
-		} else
-			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
+		} else {
+			ui.chpass_orig_pass.val ('');
+			ui.chpass_pass.val ('');
+			ui.chpass_pass2.val ('');
+			ui.chpass_submit.button ('enable');
 
+			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
+			shell.backShow ();
+			shell.menuCollapse ();
+		}
+	}
+
+	function cash_chpass_reset () {
+		ui.chpass_form.validate ().resetForm ();
+		
 		APP.later (function () {
 			if (ui.section_chpass.is (':hidden')) return true;
 			ui.chpass_orig_pass.focus ();
@@ -281,14 +299,20 @@
 	}
 
 	function cash_chpass_success () {
+		ui.chpass_orig_pass.val ('');
+		ui.chpass_pass.val ('');
+		ui.chpass_pass2.val ('');
+
 		APP.toast ('Contraseña cambiada con éxito.');
-		if (APP.mod.login.is_first) {
+		if (APP.mod.login.isFirst) {
 			// End of first login exception. Restore and go back to main screen.
-			APP.mod.login.is_first = false;
+			APP.mod.login.isFirst = false;
 			ui.chpass_title.text (chpass_title);
 			cash_main ();
-		} else
+		} else {
 			APP.history.back ();
+			shell.backShow ();
+		}
 	}
 
 	function cash_park_entry () {
@@ -351,14 +375,19 @@
 		forth.reset (cash_park_exit_charge);
 	}
 
+	var cash_charge_date;
+	var cash_entry_date;
+
 	function cash_park_exit_charge () {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
-		var charge_date = new Date ();
-		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (barcode_fields.entryDate);
+		cash_charge_date = new Date ();
+		cash_entry_date = barcode_fields.entryDate;
+
+		var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
 
 		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
-		ui.park_exit_charge_date.text (charge_date.toLocaleString ());
+		ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
 
 		var duration = delta_secs;
 		var segs = duration % 60;
@@ -378,10 +407,8 @@
 
 		ui.park_exit_duration.text (duration);
 
-
 		var cons = {
 			'tiempo_registrado': delta_secs,
-			'extraviado': 1
 		};
 
 		forth.reset (undefined, cash_forth_error);
@@ -438,11 +465,12 @@
 		var total = APP.Util.parseMoney (ui.park_exit_charge_total.text ());
 		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
 		var change = amount - total;
-		ui.park_exit_charge_change.text ((change < 0)? '': APP.Util.asMoney (change));
+		ui.park_exit_charge_change.text ((change < 0)? '-.--': APP.Util.asMoney (change));
 	}
 
 	function cash_park_exit_charge_reset () {
 		ui.park_exit_charge_submit.button ('enable');
+		ui.park_exit_charge_print.button ('disable');
 
 		APP.later (function () {
 			if (ui.section_park_exit_charge.is (':hidden')) return true;
@@ -454,12 +482,24 @@
 		evt.originalEvent.preventDefault ();
 
 		ui.park_exit_charge_submit.button ('disable');
+		ui.park_exit_charge_print.button ('enable');
+
+		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
+		var change = APP.Util.parseMoney (ui.park_exit_charge_change.text ());
+ 		
+		APP.charp.request ('cashier_park_charge',
+						   [ cash_entry_date, cash_charge_date, APP.config.defaultRateName, 'tender', amount, change, null ],
+						   cash_park_exit_charge_success);
+	}
+
+	function cash_park_exit_charge_success () {
+		
 	}
 
 	function cash_main () {
-		if (APP.mod.login.is_first) {
+		if (APP.mod.login.isFirst) {
 			// This is the first login for the user. Force a password change.
-			cash_chpass_request ();
+			cash_chpass ();
 			return;
 		}
 

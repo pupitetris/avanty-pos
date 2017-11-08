@@ -127,8 +127,8 @@
 	}
 
 	function login_success (is_first) {
-		mod.is_first = is_first;
-		mod.is_logged_in = true;
+		mod.isFirst = is_first;
+		mod.isLoggedIn = true;
 
 		APP.charp.request ('this_terminal_info_get', [],
 						   {
@@ -140,7 +140,7 @@
 						   {
 							   asObject: true,
 							   success: function (types) {
-								   mod.user_types = types;
+								   mod.userTypes = types;
 								   // Since an user can be more than one, the order is important.
 								   if (types.maintenance) {
 									   APP.loadModule ('maint');
@@ -159,8 +159,8 @@
 	}
 
 	function login_reset () {
-		mod.is_first = false;
-		mod.is_logged_in = false;
+		mod.isFirst = false;
+		mod.isLoggedIn = false;
 		
 		APP.history.setHome (null);
 		APP.history.clear ();
@@ -171,9 +171,9 @@
 	}
 
 	var mod = {
-		user_types: {},
-		is_first: false,
-		is_logged_in: false,
+		userTypes: {},
+		isFirst: false,
+		isLoggedIn: false,
 
 		passwordHash: function (pass, salt) {
 			if (pass.indexOf (salt) == 0)
@@ -245,7 +245,7 @@
 		},
 
 		reset: function () {
-			if (mod.is_logged_in)
+			if (mod.isLoggedIn)
 				APP.charp.request ('log_out', [], login_reset);
 			else
 				login_reset ();

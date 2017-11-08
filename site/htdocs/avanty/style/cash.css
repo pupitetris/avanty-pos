@@ -130,3 +130,7 @@ input[name="shift-begin-amount"] {
 #cash-park-exit-charge > table th::first-child {
 	padding-left: 0;
 }
+
+#cash-park-exit-charge form button[type="submit"] {
+	margin-left: 1ex;
+}

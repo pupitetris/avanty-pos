@@ -815,6 +815,10 @@
 		VERSION: '0.5',
 
 		main: function () {
+			APP.config = {
+				maxTender: 50000 // Biggest tender that can be received by the POS.
+			};
+
 			$.validator.addMethod ('money', function (val, ele) {
 				var re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
 				return re.exec (val);
@@ -824,6 +828,19 @@
 				var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
 				return re.exec (val);
 			}, 'La clave tiene caracteres no válidos.');
+
+			$.validator.addMethod ('pass-confirm', function (val, ele, other_pass) {
+				return other_pass.val () == val;
+			}, 'Las contraseñas deben de coincidir.');
+
+			$.validator.addMethod ('charge-min', function (val, ele, total_ele) {
+				return APP.Util.parseMoney (total_ele.text ()) <= APP.Util.parseMoney (val);
+			}, 'Monto insuficiente.');
+
+			// Make sure the change is not bigger than the biggest of bills/coins.
+			$.validator.addMethod ('charge-max', function (val, ele, total_ele) {
+				return APP.Util.parseMoney (val) - APP.Util.parseMoney (total_ele.text ()) <= APP.config.maxTender;
+			}, 'Monto excedido.');
 
 			APP.toast (false);
 			$('body').show ();

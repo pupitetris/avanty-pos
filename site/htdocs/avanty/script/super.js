@@ -42,25 +42,16 @@
 			maxlength: 255
 		};
 		rules[name + '-pass2'] = {
-			'validate-pass2': true
+			'pass-confirm': { param: pass }
 		};
 
 		validator_options.rules = rules;
 		validator_options.ignore = '';
 
 		form.validate (validator_options);
-
-		// Custom validations:
-		pass2.addClass ('validate-pass2');
 	}
 
 	function layout_init () {
-		$.validator.addMethod ('validate-pass2', function (val, ele) {
-			var pass_name = ele.name.substring (0, ele.name.length - 1).replace ('-', '_');
-			var pass = ui[pass_name].val ();
-			return pass == val;
-		}, 'Las contraseñas deben de coincidir.');
-
 		ui.sections_parent = $('#super-sections');
 		ui.section_main = $('#super-main');
 

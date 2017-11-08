@@ -63,7 +63,7 @@
 			maxlength: 255
 		};
 		rules[name + '-pass2'] = {
-			'validate-pass2': true
+			'pass-confirm': pass
 		};
 
 		validator_options.rules = rules;
@@ -72,18 +72,9 @@
 		var form = ui[name + '_form'] = section.find ('form');
 		form.attr ('autocomplete', 'off');
 		form.validate (validator_options);
-
-		// Custom validations:
-		pass2.addClass ('validate-pass2');
 	}
 
 	function layout_init () {
-		$.validator.addMethod ('validate-pass2', function (val, ele) {
-			var pass_name = ele.name.substring (0, ele.name.length - 1).replace ('-', '_');
-			var pass = ui[pass_name].val ();
-			return pass == val;
-		}, 'Las contraseñas deben de coincidir.');
-
 		ui.sections_parent = $('#cash-sections');
 
 		shell = APP.shellCreate (ui.sections_parent);
@@ -158,15 +149,22 @@
 		ui.section_park_exit_charge.find ('input').input ();
 
 		ui.park_exit_charge_form = ui.section_park_exit_charge.find ('form');
+
+		ui.park_exit_charge_total = ui.park_exit_charge_form.find ('.total');
+
 		ui.park_exit_charge_form.validate ({
 			submitHandler: cash_park_exit_charge_submit,
 			rules: {
-				'cash-park-exit-charge-amount': { required: true, maxlength: 8 }
+				'cash-park-exit-charge-amount': {
+					required: true,
+					maxlength: 8,
+					'charge-min': ui.park_exit_charge_total,
+					'charge-max': ui.park_exit_charge_total
+				}
 			}
 		});
 
 		ui.park_exit_charge_table = ui.park_exit_charge_form.find ('tbody');
-		ui.park_exit_charge_total = ui.park_exit_charge_form.find ('.total');
 		ui.park_exit_charge_change = ui.park_exit_charge_form.find ('.change');
 
 		ui.park_exit_charge_amount = ui.park_exit_charge_form.find ('input[name="cash-park-exit-charge-amount"]');

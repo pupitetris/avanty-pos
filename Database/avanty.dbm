@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="873,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2353,6 +2353,137 @@ END;]]></definition>
 			<column name="user_id"/>
 		</idxelement>
 </index>
+
+<function name="cashier_park_charge"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Registers the charge of temporary parking.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_entry_date">
+		<type name="av.ts" length="0"/>
+	</parameter>
+	<parameter name="_charge_date">
+		<type name="av.ts" length="0"/>
+	</parameter>
+	<parameter name="_rate_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="_method">
+		<type name="av.payment_type" length="0"/>
+	</parameter>
+	<parameter name="_amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="_change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="_reference">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+	_ticket_id ticket.ticket_id%TYPE;
+	_last_event av.ts;
+BEGIN
+	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
+
+	_last_event := cashier_shift_update_last_event (_uid, _terminal_id);
+	IF _charge_date < _last_event THEN 
+		PERFORM charp_raise ('USERPERM'); -- exception will rollback previous update
+	END IF;
+
+	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_id, 'exit', NULL)
+		RETURNING ticket_id INTO _ticket_id;
+
+	INSERT INTO movement 
+		SELECT _ticket_id, _charge_date, rate_id, _method, _amount, _change, _reference
+			FROM rate WHERE rate.name = _rate_name;
+END;]]></definition>
+</function>
+
+<function name="cashier_shift_assert"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[In one query, check that the user is a cashier and the remote address is of a terminal where the user has a shift begun. Return terminal_id.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="smallint" length="0"/>
+	</return-type>
+	<parameter name="_user_id">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+BEGIN
+	SELECT terminal_id INTO _terminal_id 
+		FROM cashier_shift NATURAL JOIN terminal
+		WHERE ip_addr = _remote_addr AND user_id = _user_id;
+
+	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
+
+	RETURN _terminal_id;
+END;]]></definition>
+</function>
+
+<function name="cashier_shift_update_last_event"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Update the last_event field with NOW. Assumes the cashier shift has already been validated.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_user_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="_terminal_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_last_event av.ts;
+BEGIN
+	SELECT last_event INTO _last_event FROM cashier_shift
+		WHERE terminal_id = _terminal_id AND user_id = _user_id;
+
+	UPDATE cashier_shift SET last_event = CURRENT_TIMESTAMP 
+		WHERE terminal_id = _terminal_id AND user_id = _user_id;
+
+	RETURN _last_event;
+END;]]></definition>
+</function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">

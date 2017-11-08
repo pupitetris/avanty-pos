@@ -816,6 +816,7 @@
 
 		main: function () {
 			APP.config = {
+				barcodeSecret: 'secret',
 				maxTender: 50000 // Biggest tender that can be received by the POS.
 			};
 

@@ -79,7 +79,7 @@
 		var salt = '$2a$08$' + base64;
 
 		// Now encrypt our secret with the salt. FIXME: we need to set a sensible secret, parametrically.
-		var crypt = dcodeIO.bcrypt.hashSync ('secret', salt);
+		var crypt = dcodeIO.bcrypt.hashSync (APP.config.barcodeSecret, salt);
 
 		// Get hash part and fix non-conforming use of . for +
 		var hash64 = crypt.substr (29).replace (/\./g, '+');

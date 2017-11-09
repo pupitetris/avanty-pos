@@ -2378,17 +2378,17 @@ END;]]></definition>
 	<parameter name="_remote_addr">
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
-	<parameter name="_entry_date">
+	<parameter name="_entry_ts">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
-	<parameter name="_charge_date">
+	<parameter name="_charge_ts">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
 	<parameter name="_rate_name">
 		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="_method">
-		<type name="av.payment_type" length="0"/>
+		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="_amount">
 		<type name="integer" length="0"/>
@@ -2403,20 +2403,24 @@ END;]]></definition>
 	_terminal_id av.terminal.terminal_id%TYPE;
 	_ticket_id ticket.ticket_id%TYPE;
 	_last_event av.ts;
+	_rate_id av.rate.rate_id%TYPE;
 BEGIN
 	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
 
 	_last_event := cashier_shift_update_last_event (_uid, _terminal_id);
-	IF _charge_date < _last_event THEN 
+	IF _charge_ts < _last_event THEN 
 		PERFORM charp_raise ('USERPERM'); -- exception will rollback previous update
 	END IF;
 
-	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_id, 'exit', NULL)
+	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_ts, 'exit', NULL)
 		RETURNING ticket_id INTO _ticket_id;
 
-	INSERT INTO movement 
-		SELECT _ticket_id, _charge_date, rate_id, _method, _amount, _change, _reference
-			FROM rate WHERE rate.name = _rate_name;
+	INSERT INTO movement
+		SELECT _ticket_id, _charge_ts, rate_id, _method::av.payment_type, _amount, _change, _reference
+			FROM rate WHERE rate.name = _rate_name AND rate.type = 'regular'
+        RETURNING rate_id INTO _rate_id;
+
+	IF _rate_id IS NULL THEN PERFORM charp_raise ('ASSERT', 'Rate "' || _rate_name || '" not found'); END IF;
 END;]]></definition>
 </function>
 
@@ -2467,7 +2471,7 @@ END;]]></definition>
 	<comment><![CDATA[Update the last_event field with NOW. Assumes the cashier shift has already been validated.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
-	<type name="void" length="0"/>
+	<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</return-type>
 	<parameter name="_user_id">
 		<type name="smallint" length="0"/>
@@ -2628,5 +2632,10 @@ END;]]></definition>
 	<object name="av.movement" type="table"/>
 	<roles names="avanty"/>
 	<privileges select="true" insert="true"/>
+</permission>
+<permission>
+	<object name="av.rate" type="table"/>
+	<roles names="avanty"/>
+	<privileges select="true"/>
 </permission>
 </dbmodel>

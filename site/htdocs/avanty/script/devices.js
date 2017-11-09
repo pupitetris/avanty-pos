@@ -196,7 +196,8 @@
 	}
 
 	function element_get_pseudo_content (element, pseudo) {
-		return window.getComputedStyle (element.get (0), pseudo).getPropertyValue ('content');
+		var content = window.getComputedStyle (element.get (0), pseudo).getPropertyValue ('content');
+		return (content == 'none')? '': content;
 	}
 
 	function node_name (node) {

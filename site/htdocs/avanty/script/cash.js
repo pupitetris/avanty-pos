@@ -175,7 +175,7 @@
 		ui.park_exit_charge_amount.on ('change', cash_park_exit_charge_amount_change);
 
 		ui.park_exit_charge_print = $('#cash-park-exit-charge-print');
-		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button');
+		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button[type="submit"]');
 
 		ui.park_exit_entry_date = $('#cash-park-exit-entry-date');
 		ui.park_exit_charge_date = $('#cash-park-exit-charge-date');
@@ -515,19 +515,22 @@
 	function cash_park_exit_charge_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
+		ui.park_exit_charge_amount.input ('disable');
 		ui.park_exit_charge_submit.button ('disable');
-		ui.park_exit_charge_print.button ('enable');
 
 		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
 		var change = APP.Util.parseMoney (ui.park_exit_charge_change.text ());
  		
 		APP.charp.request ('cashier_park_charge',
 						   [ cash_entry_date, cash_charge_date, APP.config.defaultRateName, 'tender', amount, change, null ],
-						   cash_park_exit_charge_success);
+						   {
+							   success: cash_park_exit_charge_success,
+							   error: function () { ui.park_exit_charge_submit.button ('enable'); return true; }
+						   });
 	}
 
 	function cash_park_exit_charge_success () {
-		
+		ui.park_exit_charge_print.button ('enable');
 	}
 
 	function cash_main () {

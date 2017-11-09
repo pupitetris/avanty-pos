@@ -2379,10 +2379,10 @@ END;]]></definition>
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
 	<parameter name="_entry_date">
-		<type name="av.ts" length="0"/>
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
 	<parameter name="_charge_date">
-		<type name="av.ts" length="0"/>
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
 	<parameter name="_rate_name">
 		<type name="varchar" length="0"/>

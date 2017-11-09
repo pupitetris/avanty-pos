@@ -388,39 +388,63 @@
 	function cash_park_exit_charge () {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
-		cash_charge_date = new Date ();
+		function check_error (err) {
+			if (err.key == 'SQL:DATADUP') { // ticket already charged
+				APP.msgDialog ({
+					icon: 'no',
+					desc: 'El ticket que presentó ya fue cobrado con anterioridad.',
+					sev: CHARP.ERROR_SEV['USER'],
+					title: 'Ticket ya procesado',
+					opts: { width: '75%' }
+				});
+				return;
+			}
+			return true;
+		}
+
+		function check_success () {
+			var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
+
+			ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
+			ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
+
+			var duration = delta_secs;
+			var segs = duration % 60;
+			duration = (duration - segs) / 60;
+			var mins = duration % 60;
+			duration = (duration - mins) / 60;
+			var hrs = duration % 24;
+			duration = (duration - hrs) / 24;
+			var days = duration % 7;
+			var weeks = (duration - days) / 7;
+
+			duration =
+				((weeks > 0)? weeks + ' semanas ': '') +
+				((days > 0)? days + ' días ': '') +
+				((hrs > 0)? hrs + ' hr. ': '') +
+				mins + ' mins. ' + segs + ' seg.';
+
+			ui.park_exit_duration.text (duration);
+
+			var cons = {
+				'tiempo_registrado': delta_secs,
+			};
+
+			forth.reset (undefined, cash_forth_error);
+			forth.setConstants (cons, cash_forth_error);
+			forth.load ('test.fth', cash_park_exit_charge_rate, cash_forth_error);
+		}
+
 		cash_entry_date = barcode_fields.entryDate;
+		cash_charge_date = new Date ();
 
-		var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
-
-		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
-		ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
-
-		var duration = delta_secs;
-		var segs = duration % 60;
-		duration = (duration - segs) / 60;
-		var mins = duration % 60;
-		duration = (duration - mins) / 60;
-		var hrs = duration % 24;
-		duration = (duration - hrs) / 24;
-		var days = duration % 7;
-		var weeks = (duration - days) / 7;
-
-		duration =
-			((weeks > 0)? weeks + ' semanas ': '') +
-			((days > 0)? days + ' días ': '') +
-			((hrs > 0)? hrs + ' hr. ': '') +
-			mins + ' mins. ' + segs + ' seg.';
-
-		ui.park_exit_duration.text (duration);
-
-		var cons = {
-			'tiempo_registrado': delta_secs,
-		};
-
-		forth.reset (undefined, cash_forth_error);
-		forth.setConstants (cons, cash_forth_error);
-		forth.load ('test.fth', cash_park_exit_charge_rate, cash_forth_error);
+		// Before displaying, register on DB that we will start charging. Optionally, if the ticket has
+		// already been charged, an error will rise.
+		APP.charp.request ('cashier_park_charge_check', [barcode_fields.terminalId, barcode_fields.entryDate],
+						   {
+							   success: check_success,
+							   error: check_error
+						   });
 	}
 
 	function cash_park_exit_charge_rate (script) {

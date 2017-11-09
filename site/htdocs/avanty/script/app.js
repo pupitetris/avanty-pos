@@ -10,8 +10,10 @@
 		// Extend jQuery so we can theme inputs.
 		$.fn.input = function (param) {
 			if (param == 'enable') {
+				this.removeClass ('ui-state-disabled');
 				this.prop ('disabled', false);
 			} else if (param == 'disable') {
+				this.addClass ('ui-state-disabled');
 				this.prop ('disabled', true);
 			} else {
 				this.addClass('ui-widget ui-widget-content ui-corner-all');
@@ -989,7 +991,7 @@
 
 			var dev_conf = {
 				qz_connect: {
-					host: 'localhost',
+					host: 'localhost.qz.io',
 					port: { secure: [8181] },
 					usingSecure: true,
 					keepAlive: 60,
@@ -999,7 +1001,7 @@
 				printer: {
 					name: 'BTP-R180',
 					type: 'ESCPOS',
-					basedir: 'C:/avanty/site/htdocs/avanty/',
+					basedir: 'file:///C:/avanty/site/htdocs/avanty',
 					qz_type: 'escp',
 					qz_options: {
 						encoding: 'cp437'

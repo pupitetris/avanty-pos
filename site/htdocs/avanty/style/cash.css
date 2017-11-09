@@ -87,10 +87,6 @@ input[name="shift-begin-amount"] {
 	padding-right: 8px;
 }
 
-#cash-park-exit-charge table input {
-	line-height: 1.5em;
-}
-
 #cash-park-exit-charge tbody tr:last-child > * {
 	padding-bottom: 0.5em;
 }

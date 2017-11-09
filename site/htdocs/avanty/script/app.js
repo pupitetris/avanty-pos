@@ -8,8 +8,16 @@
 	// jQuery extensions.
 	(function ($) {
 		// Extend jQuery so we can theme inputs.
-		$.fn.input = function () {
-			return this.addClass('ui-widget ui-widget-content ui-corner-all');
+		$.fn.input = function (param) {
+			if (param == 'enable') {
+				this.prop ('disabled', false);
+			} else if (param == 'disable') {
+				this.prop ('disabled', true);
+			} else {
+				this.addClass('ui-widget ui-widget-content ui-corner-all');
+			}
+
+			return this;
 		};
 	} (jQuery));
 

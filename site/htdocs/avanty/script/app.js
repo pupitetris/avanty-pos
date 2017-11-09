@@ -404,7 +404,25 @@
 			// You can go back on a specific process, or in general, in a cross-proces way.
 			// Returns undefined if you can't pop for that process, or in general, any more.
 			pop: function (process) {
-				var idx = index_of.call (this, process);
+				if (process) {
+					var seen_process = false;
+					var new_curr = 0;
+					for (var i = 0; i < this._hist.length; i++)
+						if (this._hist[i].process == process) {
+							seen_process = true;
+							this._hist.splice (i, 1);
+							i--; // compensate removal.
+						} else {
+							if (seen_process) {
+								seen_process = false;
+								new_curr = i;
+							}
+						}
+					this._curr = new_curr;
+					return;
+				}
+										   
+				var idx = index_of.call (this);
 				if (idx < this._hist.length)
 					this._curr = idx + 1;
 				return this._hist[idx]; // with idx >= length, it's undefined.
@@ -472,32 +490,29 @@
 			},
 
 			// Returns true if history was able to change location.
-			back: function (process) {
+			back: function (process, do_trigger) {
 				this.pop (process);
-				var slot = this.get (process);
-				if (!slot) {
-					if (process)
-						return false;
+				var slot = this.get ();
+				if (!slot)
 					slot = this._home;
-				}
 
 				if (!slot)
 					return false;
 
 				APP.switchPage (slot.page);
-				APP.switchSection (slot.section);
+				APP.switchSection (slot.section, do_trigger);
 				return true;
 			},
 
 			// Returns true if history was able to change location.
-			forward: function (process) {
+			forward: function (process, do_trigger) {
 				this.unpop (process);
 				var slot = this.get (process);
 				if (!slot)
 					return false;
 
 				APP.switchPage (slot.page);
-				APP.switchSection (slot.section);
+				APP.switchSection (slot.section, do_trigger);
 				return true;
 			},
 
@@ -768,13 +783,14 @@
 			current_page = page;
 		},
 
-		switchSection: function (div) {
+		switchSection: function (div, do_trigger) {
 			APP.hidHandlerStart (false);
 
 			div.parent ().find ('> .section').hide ();
 			div.show ();
 
-			div.trigger ('avanty:switchSectionEnter');
+			if (do_trigger == undefined || do_trigger === true)
+				div.trigger ('avanty:switchSectionEnter');
 		},
 
 		setTitle: function (text) {

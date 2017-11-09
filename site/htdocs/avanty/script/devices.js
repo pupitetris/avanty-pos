@@ -247,6 +247,8 @@
 			return node.width () > 0;
 		}
 		
+		if (node_name (node) == 'HR')
+			return true;
 		return node.height () > 0;
 	}
 

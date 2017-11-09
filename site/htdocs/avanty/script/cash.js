@@ -30,7 +30,7 @@
 		for (var id of ids) {
 			var ele = obj_search (ui, id);
 			prev_state[id] = ele.is (':disabled');
-			ele.button ('disabled');
+			ele.button ('disable');
 		}
 		return prev_state;
 	}
@@ -174,8 +174,13 @@
 		ui.park_exit_charge_amount.on ('input', cash_park_exit_charge_amount_input);
 		ui.park_exit_charge_amount.on ('change', cash_park_exit_charge_amount_change);
 
-		ui.park_exit_charge_print = $('#cash-park-exit-charge-print');
 		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button[type="submit"]');
+
+		ui.park_exit_charge_print = $('#cash-park-exit-charge-print');
+		ui.park_exit_charge_print.on ('click', cash_park_exit_charge_print);
+
+		ui.park_exit_charge_close = $('#cash-park-exit-charge-close');
+		ui.park_exit_charge_close.on ('click', cash_park_exit_charge_close);
 
 		ui.park_exit_entry_date = $('#cash-park-exit-entry-date');
 		ui.park_exit_charge_date = $('#cash-park-exit-charge-date');
@@ -349,6 +354,9 @@
 	}
 
 	function cash_park_exit_hid (evt, str) {
+		APP.history.back ('cash-park-exit', false);
+		shell.navShow ();
+
 		cash_park_exit ();
 
 		APP.later (function () {
@@ -503,8 +511,11 @@
 	}
 
 	function cash_park_exit_charge_reset () {
+		ui.park_exit_charge_form.validate ().resetForm ();
+		ui.park_exit_charge_amount.input ('enable');
 		ui.park_exit_charge_submit.button ('enable');
 		ui.park_exit_charge_print.button ('disable');
+		ui.park_exit_charge_close.button ('disable');
 
 		APP.later (function () {
 			if (ui.section_park_exit_charge.is (':hidden')) return true;
@@ -514,6 +525,9 @@
 
 	function cash_park_exit_charge_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
+
+		if (ui.park_exit_charge_amount.is (':disabled')) // avoid re-submitting.
+			return false;
 
 		ui.park_exit_charge_amount.input ('disable');
 		ui.park_exit_charge_submit.button ('disable');
@@ -525,12 +539,27 @@
 						   [ cash_entry_date, cash_charge_date, APP.config.defaultRateName, 'tender', amount, change, null ],
 						   {
 							   success: cash_park_exit_charge_success,
-							   error: function () { ui.park_exit_charge_submit.button ('enable'); return true; }
+							   error: function () {
+								   ui.park_exit_charge_submit.button ('enable');
+								   ui.park_exit_charge_amount.input ('enable');
+								   return true;
+							   }
 						   });
 	}
 
 	function cash_park_exit_charge_success () {
+		APP.hidHandlerStart ();
 		ui.park_exit_charge_print.button ('enable');
+		ui.park_exit_charge_close.button ('enable');
+	}
+
+	function cash_park_exit_charge_print () {
+	}
+
+	function cash_park_exit_charge_close () {
+		APP.history.back ('cash-park-exit');
+		shell.navShow ();
+		shell.menuCollapse (false);
 	}
 
 	function cash_main () {

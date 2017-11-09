@@ -644,9 +644,19 @@
 		ui.shift_begin_amount.val ('');
 	}
 
-	function cash_shift_begin_error () {
+	function cash_shift_begin_error (err) {
 		ui.shift_begin_submit.button ('enable');
 		ui.shift_begin_amount.focus ();
+		if (err.key == 'SQL:DATADUP') {
+			APP.msgDialog ({
+				icon: 'shift',
+				desc: 'Finaliza tu turno en la otra terminal para poder iniciar otro aquí.',
+				sev: CHARP.ERROR_SEV['USER'],
+				title: 'Turno sin finalizar en otra terminal',
+				opts: { width: '75%' }
+			});
+			return;
+		}
 		return true;
 	}
 

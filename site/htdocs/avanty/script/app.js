@@ -613,6 +613,36 @@
 		$(document).on ('keypress.hidHandler', hid_handler_keypress);
 	}
 
+	// Check that the amount received is not excessive, compared to the total. For validation.
+	function check_valid_amount_received_for_total (amount, total) {
+		// Trivial case: total is covered exactly.
+		if (amount == total) return true;
+
+		// We assume tender to be ordered in ascending order.
+		var tender = APP.config.tender;
+
+		// Find most efficient set of tender (minimum of pieces) that gathers the amount received:
+		var best_set = [];
+		var remainder = amount;
+		for (var i = tender.length - 1; i >= 0 && remainder > 0; i--) {
+			var denomination = tender[i].denomination;
+			while (remainder >= denomination) {
+				best_set.push (denomination);
+				remainder -= denomination;
+			}
+		}
+		if (remainder > 0) // Imposible! Amount cannot be represented exactly. We fail.
+			return false;
+
+		// best set is in descending order, biggest bills first.
+		var sum = 0, i;
+		for (i = 0; i < best_set.length && sum < total; i++)
+			sum += best_set[i];
+
+		// Couldn't find a premature sum that covered the amount.
+		return (i == best_set.length);
+	}
+
 	var current_page;
 
 	// Public functions
@@ -882,7 +912,24 @@
 			APP.config = {
 				defaultRateName: 'test',
 				barcodeSecret: 'secret',
-				maxTender: 100000 // Biggest tender (in cents) that can be received by the POS.
+				maxTender: 100000, // Biggest tender (in cents) that can be received by the POS.
+				tender: [ // Watch out: this array needs to be in ascending order.
+					{ denomination:      5, type: 'coin' }, // denominations are in cents.
+					{ denomination:     10, type: 'coin' },
+					{ denomination:     20, type: 'coin' },
+					{ denomination:     50, type: 'coin' },
+					{ denomination:    100, type: 'coin' },
+					{ denomination:    200, type: 'coin' },
+					{ denomination:    500, type: 'coin' },
+					{ denomination:   1000, type: 'coin' },
+					{ denomination:   2000, type: 'coin' },
+					{ denomination:   2000, type: 'bill' },
+					{ denomination:   5000, type: 'bill' },
+					{ denomination:  10000, type: 'bill' },
+					{ denomination:  20000, type: 'bill' },
+					{ denomination:  50000, type: 'bill' },
+					{ denomination: 100000, type: 'bill' }
+				].sort (function (a, b) { return a.denomination - b.denomination; }) // Paranoia
 			};
 
 			$.validator.addMethod ('money', function (val, ele) {
@@ -905,7 +952,7 @@
 
 			// Make sure the change is not bigger than the biggest of bills/coins.
 			$.validator.addMethod ('charge-max', function (val, ele, total_ele) {
-				return APP.Util.parseMoney (val) - APP.Util.parseMoney (total_ele.text ()) <= APP.config.maxTender;
+				return check_valid_amount_received_for_total (APP.Util.parseMoney (val), APP.Util.parseMoney (total_ele.text ()));
 			}, 'Monto excedido.');
 
 			APP.toast (false);

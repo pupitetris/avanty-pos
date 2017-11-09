@@ -216,6 +216,11 @@ CHARP.ERRORS = {
 			else if (typeof ctx == 'function')
 				ctx = {success: ctx};
 
+			params = params.map (function (p) {
+				if (p instanceof Date) return p.toISOString ();
+				return p;
+			});
+
 			var data = {
 				login: this.cred.login,
 				res: resource,

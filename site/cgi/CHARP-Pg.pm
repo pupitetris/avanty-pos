@@ -61,6 +61,10 @@ sub sql_date_type {
 	return SQL_DATE;
 }
 
+sub sql_timestamp_type {
+	return SQL_TYPE_TIMESTAMP_WITH_TIMEZONE;
+}
+
 sub sql_inet_type {
 	return { 'pg_type' => PG_INET };
 }

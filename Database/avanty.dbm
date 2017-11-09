@@ -193,7 +193,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[other activities may be added later]]></comment>
-	<enumeration values="login,logout,shift_begin,shift_end"/>
+	<enumeration values="login,logout,shift_begin,shift_end,charge_check"/>
 </usertype>
 
 <table name="user_activity">
@@ -945,7 +945,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[parameters that can be mapped by the CHARP RPC system.]]></comment>
-	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR,REMOTE_ADDR"/>
+	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR,REMOTE_ADDR,TS"/>
 </usertype>
 
 <usertype name="charp_cmd_code" configuration="enumeration">
@@ -1239,6 +1239,9 @@ BEGIN
 				  WHEN 'text'			     THEN 'STR'
 				  WHEN 'boolean'		     THEN 'BOOL'
 				  WHEN 'date'			     THEN 'DATE'
+				  WHEN 'ts'			         THEN 'TS'
+				  WHEN 'timestamp'	         THEN 'TS'
+				  WHEN 'timestamp with time zone' THEN 'TS'
 				  WHEN 'integer[]'		     THEN 'INTARR'
 				  WHEN 'character varying[]' THEN 'STRARR'
 				  WHEN 'text[]'			     THEN 'STRARR'
@@ -2482,6 +2485,56 @@ BEGIN
 		WHERE terminal_id = _terminal_id AND user_id = _user_id;
 
 	RETURN _last_event;
+END;]]></definition>
+</function>
+
+<function name="cashier_park_charge_check"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Check if the ticket exists and has not been already charged. Register the user's intention to charge.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_ticket_terminal_id">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="_ticket_entry_ts">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+	_ticket_id av.ticket.ticket_id%TYPE;
+	_movement_ts av.movement.timestamp%TYPE;
+BEGIN
+	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
+
+	SELECT ticket_id, m.timestamp INTO _ticket_id, _movement_ts
+		FROM ticket AS t 
+			LEFT JOIN movement AS m USING (ticket_id)
+		WHERE terminal_id = _ticket_terminal_id
+			AND t.timestamp = _ticket_entry_ts
+			AND t.type = 'entry';
+
+	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+	IF _movement_ts IS NOT NULL THEN PERFORM charp_raise ('DATADUP'); END IF;
+
+	INSERT INTO user_activity
+		VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'charge_check', 
+			jsonb_build_object ('ticket_id', _ticket_id));
 END;]]></definition>
 </function>
 

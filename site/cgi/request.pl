@@ -78,6 +78,7 @@ sub request_challenge {
 	'STR' => CHARP::sql_str_type,
 	'BOOL' => CHARP::sql_bool_type,
 	'DATE' => CHARP::sql_date_type,
+	'TS' => CHARP::sql_timestamp_type,
 	'INTARR'  => CHARP::sql_intarr_type,
 	'STRARR'  => CHARP::sql_strarr_type,
 	'BOOLARR' => CHARP::sql_boolarr_type,

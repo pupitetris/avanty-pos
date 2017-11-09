@@ -2522,19 +2522,15 @@ END;]]></definition>
 BEGIN
 	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
 
-	SELECT ticket_id, m.timestamp INTO _ticket_id, _movement_ts
-		FROM ticket AS t 
-			LEFT JOIN movement AS m USING (ticket_id)
+	PERFORM 1 FROM ticket
 		WHERE terminal_id = _ticket_terminal_id
-			AND t.timestamp = _ticket_entry_ts
-			AND t.type = 'entry';
+			AND timestamp = _ticket_entry_ts;
 
-	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
-	IF _movement_ts IS NOT NULL THEN PERFORM charp_raise ('DATADUP'); END IF;
+	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
 	INSERT INTO user_activity
 		VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'charge_check', 
-			jsonb_build_object ('ticket_id', _ticket_id));
+			jsonb_build_object ('terminal_id', _ticket_terminal_id, 'timestamp', _ticket_entry_ts));
 END;]]></definition>
 </function>
 

@@ -9,32 +9,42 @@
 		<li><a href="#cash-tab-user"><span><img src="img/symbolic/user.svg" /><span class="username"></span></span></a></li>
 	  </ul>
 	  <div id="cash-tab-park">
-		<button class="requires-shift" id="cash-tab-park-entry">Entrada</button>
-		<button class="requires-shift" id="cash-tab-park-exit">Salida</button>
+		<div>
+		  <button class="requires-shift" id="cash-tab-park-entry">Entrada</button>
+		  <button class="requires-shift" id="cash-tab-park-exit">Salida</button>
+		</div>
 	  </div>
 <!--
 	  <div id="cash-tab-rent">
-		<button class="requires-shift" id="cash-tab-rent-entry">Entrada</button>
-		<button class="requires-shift" id="cash-tab-rent-exit">Salida</button>
+		<div>
+		  <button class="requires-shift" id="cash-tab-rent-entry">Entrada</button>
+		  <button class="requires-shift" id="cash-tab-rent-exit">Salida</button>
+		</div>
 		<div>
 		  <h4>Administrar pensiones</h4>
-		  <button class="requires-shift" id="cash-tab-rent-create">Crear</button>
-		  <button class="requires-shift" id="cash-tab-rent-search">Buscar</button>
+		  <div>
+			<button class="requires-shift" id="cash-tab-rent-create">Crear</button>
+			<button class="requires-shift" id="cash-tab-rent-search">Buscar</button>
+		  </div>
 		</div>
 	  </div>
 -->
 	  <div id="cash-tab-user">
 		<div>
 		  <button id="cash-tab-user-chpass">Cambiar contraseña</button>
+		</div>
+		<div>
 		  <h4>Turno</h4>
-		  <button id="cash-tab-user-shift-begin">Iniciar</button>
-		  <button class="requires-shift" id="cash-tab-user-shift-end">Finalizar</button>
+		  <div>
+			<button id="cash-tab-user-shift-begin">Iniciar</button>
+			<button class="requires-shift" id="cash-tab-user-shift-end">Finalizar</button>
+		  </div>			
 		</div>
 	  </div>
 	</div>
 	<button class="shell-tool shell-logout button-icon"><img src="img/icons/logout.svg" /></button>
 	<button class="shell-tool shell-lock button-icon"><img src="img/icons/lock.svg" /></button>
-	<div class="shell-status"></div>
+	<div class="shell-status"><div></div><div></div></div>
   </div>
   <div class="section section-small" id="cash-chpass">
 	<form>

@@ -115,7 +115,7 @@
 
 			var status = ui.shell.find ('.shell-status');
 			if (status.length > 0)
-				ui.status = status;
+				ui._status = [ status.find ('div:eq(0)'), status.find ('div:eq(1)') ];
 		}
 
 		Shell.prototype = {
@@ -189,6 +189,16 @@
 					APP.history.forward ();
 					that.navShow ();
 				});
+			},
+
+			// secondary is in the current layout, the status on the right.
+			setStatus: function (text, secondary) {
+				if (this.ui._status) {
+					if (secondary)
+						this.ui._status[1].text (text);
+					else
+						this.ui._status[0].text (text);
+				}
 			}
 		}
 	}) ();
@@ -937,12 +947,12 @@
 			return args;
 		},
 
-		title: '',
 		DEVEL: true,
-		VERSION: '0.5',
 
 		main: function () {
 			APP.config = {
+				establishment: 'Laboratorio',
+				version: '0.8',
 				defaultRateName: 'test',
 				barcodeSecret: 'secret',
 				maxTender: 100000, // Biggest tender (in cents) that can be received by the POS.

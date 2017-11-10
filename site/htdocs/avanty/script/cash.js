@@ -602,8 +602,13 @@
 	}
 
 	function cash_main_reset () {
-		shell.ui.status.text ('');
+		shell.setStatus ('');
 		ui.section_main.children ('div').hide ();
+
+		shell.setStatus (APP.config.establishment +
+						 ' Versión: ' + APP.config.version +
+						 ' Terminal: ' + APP.terminal.name, true);
+
 		if (!APP.terminal.shiftUser) {
 			// No shift is started in this terminal. Recommend user to start his shift.
 			shell.ui.user_shift_begin.button ('enable');
@@ -616,7 +621,7 @@
 			ui.main_othershift.show ();
 		} else {
 			// Our shift is running.
-			shell.ui.status.text ('Turno iniciado.');
+			shell.setStatus ('Turno iniciado.');
 
 			// Can't begin it again, right?
 			shell.ui.user_shift_begin.button ('disable');

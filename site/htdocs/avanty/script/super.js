@@ -337,6 +337,10 @@
 	function super_main () {
 		shell.show (true);
 		shell.navShow ();
+		shell.setStatus (APP.config.establishment +
+						 ' Versión: ' + APP.config.version +
+						 ' Terminal: ' + APP.terminal.name, true);
+
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
 	}

@@ -534,11 +534,9 @@
 	var util_money_re = new RegExp ('(-?[0-9]*)\.?([0-9]{0,2})');
 	
 	var util = {
-		// Pad with zeroes to the left to the given width.
+		// Pad with chars (default space) to the left to the given width.
 		// width < 0 pads to the right to abs(width) width.
-		padZeroes: function (num, width) {
-			var num_str = num.toString ();
-
+		padString: function (str, width, chr) {
 			var to_the_right;
 			if (width < 0) {
 				to_the_right = true;
@@ -546,14 +544,23 @@
 			} else
 				to_the_right = false;
 
-			if (num_str.length > width)
-				throw 'Number ' + num_str + ' too wide (' + width + ').';
+			if (str.length > width) {
+				console.error ('String ' + str + ' too wide (' + width + ').');
+				return str;
+			}
 			
-			var str = '';
-			for (var i = num_str.length; i < width; i++)
-				str += '0';
+			chr = (chr == undefined)? ' ': chr.toString ();
 
-			return (to_the_right)? num_str + str: str + num_str;
+			var pad = '';
+			for (var i = str.length; i < width; i++)
+				pad += chr;
+
+			return (to_the_right)? str + pad: pad + str;
+		},
+
+		padZeroes: function (num, width) {
+			var num_str = num.toString ();
+			return util.padString (num_str, width, '0');
 		},
 
 		// num is an integer representing money in cents.

@@ -196,6 +196,13 @@
 		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
 		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
 
+		ui.tickets.exit = $('#cash-ticket-exit');
+		ui.tickets.exit_entry_time = ui.tickets.exit.find ('time:eq(0)');
+		ui.tickets.exit_charge_time = ui.tickets.exit.find ('time:eq(1)');
+		ui.tickets.exit_duration = ui.tickets.exit.find ('time:eq(2)');
+		ui.tickets.exit_terminal = ui.tickets.exit.find ('.term');
+		ui.tickets.exit_items = ui.tickets.exit.find ('.items');
+
 		$(document).on ('avanty:HID', cash_park_exit_hid);
 
 		mod.loaded = true;
@@ -415,6 +422,10 @@
 			ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
 			ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
 
+			ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
+			ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
+			ui.tickets.exit_terminal.text (APP.terminal.name);
+
 			var duration = delta_secs;
 			var segs = duration % 60;
 			duration = (duration - segs) / 60;
@@ -432,6 +443,7 @@
 				mins + ' mins. ' + segs + ' seg.';
 
 			ui.park_exit_duration.text (duration);
+			ui.tickets.exit_duration.text (duration);
 
 			var cons = {
 				'tiempo_registrado': delta_secs,
@@ -477,10 +489,17 @@
 			}
 		
 		ui.park_exit_charge_table.empty ();
+		var pre = '';
 		var total = 0;
 		for (var rec of records) {
 			var subtotal = rec[1] * rec[2];
 			total += subtotal;
+
+			pre += '<div class="desc">' + APP.Util.padString (rec[0], 30) + '</div>\n' +
+				'<div class="sum">' + rec[2] + ' x ' +
+				APP.Util.asMoney (rec[1]) + ' = ' +
+				APP.Util.padString (APP.Util.asMoney (subtotal), 6) + '</div>\n';
+
 			ui.park_exit_charge_table.append ($('<tr>' +
 												'<th><span>' + rec[0] + '</span></th>' +
 												'<td><s/></td><td class="money">' + APP.Util.asMoney (rec[1]) + '</td>' +
@@ -488,9 +507,15 @@
 												'<td><s/></td><td class="money"><span>' + APP.Util.asMoney (subtotal) + '</span></td>' +
 												'</tr>'));
 		}
-		ui.park_exit_charge_total.text (APP.Util.asMoney (total));
+
+		total = APP.Util.asMoney (total);
+		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
+		ui.tickets.exit_items.html (pre);
+		ui.park_exit_charge_total.text (total);
 
 		ui.park_exit_charge_amount.val ('');
+
+		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
 
 		APP.history.go (MOD_NAME, ui.section_park_exit_charge, 'cash-park-exit');
 		shell.navShow ();
@@ -553,6 +578,7 @@
 	}
 
 	function cash_park_exit_charge_print () {
+		APP.mod.devices.print (ui.tickets.exit);
 	}
 
 	function cash_park_exit_charge_close () {

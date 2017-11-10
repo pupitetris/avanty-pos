@@ -130,3 +130,12 @@ input[name="shift-begin-amount"] {
 #cash-park-exit-charge form button[type="submit"] {
 	margin-left: 1ex;
 }
+
+#cash-ticket-exit .items {
+	font-size: 8px;
+}
+
+#cash-ticket-exit .sum {
+	text-align: right;
+}
+

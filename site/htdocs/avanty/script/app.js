@@ -603,6 +603,27 @@
 		getTimeSecs: function (date) {
 			if (!date) date = new Date ();
 			return Math.floor (date.getTime () / 1000);
+		},
+
+		// truncate a date given in secs since epoch to the given component (days means put hours and smaller to 00).
+		truncDate: function (secs, component) {
+			var index = { year: 0, month: 1, date: 2, hours: 3, minutes: 4, seconds: 5 };
+
+			var num = parseInt (component);
+			if (isNaN (num))
+				num = index[component];
+
+			var start = num + 1;
+			if (isNaN (start) || start < 1 || start >= index.length)
+				throw 'truncDate: Invalid component ' + component;
+
+			var date = new Date (secs * 1000);
+			var comps = [ date.getFullYear (), date.getMonth (), date.getDate (),
+						  date.getHours (), date.getMinutes (), date.getSeconds () ];
+			for (var i = start; i < comps.length; i++)
+				comps[i] = 0;
+
+			return APP.Util.getTimeSecs (new Date (comps[0], comps[1], comps[2], comps[3], comps[4], comps[5]));
 		}
 	}
 
@@ -953,6 +974,7 @@
 			APP.config = {
 				establishment: 'Laboratorio',
 				version: '0.8',
+				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
 				defaultRateName: 'test',
 				barcodeSecret: 'secret',
 				maxTender: 100000, // Biggest tender (in cents) that can be received by the POS.

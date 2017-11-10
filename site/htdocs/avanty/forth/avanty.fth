@@ -33,3 +33,6 @@ define registra type " | " type . " | " type . #10 emit ;
 // Cancel all previous items
 define _desc_cancel " __CANCEL__ " ;
 define cancela_anteriores 0 0 _desc_cancel registra ;
+
+// Call the truncDate method
+define truncar_fecha js /APP.Util.truncDate{2} ;

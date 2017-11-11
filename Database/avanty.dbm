@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="306,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2549,6 +2549,70 @@ END;]]></definition>
 			<column name="name"/>
 		</idxelement>
 </index>
+
+<function name="cashier_shift_end"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Remove corresponding cashier_shift and return accounting for the shift.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+	_start av.user_activity.timestamp%TYPE;
+	_type av.user_activity.type%TYPE;
+BEGIN
+	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
+
+	SELECT timestamp, type INTO _start, _type FROM user_activity 
+		WHERE user_id = _uid AND (type = 'shift_begin' OR type = 'shift_end')
+		ORDER BY timestamp DESC LIMIT 1;
+
+	IF NOT FOUND OR _type = 'shift_end' THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+
+	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_end', NULL);
+
+	DELETE FROM cashier_shift WHERE terminal_id = _terminal_id AND user_id = _uid;
+
+	RETURN QUERY
+		SELECT 'shift_begin', movement.amount, 0, _start 
+			FROM user_activity AS ua 
+				JOIN ticket USING(user_id, timestamp)
+				JOIN movement USING (ticket_id)
+			WHERE ua.user_id = _uid AND ticket.terminal_id = _terminal_id 
+				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
+
+	RETURN QUERY
+		SELECT t.type::varchar, m.amount, m.change, m.timestamp
+			FROM ticket AS t JOIN movement AS m USING (ticket_id)
+			WHERE t.user_id = _uid AND t.terminal_id = _terminal_id AND m.timestamp > _start;
+END;]]></definition>
+</function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">

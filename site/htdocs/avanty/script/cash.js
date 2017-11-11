@@ -74,6 +74,54 @@
 		form.validate (validator_options);
 	}
 
+	function park_charge_layout_init (prefix) {
+		var id = prefix.replace (/_/g, '-');
+
+		var section = ui['section_' + prefix + '_charge'] = $('#cash-'+ id + '-charge');
+		section.on ('avanty:switchSectionEnter', function () { cash_park_charge_reset (prefix); });
+		section.find ('button').button ();
+		section.find ('input').input ();
+
+		var form = ui[prefix + '_charge_form'] = section.find ('form');
+
+		var total = ui[prefix + '_charge_total'] = form.find ('.total');
+
+		var rules = {};
+		rules['cash-' + id + '-charge-amount'] =
+			{
+				required: true,
+				maxlength: 8,
+				'charge-min': total,
+				'charge-max': total
+			};
+
+		form.validate ({
+			submitHandler: function (form, evt) { cash_park_charge_submit (prefix, form, evt); },
+			rules: rules
+		});
+
+		ui[prefix + '_charge_table'] = form.find ('tbody');
+		ui[prefix + '_charge_change'] = form.find ('.change');
+
+		var amount = ui[prefix + '_charge_amount'] = form.find ('input[name="cash-' + id + '-charge-amount"]');
+		amount.on ('input', function () { cash_park_charge_amount_input (prefix); });
+		amount.on ('change', function () { cash_park_charge_amount_change (prefix); });
+
+		ui[prefix + '_charge_submit'] = form.find ('button[type="submit"]');
+
+		ui[prefix + '_charge_print'] = $('#cash-' + id + '-charge-print');
+		ui[prefix + '_charge_print'].on ('click', cash_park_charge_print);
+
+		ui[prefix + '_charge_close'] = $('#cash-' + id + '-charge-close');
+		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close ('cash-' + id); });
+
+		ui[prefix + '_charge_detail'] = section.find ('.detail');
+
+		ui[prefix + '_entry_date'] = $('#cash-' + id + '-entry-date');
+		ui[prefix + '_charge_date'] = $('#cash-' + id + '-charge-date');
+		ui[prefix + '_duration'] = $('#cash-' + id + '-duration');
+	}
+
 	function layout_init () {
 		ui.sections_parent = $('#cash-sections');
 
@@ -86,6 +134,9 @@
 
 		shell.ui.park_exit = $('#cash-tab-park-exit');
 		shell.ui.park_exit.on ('click', cash_park_exit);
+
+		shell.ui.park_lost = $('#cash-tab-park-lost');
+		shell.ui.park_lost.on ('click', cash_park_lost);
 
 		shell.ui.rent_entry = $('#cash-tab-rent-entry');
 		shell.ui.rent_exit = $('#cash-tab-rent-exit');
@@ -146,45 +197,25 @@
 		ui.park_exit_barcode = ui.section_park_exit.find ('input[name="cash-park-exit-barcode"]');
 		ui.park_exit_submit = ui.section_park_exit.find ('button');
 
-		ui.section_park_exit_charge = $('#cash-park-exit-charge');
-		ui.section_park_exit_charge.on ('avanty:switchSectionEnter', cash_park_exit_charge_reset);
-		ui.section_park_exit_charge.find ('button').button ();
-		ui.section_park_exit_charge.find ('input').input ();
+		park_charge_layout_init ('park_exit');
 
-		ui.park_exit_charge_form = ui.section_park_exit_charge.find ('form');
+		ui.section_park_lost = $('#cash-park-lost');
+		ui.section_park_lost.on ('avanty:switchSectionEnter', cash_park_lost_reset);
+		ui.section_park_lost.find ('button').button ();
 
-		ui.park_exit_charge_total = ui.park_exit_charge_form.find ('.total');
+		ui.park_lost_form = ui.section_park_lost.find ('form');
+		ui.park_lost_form.on ('submit', cash_park_lost_submit);
 
-		ui.park_exit_charge_form.validate ({
-			submitHandler: cash_park_exit_charge_submit,
-			rules: {
-				'cash-park-exit-charge-amount': {
-					required: true,
-					maxlength: 8,
-					'charge-min': ui.park_exit_charge_total,
-					'charge-max': ui.park_exit_charge_total
-				}
-			}
-		});
+		ui.park_lost_date = $('#cash-park-lost-date');
+		ui.park_lost_date.datepicker (
+			{
+				maxDate: 0,
+				firstDay: APP.config.weekFirstDay
+			});
 
-		ui.park_exit_charge_table = ui.park_exit_charge_form.find ('tbody');
-		ui.park_exit_charge_change = ui.park_exit_charge_form.find ('.change');
+		ui.park_lost_submit = ui.section_park_lost.find ('button[type="submit"]');
 
-		ui.park_exit_charge_amount = ui.park_exit_charge_form.find ('input[name="cash-park-exit-charge-amount"]');
-		ui.park_exit_charge_amount.on ('input', cash_park_exit_charge_amount_input);
-		ui.park_exit_charge_amount.on ('change', cash_park_exit_charge_amount_change);
-
-		ui.park_exit_charge_submit = ui.park_exit_charge_form.find ('button[type="submit"]');
-
-		ui.park_exit_charge_print = $('#cash-park-exit-charge-print');
-		ui.park_exit_charge_print.on ('click', cash_park_exit_charge_print);
-
-		ui.park_exit_charge_close = $('#cash-park-exit-charge-close');
-		ui.park_exit_charge_close.on ('click', cash_park_exit_charge_close);
-
-		ui.park_exit_entry_date = $('#cash-park-exit-entry-date');
-		ui.park_exit_charge_date = $('#cash-park-exit-charge-date');
-		ui.park_exit_duration = $('#cash-park-exit-duration');
+		park_charge_layout_init ('park_lost');
 
 		// ui.section_chpass is defined inside here:
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
@@ -446,12 +477,13 @@
 			ui.tickets.exit_duration.text (duration);
 
 			var cons = {
-				'tiempo_registrado': delta_secs,
+				tiempo_registrado: delta_secs,
 			};
 
-			forth.reset (undefined, cash_forth_error);
 			forth.setConstants (cons, cash_forth_error);
-			forth.load ('test.fth', cash_park_exit_charge_rate, cash_forth_error);
+			forth.load ('test.fth',
+						function (script) { cash_park_charge_rate ('park_exit', script, 'cash-park-exit'); },
+						cash_forth_error);
 		}
 
 		cash_entry_date = barcode_fields.entryDate;
@@ -466,7 +498,7 @@
 						   });
 	}
 
-	function cash_park_exit_charge_rate (script) {
+	function cash_park_charge_rate (prefix, script, process) {
 		// Run script and Update rate stuff
 		var res = forth.run (script, cash_forth_error);
 
@@ -488,7 +520,7 @@
 				i = -1;
 			}
 		
-		ui.park_exit_charge_table.empty ();
+		ui[prefix + '_charge_table'].empty ();
 		var pre = '';
 		var total = 0;
 		for (var rec of records) {
@@ -500,7 +532,7 @@
 				APP.Util.asMoney (rec[1]) + ' = ' +
 				APP.Util.padString (APP.Util.asMoney (subtotal), 6) + '</div>\n';
 
-			ui.park_exit_charge_table.append ($('<tr>' +
+			ui[prefix + '_charge_table'].append ($('<tr>' +
 												'<th><span>' + rec[0] + '</span></th>' +
 												'<td><s/></td><td class="money">' + APP.Util.asMoney (rec[1]) + '</td>' +
 												'<td class="qty">' + rec[2] + '</td>' +
@@ -511,80 +543,134 @@
 		total = APP.Util.asMoney (total);
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
 		ui.tickets.exit_items.html (pre);
-		ui.park_exit_charge_total.text (total);
+		ui[prefix + '_charge_total'].text (total);
 
-		ui.park_exit_charge_amount.val ('');
+		ui[prefix + '_charge_amount'].val ('');
 
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
 
-		APP.history.go (MOD_NAME, ui.section_park_exit_charge, 'cash-park-exit');
+		APP.history.go (MOD_NAME, ui['section_' + prefix + '_charge'], process);
 		shell.navShow ();
 	}
 
 	// Canonize value to include cents if none were introduced.
-	function cash_park_exit_charge_amount_change () {
-		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
-		ui.park_exit_charge_amount.val (APP.Util.asMoney (amount));
+	function cash_park_charge_amount_change (prefix) {
+		var amount = APP.Util.parseMoney (ui[prefix + '_charge_amount'].val ());
+		ui[prefix + '_charge_amount'].val (APP.Util.asMoney (amount));
 	}
 
-	function cash_park_exit_charge_amount_input () {
-		var total = APP.Util.parseMoney (ui.park_exit_charge_total.text ());
-		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
+	function cash_park_charge_amount_input (prefix) {
+		var total = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
+		var amount = APP.Util.parseMoney (ui[prefix + '_charge_amount'].val ());
 		var change = amount - total;
-		ui.park_exit_charge_change.text ((change < 0)? '-.--': APP.Util.asMoney (change));
+		ui[prefix + '_charge_change'].text ((change < 0)? '-.--': APP.Util.asMoney (change));
 	}
 
-	function cash_park_exit_charge_reset () {
-		ui.park_exit_charge_form.validate ().resetForm ();
-		ui.park_exit_charge_amount.input ('enable');
-		ui.park_exit_charge_submit.button ('enable');
-		ui.park_exit_charge_print.button ('disable');
-		ui.park_exit_charge_close.button ('disable');
+	function cash_park_charge_reset (prefix) {
+		ui[prefix + '_charge_form'].validate ().resetForm ();
+		ui[prefix + '_charge_amount'].input ('enable');
+		ui[prefix + '_charge_submit'].button ('enable');
+		ui[prefix + '_charge_print'].button ('disable');
+		ui[prefix + '_charge_close'].button ('disable');
 
 		APP.later (function () {
-			if (ui.section_park_exit_charge.is (':hidden')) return true;
-			ui.park_exit_charge_amount.focus ();
+			if (ui['section_' + prefix + '_charge'].is (':hidden')) return true;
+			ui[prefix + '_charge_amount'].focus ();
 		});
 	}
 
-	function cash_park_exit_charge_submit (form, evt) {
+	function cash_park_charge_submit (prefix, form, evt) {
 		evt.originalEvent.preventDefault ();
 
-		if (ui.park_exit_charge_amount.is (':disabled')) // avoid re-submitting.
+		var ui_amount = ui[prefix + '_charge_amount'];
+		if (ui_amount.is (':disabled')) // avoid re-submitting.
 			return false;
 
-		ui.park_exit_charge_amount.input ('disable');
-		ui.park_exit_charge_submit.button ('disable');
+		var ui_submit = ui[prefix + '_charge_submit'];
 
-		var amount = APP.Util.parseMoney (ui.park_exit_charge_amount.val ());
-		var change = APP.Util.parseMoney (ui.park_exit_charge_change.text ());
+		ui_amount.input ('disable');
+		ui_submit.button ('disable');
+
+		var amount = APP.Util.parseMoney (ui_amount.val ());
+		var change = APP.Util.parseMoney (ui[prefix + '_charge_change'].text ());
  		
+		var rate_name;
+		var ticket_type;
+
+		switch (prefix) {
+		case 'park_exit':
+			rate_name = APP.config.defaultRateName;
+			ticket_type = 'exit';
+			break;
+		case 'park_lost':
+			rate_name = APP.config.lostRateName;
+			ticket_type = 'lost';
+			break;
+		}
+
 		APP.charp.request ('cashier_park_charge',
-						   [ cash_entry_date, cash_charge_date, APP.config.defaultRateName, 'tender', amount, change, null ],
+						   [ cash_entry_date, cash_charge_date, ticket_type, rate_name, 'tender', amount, change, null ],
 						   {
-							   success: cash_park_exit_charge_success,
+							   success: function () { cash_park_charge_success (prefix); },
 							   error: function () {
-								   ui.park_exit_charge_submit.button ('enable');
-								   ui.park_exit_charge_amount.input ('enable');
+								   ui_submit.button ('enable');
+								   ui_amount.input ('enable');
 								   return true;
 							   }
 						   });
 	}
 
-	function cash_park_exit_charge_success () {
+	function cash_park_charge_success (prefix) {
 		APP.hidHandlerStart ();
-		ui.park_exit_charge_print.button ('enable');
-		ui.park_exit_charge_close.button ('enable');
+		ui[prefix + '_charge_print'].button ('enable');
+		ui[prefix + '_charge_close'].button ('enable');
 	}
 
-	function cash_park_exit_charge_print () {
+	function cash_park_charge_print () {
 		APP.mod.devices.print (ui.tickets.exit);
 	}
 
-	function cash_park_exit_charge_close () {
-		APP.history.back ('cash-park-exit');
+	function cash_park_charge_close (process) {
+		APP.history.back (process);
 		shell.navShow ();
 		shell.menuCollapse (false);
+	}
+
+	function cash_park_lost () {
+		APP.history.go (MOD_NAME, ui.section_park_lost, 'cash-park-lost');
+		shell.navShow ();
+		shell.menuCollapse ();
+	}
+
+	function cash_park_lost_reset () {
+	}
+
+	function cash_park_lost_submit (evt) {
+		if (evt) evt.preventDefault ();
+
+		forth.reset (cash_park_lost_charge, cash_forth_error);
+	}
+
+	function cash_park_lost_charge () {
+		cash_entry_date = ui.park_lost_date.datepicker ('getDate');
+		cash_charge_date = new Date ();
+
+		var cons = {
+			fecha_ingreso: APP.Util.getTimeSecs (cash_entry_date),
+			ahora: APP.Util.getTimeSecs ()
+		};
+
+		forth.setConstants (cons, cash_forth_error);
+		forth.load ('test-perdido.fth',
+					function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
+					cash_forth_error);
+
+		// The entry date comes from the date picker without HMS, so we set those of the
+		// charge date so that it is unique when it goes into the database. Otherwise, you
+		// would only be able to charge one lost ticket per day.
+		cash_entry_date.setHours (cash_charge_date.getHours ());
+		cash_entry_date.setMinutes (cash_charge_date.getMinutes ());
+		cash_entry_date.setSeconds (cash_charge_date.getSeconds ());
 	}
 
 	function cash_main () {

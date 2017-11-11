@@ -316,7 +316,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 <usertype name="ticket_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="entry,exit,rent,deposit,withdrawal"/>
+	<enumeration values="entry,exit,rent,deposit,withdrawal,lost"/>
 </usertype>
 
 <table name="ticket">
@@ -2384,6 +2384,9 @@ END;]]></definition>
 	<parameter name="_charge_ts">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
+	<parameter name="_ticket_type">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="_rate_name">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -2412,7 +2415,7 @@ BEGIN
 		PERFORM charp_raise ('USERPERM'); -- exception will rollback previous update
 	END IF;
 
-	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_ts, 'exit', NULL)
+	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_ts, _ticket_type::av.ticket_type, NULL)
 		RETURNING ticket_id INTO _ticket_id;
 
 	INSERT INTO movement
@@ -2537,6 +2540,15 @@ BEGIN
 			jsonb_build_object ('terminal_id', _ticket_terminal_id, 'timestamp', _ticket_entry_ts));
 END;]]></definition>
 </function>
+
+<index name="rate_uq" table="av.rate"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[Rates are unique by name.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="name"/>
+		</idxelement>
+</index>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">

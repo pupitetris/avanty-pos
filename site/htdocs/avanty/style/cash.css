@@ -43,64 +43,64 @@ input[name="shift-begin-amount"] {
 	width: 8ex;
 }
 
-#cash-park-exit-charge table {
+.cash-park-charge table {
 	border-spacing: 0;
 }
 
-#cash-park-exit-charge th {
+.cash-park-charge th {
 	padding: 0;
 	white-space: nowrap;
 }
 
-#cash-park-exit-charge thead th {
+.cash-park-charge thead th {
 	padding-left: 0.25em;
 	padding-right: 0.25em;
 }
 
-#cash-park-exit-charge tbody td, #cash-park-exit-charge tfoot td {
+.cash-park-charge tbody td, .cash-park-charge tfoot td {
 	position: relative;
 	padding: 0;
 	text-align: right;
 }
 
-#cash-park-exit-charge table .money {
+.cash-park-charge table .money {
 	width: 9ex;
 }
 
-#cash-park-exit-charge tbody th, #cash-park-exit-charge tfoot th {
+.cash-park-charge tbody th, .cash-park-charge tfoot th {
 	padding-top: 0.5em;
 	text-align: right;
 }
 
-#cash-park-exit-charge tbody th span:after {
+.cash-park-charge tbody th span:after {
 	content: ':';
 }
 
-#cash-park-exit-charge tbody td.qty {
+.cash-park-charge tbody td.qty {
 	text-align: center;
 }
 
-#cash-park-exit-charge table .money span {
+.cash-park-charge table .money span {
 	display: inline-block;
 	width: 9ex;
 	padding-left: 8px;
 	padding-right: 8px;
 }
 
-#cash-park-exit-charge tbody tr:last-child > * {
+.cash-park-charge tbody tr:last-child > * {
 	padding-bottom: 0.5em;
 }
 
-#cash-park-exit-charge tfoot tr:first-child > * {
+.cash-park-charge tfoot tr:first-child > * {
 	border-top: 1px solid black;
 }
 
-#cash-park-exit-charge tfoot td[colspan="6"] {
+.cash-park-charge tfoot td[colspan="6"] {
 	padding-top: 1.5em;
 	text-align: right;
 }
 
-#cash-park-exit-charge h4 {
+.cash-park-charge h4 {
 	width: 95%;
 	height: 3em;
 	line-height: 4.5em;
@@ -109,26 +109,34 @@ input[name="shift-begin-amount"] {
 	border-bottom: 1px solid lightgray;
 }
 
-#cash-park-exit-charge > table {
+.cash-park-charge > table {
 	
 }
 
-#cash-park-exit-charge > table td {
+.cash-park-charge > table td {
 	text-align: left;
 	vertical-align: bottom;
 }
 
-#cash-park-exit-charge > table th {
+.cash-park-charge > table th {
 	padding-left: 2ex;
 	padding-right: 1ex;
 }
 
-#cash-park-exit-charge > table th::first-child {
+.cash-park-charge > table th:first-child {
 	padding-left: 0;
 }
 
-#cash-park-exit-charge form button[type="submit"] {
+.cash-park-charge form button[type="submit"] {
 	margin-left: 1ex;
+}
+
+#cash-park-lost {
+	margin-top: 0;
+}
+
+#cash-park-lost button[type="submit"] {
+	margin-top: 1em;
 }
 
 #cash-ticket-exit .items {

@@ -13,6 +13,9 @@
 		  <button class="requires-shift" id="cash-tab-park-entry">Entrada</button>
 		  <button class="requires-shift" id="cash-tab-park-exit">Salida</button>
 		</div>
+		<div>
+		  <button class="requires-shift" id="cash-tab-park-lost">Boleto perdido</button>
+		</div>
 	  </div>
 <!--
 	  <div id="cash-tab-rent">
@@ -45,6 +48,19 @@
 	<button class="shell-tool shell-logout button-icon"><img src="img/icons/logout.svg" /></button>
 	<button class="shell-tool shell-lock button-icon"><img src="img/icons/lock.svg" /></button>
 	<div class="shell-status"><div></div><div></div></div>
+  </div>
+  <div class="section" id="cash-main">
+	<div id="cash-main-noshift">
+	  <img src="img/icons/warning.svg" />Advertencia: No has dado inicio a tu turno en esta terminal.
+	  <button>Iniciar turno</button>
+	</div>
+	<div id="cash-main-othershift">
+	  <img src="img/icons/warning.svg" />Advertencia: el turno de <span></span> está sin finalizar.<br />
+	  No podrás realizar operaciones hasta que <span></span><br />
+	  cierre su turno en esta terminal.
+	</div>
+	<div id="cash-main-summary">
+	</div>
   </div>
   <div class="section section-small" id="cash-chpass">
 	<form>
@@ -87,19 +103,6 @@
 	  </table>
 	</form>
   </div>
-  <div class="section" id="cash-main">
-	<div id="cash-main-noshift">
-	  <img src="img/icons/warning.svg" />Advertencia: No has dado inicio a tu turno en esta terminal.
-	  <button>Iniciar turno</button>
-	</div>
-	<div id="cash-main-othershift">
-	  <img src="img/icons/warning.svg" />Advertencia: el turno de <span></span> está sin finalizar.<br />
-	  No podrás realizar operaciones hasta que <span></span><br />
-	  cierre su turno en esta terminal.
-	</div>
-	<div id="cash-main-summary">
-	</div>
-  </div>
   <div class="section" id="cash-park-exit">
 	<form>
 	  <h3>Pon el código de barras frente al sensor o teclea a mano:</h3>
@@ -116,7 +119,7 @@
 	  </table>
 	</form>
   </div>
-  <div class="section" id="cash-park-exit-charge">
+  <div class="section cash-park-charge" id="cash-park-exit-charge">
 	<form>
 	  <table>
 		<thead>
@@ -162,6 +165,47 @@
 		<td colspan="3" id="cash-park-exit-duration"></td>
 	  </tr>
 	</table>
+  </div>
+  <div class="section section-small" id="cash-park-lost">
+	<form>
+	  <h2>Boleto perdido: ingresa la fecha de ingreso</h2>
+	  <div id="cash-park-lost-date"></div>
+	  <button type="submit">Continuar</button>
+	</form>
+  </div>
+  <div class="section section-small cash-park-charge" id="cash-park-lost-charge">
+	<form>
+	  <table>
+		<thead>
+		  <tr>
+			<th></th><th colspan="2">Costo unitario</th><th>Cant.</th><th colspan="2">Subtotal</th>
+		  </tr>
+		</thead>
+		<tbody>
+		</tbody>
+		<tfoot>
+		  <tr>
+			<th>Total:</th>
+			<td colspan="4"><s/></td><td class="money"><span class="total"></span></td>
+		  </tr>
+		  <tr>
+			<th>Monto recibido:</th>
+			<td colspan="4"><s/></td><td><input class="money" maxlength="8" name="cash-park-lost-charge-amount" type="text" /></td>
+		  </tr>
+		  <tr>
+			<th>Cambio:</th>
+			<td colspan="4"><s/></td><td class="money"><span class="change"></span></td>
+		  </tr>
+		  <tr>
+			<td colspan="6">
+			  <button class="button-icon" type="submit"><img src="img/symbolic/yes.svg" />Abrir caja</button>
+			  <button id="cash-park-lost-charge-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
+			  <button id="cash-park-lost-charge-close" class="button-icon"><img src="img/symbolic/close.svg" />Cerrar</button>
+			</td>
+		  </tr>
+		</tfoot>
+	  </table>
+	</form>
   </div>
   <div class="ticket-cont">
 	<article class="ticket" id="cash-ticket-entry">

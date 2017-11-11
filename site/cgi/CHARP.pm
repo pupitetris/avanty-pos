@@ -383,6 +383,9 @@ sub connect {
 	}
 
 	$dbh->do ("SET application_name='charp'");
+	if ($CHARP::DB_TIMEZONE) {
+		$dbh->do ("SET SESSION TIME ZONE '$CHARP::DB_TIMEZONE'");
+	}
 
 	my $ctx = CHARP::init ($dbh);
 	return $ctx;

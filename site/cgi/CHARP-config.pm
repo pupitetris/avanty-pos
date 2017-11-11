@@ -31,6 +31,8 @@ undef $DB_PORT;
 # MySQL: use mysql
 $DB_DRIVER = 'Pg';
 
+$DB_TIMEZONE = 'Mexico/General';
+
 # Language for the localized strings.
 $CHARP_LANG = 'es';
 

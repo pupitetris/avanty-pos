@@ -2584,12 +2584,12 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[DECLARE
 	_terminal_id av.terminal.terminal_id%TYPE;
-	_start av.user_activity.timestamp%TYPE;
+	_start timestamp with time zone;
 	_type av.user_activity.type%TYPE;
 BEGIN
 	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
 
-	SELECT timestamp, type INTO _start, _type FROM user_activity 
+	SELECT ua.timestamp, type INTO _start, _type FROM user_activity AS ua
 		WHERE user_id = _uid AND (type = 'shift_begin' OR type = 'shift_end')
 		ORDER BY timestamp DESC LIMIT 1;
 
@@ -2600,7 +2600,7 @@ BEGIN
 	DELETE FROM cashier_shift WHERE terminal_id = _terminal_id AND user_id = _uid;
 
 	RETURN QUERY
-		SELECT 'shift_begin', movement.amount, 0, _start 
+		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
 			FROM user_activity AS ua 
 				JOIN ticket USING(user_id, timestamp)
 				JOIN movement USING (ticket_id)
@@ -2608,9 +2608,13 @@ BEGIN
 				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
 
 	RETURN QUERY
-		SELECT t.type::varchar, m.amount, m.change, m.timestamp
+		SELECT t.type::varchar, m.amount, m.change, m.timestamp::timestamp with time zone
 			FROM ticket AS t JOIN movement AS m USING (ticket_id)
-			WHERE t.user_id = _uid AND t.terminal_id = _terminal_id AND m.timestamp > _start;
+			WHERE t.user_id = _uid AND t.terminal_id = _terminal_id AND m.timestamp > _start
+			ORDER BY m.timestamp;
+
+	RETURN QUERY
+		SELECT 'shift_end'::varchar, 0, 0, CURRENT_TIMESTAMP;
 END;]]></definition>
 </function>
 

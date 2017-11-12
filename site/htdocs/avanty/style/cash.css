@@ -127,8 +127,13 @@ input[name="shift-begin-amount"] {
 	padding-left: 0;
 }
 
-.cash-park-charge form button[type="submit"] {
+
+.cash-park-charge button {
 	margin-left: 1ex;
+}
+
+.cash-park-charge button:first-child {
+	margin-left: 0;
 }
 
 #cash-park-lost {
@@ -139,11 +144,32 @@ input[name="shift-begin-amount"] {
 	margin-top: 1em;
 }
 
-#cash-ticket-exit .items {
-	font-size: 8px;
+#cash-shift-end td:first-child {
+	padding-right: 1em;
 }
 
-#cash-ticket-exit .sum {
+#cash-shift-end th {
+	padding-right: 1ex;
+}
+
+#cash-shift-end table .money {
 	text-align: right;
+	line-height: unset;
+	width: auto;
 }
 
+#cash-shift-end td.tickets {
+	text-align: left;
+}
+
+#cash-shift-end > div {
+	margin-top: 2em;
+}
+
+#cash-shift-end > div button {
+	margin-left: 1ex;
+}
+
+#cash-shift-end > div button:first-child {
+	margin-left: 0;
+}

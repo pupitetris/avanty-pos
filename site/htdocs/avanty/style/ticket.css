@@ -157,3 +157,13 @@
 	background-repeat: repeat;
 	margin: auto;
 }
+
+/* For itimizing lists */
+.ticket .items {
+	/* font-size 8 triggers font (B) command: */
+	font-size: 8px;
+}
+
+.ticket .items .sum {
+	text-align: right;
+}

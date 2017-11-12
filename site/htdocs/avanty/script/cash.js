@@ -122,6 +122,28 @@
 		ui[prefix + '_duration'] = $('#cash-' + id + '-duration');
 	}
 
+	function layout_tickets () {
+		ui.tickets = {};
+		ui.tickets.entry = $('#cash-ticket-entry');
+		ui.tickets.entry_time = ui.tickets.entry.find ('time');
+		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
+		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
+
+		ui.tickets.exit = $('#cash-ticket-exit');
+		ui.tickets.exit_entry_time = ui.tickets.exit.find ('time:eq(0)');
+		ui.tickets.exit_charge_time = ui.tickets.exit.find ('time:eq(1)');
+		ui.tickets.exit_duration = ui.tickets.exit.find ('time:eq(2)');
+		ui.tickets.exit_terminal = ui.tickets.exit.find ('.term');
+		ui.tickets.exit_items = ui.tickets.exit.find ('.items');
+
+		ui.tickets.shift_end = $('#cash-ticket-shift-end');
+		ui.tickets.shift_end_begin_time = ui.tickets.shift_end.find ('time:eq(0)');
+		ui.tickets.shift_end_time = ui.tickets.shift_end.find ('time:eq(1)');
+		ui.tickets.shift_end_terminal = ui.tickets.shift_end.find ('.term');
+		ui.tickets.shift_end_user = ui.tickets.shift_end.find ('.user');
+		ui.tickets.shift_end_items = ui.tickets.shift_end.find ('.items');
+	}
+
 	function layout_init () {
 		ui.sections_parent = $('#cash-sections');
 
@@ -150,6 +172,7 @@
 		shell.ui.user_shift_begin.on ('click', cash_shift_begin);
 
 		shell.ui.user_shift_end = $('#cash-tab-user-shift-end');
+		shell.ui.user_shift_end.on ('click', cash_shift_end);
 
 		shell.ui.username = shell.ui.shell.find ('.username');
 
@@ -177,6 +200,19 @@
 
 		ui.shift_begin_amount = ui.section_shift_begin.find ('input[name="shift-begin-amount"]');
 		ui.shift_begin_submit = ui.section_shift_begin.find ('button');
+
+		ui.section_shift_end = $('#cash-shift-end');
+		ui.section_shift_end.find ('button').button ();
+		ui.shift_end_table = ui.section_shift_end.find ('tbody');
+		ui.shift_end_total = ui.section_shift_end.find ('.total');
+		ui.shift_end_change = ui.section_shift_end.find ('.change');
+		ui.shift_end_tickets = ui.section_shift_end.find ('.tickets');
+		ui.shift_end_print = $('#cash-shift-end-print');
+		ui.shift_end_print.on ('click', cash_shift_end_print);
+		ui.shift_end_continue = $('#cash-shift-end-continue');
+		ui.shift_end_continue.on ('click', cash_shift_end_continue);
+		ui.shift_end_quit = $('#cash-shift-end-quit');
+		ui.shift_end_quit.on ('click', cash_shift_end_quit);
 
 		ui.section_park_exit = $('#cash-park-exit');
 		ui.section_park_exit.on ('avanty:switchSectionEnter', cash_park_exit_reset);
@@ -221,19 +257,8 @@
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 		ui.section_chpass.on ('avanty:switchSectionEnter', cash_chpass_reset);
 
-		ui.tickets = {};
-		ui.tickets.entry = $('#cash-ticket-entry');
-		ui.tickets.entry_time = ui.tickets.entry.find ('time');
-		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
-		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
-
-		ui.tickets.exit = $('#cash-ticket-exit');
-		ui.tickets.exit_entry_time = ui.tickets.exit.find ('time:eq(0)');
-		ui.tickets.exit_charge_time = ui.tickets.exit.find ('time:eq(1)');
-		ui.tickets.exit_duration = ui.tickets.exit.find ('time:eq(2)');
-		ui.tickets.exit_terminal = ui.tickets.exit.find ('.term');
-		ui.tickets.exit_items = ui.tickets.exit.find ('.items');
-
+		APP.loadLayout (ui.sections_parent.find ('.ticket-cont'), 'cash-tickets.html', layout_tickets);
+		
 		$(document).on ('avanty:HID', cash_park_exit_hid);
 
 		mod.loaded = true;
@@ -244,26 +269,32 @@
 		var desc;
 		var icon;
 		
-		if (APP.terminal.shiftUser == APP.charp.credentialsGet ().login) {
-			desc = '<>No has finalizado tu turno.<br /><br />¿Estás seguro que quieres salir?';
-			icon = 'shift';
-		} else if (APP.history.length () > 0) {
+		var buttons = [];
+		if (APP.history.length () > 0) {
 			desc = '<>Parece que dejaste actividades pendientes.<br /><br />¿Estás seguro que quieres salir?';
 			icon = 'warning';
+		} else if (APP.terminal.shiftUser == APP.charp.credentialsGet ().login) {
+			desc = '<>No has finalizado tu turno.<br /><br />¿Estás seguro que quieres salir?';
+			icon = 'shift';
+			buttons.push ({
+				text: 'Finalizar turno',
+				'class': 'button-left',
+				click: function () { APP.later (cash_shift_end); }
+			});
 		} else {
 			desc = '¿Estás seguro que quieres salir?';
 			icon = 'question';
 		}
+
+		buttons.push ({ text: 'Sí, salir', click: cash_do_logout });
+		buttons.push ({ text: 'Cancelar', click: null });
 
 		APP.msgDialog ({
 			icon: icon,
 			desc: desc,
 			title: 'Cerrar sesión',
 			opts: {
-				buttons: {
-					'Sí, salir': cash_do_logout,
-					'Cancelar': null
-				},
+				buttons: buttons,
 				width: '75%',
 				open: function() { $(this).siblings('.ui-dialog-buttonpane').find('button:eq(1)').focus(); }
 			}
@@ -542,12 +573,12 @@
 
 		total = APP.Util.asMoney (total);
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
-		ui.tickets.exit_items.html (pre);
 		ui[prefix + '_charge_total'].text (total);
 
-		ui[prefix + '_charge_amount'].val ('');
-
+		ui.tickets.exit_items.html (pre);
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
+
+		ui[prefix + '_charge_amount'].val ('');
 
 		APP.history.go (MOD_NAME, ui['section_' + prefix + '_charge'], process);
 		shell.navShow ();
@@ -774,6 +805,101 @@
 			return;
 		}
 		return true;
+	}
+
+	function cash_shift_end () {
+		APP.msgDialog ({
+			icon: 'shift',
+			desc: 'Al finalizar turno se requerirá el corte de caja. ¿Deseas continuar?',
+			title: 'Finalizar turno',
+			opts: {
+				buttons: {
+					'Sí, finalizar': function () { APP.charp.request ('cashier_shift_end', [], cash_shift_end_success); },
+					'Cancelar': null
+				}
+			}
+		});
+	}
+
+	function cash_shift_end_success (records) {
+		APP.terminal.shiftUser = null;
+		shell.setStatus ('');
+
+		var desc = {
+			shift_begin: 'Dotación inicial:',
+			deposit: 'Depósito:'
+		};
+
+		var total = 0;
+		var change = 0;
+		var tickets = 0;
+		var pre = '';
+		ui.shift_end_table.empty ();
+		for (var rec of records) {
+			total += rec.amount;
+			if (rec.change) change += rec.change;
+			switch (rec.concept) {
+			case 'exit':
+			case 'lost':
+				tickets ++;
+				break;
+			case 'shift_begin':
+				ui.tickets.shift_end_begin_time.text (rec.timestamp.toLocaleString ());
+				break;
+			case 'shift_end':
+				ui.tickets.shift_end_time.text (rec.timestamp.toLocaleString ());
+			}
+			if (desc[rec.concept]) {
+				pre += '<div class="desc">' + rec.timestamp.toLocaleString () + ' ' + desc[rec.concept] + '</div>\n' +
+					'<div class="sum">$' + APP.Util.asMoney (rec.amount) + '</div>\n';
+				ui.shift_end_table.append ($('<tr>' +
+											 '<td>' + rec.timestamp.toLocaleString () + '</td>' +
+											 '<th>' + desc[rec.concept] + '</th>' +
+											 '<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
+											 '</tr>'));
+			}
+		}
+
+		total = APP.Util.asMoney (total);
+		pre += '<br /><div class="sum">Balance: $' + total + '</div>\n';
+		ui.shift_end_total.text (total);
+
+		change = APP.Util.asMoney (change);
+		pre += '<div class="sum">Cambio: $' + change + '</div><br />\n';
+		ui.shift_end_change.text (change);
+
+		pre += '<div class="sum">Boletos cobrados: ' + tickets + '</div>';
+		ui.shift_end_tickets.text (tickets);
+
+		ui.tickets.shift_end_terminal.text (APP.terminal.name);
+		ui.tickets.shift_end_user.text (APP.charp.credentialsGet ().login);
+		ui.tickets.shift_end_items.html (pre);
+		APP.mod.devices.escposTicketLayout (ui.tickets.shift_end);
+
+		ui.shift_end_print.button ('enable');
+		ui.shift_end_continue.button ('disable');
+		ui.shift_end_quit.button ('disable');
+
+		APP.history.go (MOD_NAME, ui.section_shift_end, 'cash-shift-end');
+		shell.navShow ();
+	}
+
+	function cash_shift_end_print () {
+		// print ticket
+		ui.shift_end_continue.button ('enable');
+		ui.shift_end_quit.button ('enable');
+
+		APP.mod.devices.print (ui.tickets.shift_end);
+	}
+
+	function cash_shift_end_continue () {
+		APP.history.back ('cash-shift-end');
+		shell.navShow ();
+	}
+
+	function cash_shift_end_quit () {
+		cash_shift_end_continue ();
+		cash_logout ();
 	}
 
 	var mod = {

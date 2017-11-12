@@ -10,6 +10,11 @@
 	padding-left: 56px;
 }
 
+.avanty .button-left {
+	position: absolute;
+	left: 3ex;
+}
+
 .avanty button.ui-widget img {
 	position: absolute;
 	left: 16px;
@@ -74,6 +79,14 @@
 
 .avanty .ui-dialog .ui-dialog-buttonpane {
 	margin-bottom: 8px;
+}
+
+.avanty .ui-dialog-buttonset .ui-button {
+	margin-left: 1ex;
+}
+
+.avanty .ui-dialog-buttonset .ui-button:first-child {
+	margin-left: 0;
 }
 
 .avanty .ui-dialog-content .icon {

@@ -45,6 +45,10 @@ sub sql_uid_type {
 	return SQL_SMALLINT;
 }
 
+sub sql_smallint_type {
+	return SQL_SMALLINT;
+}
+
 sub sql_int_type {
 	return SQL_INTEGER;
 }
@@ -71,6 +75,10 @@ sub sql_inet_type {
 
 sub sql_params_type {
 	return { 'pg_type' => PG_JSONB };
+}
+
+sub sql_smallintarr_type {
+	return { 'pg_type' => PG_INT2ARRAY };
 }
 
 sub sql_intarr_type {

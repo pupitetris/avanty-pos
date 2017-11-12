@@ -75,11 +75,13 @@ sub request_challenge {
 %::SQL_TYPES = (
 	'UID' => CHARP::sql_uid_type,
 	'INT' => CHARP::sql_int_type,
+	'SMINT' => CHARP::sql_smallint_type,
 	'STR' => CHARP::sql_str_type,
 	'BOOL' => CHARP::sql_bool_type,
 	'DATE' => CHARP::sql_date_type,
 	'TS' => CHARP::sql_timestamp_type,
 	'INTARR'  => CHARP::sql_intarr_type,
+	'SMINTARR'  => CHARP::sql_smallintarr_type,
 	'STRARR'  => CHARP::sql_strarr_type,
 	'BOOLARR' => CHARP::sql_boolarr_type,
 	'REMOTE_ADDR' => CHARP::sql_inet_type

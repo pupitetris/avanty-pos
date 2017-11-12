@@ -54,9 +54,11 @@ CHARP.ERRORS = {
 
 	function cast_datum (datum, type) {
 		switch (type) {
-			case 'bool': return (datum)? true: false;
+		case 'bool': return (datum)? true: false;
+		case 'timestamp':
+		case 'timestamptz': return new Date (datum);
 		}
-		// text or some other thing.
+		// text or a number or some other thing.
 		return datum;
 	}
 

@@ -765,7 +765,8 @@
 				if (APP.DEVEL)
 					add = '?' + Math.random ().toString ().substr (2);
 				else
-					add = '?' + APP.VERSION;
+					add = '?' + APP.config.version;
+
 				$.ajax ({ dataType: 'script',
 						  url: 'script/' + name + '.js' + add, 
 						  success: function () {
@@ -795,7 +796,7 @@
 			if (APP.DEVEL)
 				add = '?' + Math.random ().toString ().substr (2);
 			else
-				add = '?' + APP.VERSION;
+				add = '?' + APP.config.version;
 
 			div.load ('pages/' + html_file + add, cb);
 		},

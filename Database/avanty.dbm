@@ -945,7 +945,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[parameters that can be mapped by the CHARP RPC system.]]></comment>
-	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR,REMOTE_ADDR,TS"/>
+	<enumeration values="UID,INT,STR,BOOL,DATE,INTARR,STRARR,BOOLARR,REMOTE_ADDR,TS,SMINT,SMINTARR"/>
 </usertype>
 
 <usertype name="charp_cmd_code" configuration="enumeration">
@@ -1234,6 +1234,7 @@ BEGIN
 	       	      SELECT 
 			     CASE format_type (_proargtypes[s.i], NULL)
 				  WHEN 'uid'	   		 	 THEN 'UID'
+				  WHEN 'smallint'		     THEN 'SMINT'
 				  WHEN 'integer'		     THEN 'INT'
 				  WHEN 'character varying'   THEN 'STR'
 				  WHEN 'text'			     THEN 'STR'
@@ -1242,6 +1243,7 @@ BEGIN
 				  WHEN 'ts'			         THEN 'TS'
 				  WHEN 'timestamp'	         THEN 'TS'
 				  WHEN 'timestamp with time zone' THEN 'TS'
+				  WHEN 'smallint[]'		     THEN 'SMINTARR'
 				  WHEN 'integer[]'		     THEN 'INTARR'
 				  WHEN 'character varying[]' THEN 'STRARR'
 				  WHEN 'text[]'			     THEN 'STRARR'
@@ -2378,6 +2380,9 @@ END;]]></definition>
 	<parameter name="_remote_addr">
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
+	<parameter name="_ticket_terminal_id">
+		<type name="smallint" length="0"/>
+	</parameter>
 	<parameter name="_entry_ts">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
@@ -2407,16 +2412,30 @@ END;]]></definition>
 	_ticket_id ticket.ticket_id%TYPE;
 	_last_event av.ts;
 	_rate_id av.rate.rate_id%TYPE;
+	_type av.ticket_type;
 BEGIN
 	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
 
 	_last_event := cashier_shift_update_last_event (_uid, _terminal_id);
 	IF _charge_ts < _last_event THEN 
-		PERFORM charp_raise ('USERPERM'); -- exception will rollback previous update
+		PERFORM charp_raise ('USERPERM'); -- exception will roll back previous update
 	END IF;
 
-	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_ts, _ticket_type::av.ticket_type, NULL)
-		RETURNING ticket_id INTO _ticket_id;
+	_type = _ticket_type::av.ticket_type;
+	IF _type <> 'entry' AND _type <> 'deposit' AND _type <> 'lost' THEN 
+		PERFORM charp_raise ('ASSERT', 'Ticket type ' || _ticket_type || ' not supported');
+	END IF;
+
+	IF _ticket_type <> 'entry' OR _ticket_terminal_id <> _terminal_id THEN
+		INSERT INTO ticket VALUES (DEFAULT, _ticket_terminal_id, _uid, _entry_ts, _type, NULL)
+			RETURNING ticket_id INTO _ticket_id;
+	ELSE
+		SELECT ticket_id INTO _ticket_id FROM ticket
+			WHERE terminal_id = _terminal_id
+				AND date_trunc ('second', timestamp) = _entry_ts
+				AND type = _type;
+		IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+	END IF;
 
 	INSERT INTO movement
 		SELECT _ticket_id, _charge_ts, rate_id, _method::av.payment_type, _amount, _change, _reference
@@ -2529,9 +2548,9 @@ END;]]></definition>
 BEGIN
 	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
 
-	PERFORM 1 FROM ticket
+	PERFORM 1 FROM ticket AS t JOIN movement USING (ticket_id)
 		WHERE terminal_id = _ticket_terminal_id
-			AND timestamp = _ticket_entry_ts;
+			AND date_trunc ('second', t.timestamp) = _ticket_entry_ts;
 
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
@@ -2615,6 +2634,118 @@ BEGIN
 
 	RETURN QUERY
 		SELECT 'shift_end'::varchar, 0, 0, CURRENT_TIMESTAMP;
+END;]]></definition>
+</function>
+
+<function name="cashier_park_entry"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Registers the entry of a vehicle for temporary parking.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="void" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_entry_ts">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_terminal_id av.terminal.terminal_id%TYPE;
+	_last_event av.ts;
+BEGIN
+	_terminal_id := cashier_shift_assert (_uid, _remote_addr);
+
+	_last_event := cashier_shift_update_last_event (_uid, _terminal_id);
+	IF _entry_ts < _last_event THEN 
+		PERFORM charp_raise ('USERPERM'); -- exception will rollback previous update
+	END IF;
+
+	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, _entry_ts, 'entry', NULL);
+END;]]></definition>
+</function>
+
+<function name="supervisor_terminal_report"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get a report of the activity from the last shift beginning for the given terminal.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="end">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_terminal_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_start timestamp with time zone;
+BEGIN
+	PERFORM user_supervisor_assert(_uid);
+
+	SELECT ua.timestamp INTO _start
+		FROM user_activity AS ua
+		WHERE type = 'shift_begin'
+		ORDER BY timestamp DESC LIMIT 1;
+
+	-- not one shift has been begun on this terminal.
+	IF NOT FOUND  THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+
+	RETURN QUERY
+		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
+			FROM user_activity AS ua 
+				JOIN ticket USING(user_id, timestamp)
+				JOIN movement USING (ticket_id)
+			WHERE ticket.terminal_id = _terminal_id 
+				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
+
+	RETURN QUERY
+		SELECT t.type::varchar, m.amount, m.change, 
+			t.timestamp::timestamp with time zone,
+			m.timestamp::timestamp with time zone
+			FROM ticket AS t LEFT JOIN movement AS m USING (ticket_id)
+			WHERE t.terminal_id = _terminal_id 
+				AND (t.timestamp > _start OR m.timestamp > _start)
+			ORDER BY t.timestamp;
+
+	RETURN QUERY
+		SELECT 'shift_end'::varchar, 0, 0, ua.timestamp, ua.timestamp
+			FROM user_activity AS ua 
+			WHERE ua.terminal_id = _terminal_id 
+				AND ua.type = 'shift_end' AND ua.timestamp > _start;
 END;]]></definition>
 </function>
 

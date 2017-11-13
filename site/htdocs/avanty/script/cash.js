@@ -387,9 +387,15 @@
 	}
 
 	function cash_park_entry () {
+		var entry_date = new Date ();
+
+		APP.charp.request ('cashier_park_entry', [entry_date], function () { cash_park_entry_print (entry_date); });
+	}
+
+	function cash_park_entry_print (entry_date) {
 		var barcode_fields = {
 			terminalId: APP.terminal.id,
-			entryDate: new Date ()
+			entryDate: entry_date
 		}
 
 		var barcode = APP.mod.barcode.generate (barcode_fields);
@@ -459,6 +465,7 @@
 	}
 
 	var cash_charge_date;
+	var cash_entry_terminal;
 	var cash_entry_date;
 
 	function cash_park_exit_charge () {
@@ -518,6 +525,7 @@
 		}
 
 		cash_entry_date = barcode_fields.entryDate;
+		cash_entry_terminal = barcode_fields.terminalId;
 		cash_charge_date = new Date ();
 
 		// Before displaying, register on DB that we will start charging. Optionally, if the ticket has
@@ -631,7 +639,7 @@
 		switch (prefix) {
 		case 'park_exit':
 			rate_name = APP.config.defaultRateName;
-			ticket_type = 'exit';
+			ticket_type = 'entry';
 			break;
 		case 'park_lost':
 			rate_name = APP.config.lostRateName;
@@ -640,7 +648,8 @@
 		}
 
 		APP.charp.request ('cashier_park_charge',
-						   [ cash_entry_date, cash_charge_date, ticket_type, rate_name, 'tender', amount, change, null ],
+						   [ cash_entry_terminal, cash_entry_date, cash_charge_date,
+							 ticket_type, rate_name, 'tender', amount, change, null ],
 						   {
 							   success: function () { cash_park_charge_success (prefix); },
 							   error: function () {

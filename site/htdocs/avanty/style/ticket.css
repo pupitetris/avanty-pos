@@ -162,6 +162,7 @@
 .ticket .items {
 	/* font-size 8 triggers font (B) command: */
 	font-size: 8px;
+	white-space: pre;
 }
 
 .ticket .items .sum {

@@ -159,7 +159,7 @@
 		switch (transform) {
 		case 'capitalize':
 			return escpos_text_capitalize (text);
-		case 'uppsercase':
+		case 'uppercase':
 			return text.toUpperCase ();
 		case 'lowercase':
 			return text.toLowerCase ();

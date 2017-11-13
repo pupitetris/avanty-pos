@@ -59,8 +59,11 @@
 
 		shell.ui.logout.on ('click', super_logout);
 
-		shell.ui.users_create = $('#super-tab-users-create');
-		shell.ui.users_create.on ('click', super_create_user);
+		shell.ui.user_create = $('#super-tab-user-create');
+		shell.ui.user_create.on ('click', super_create_user);
+
+		shell.ui.report_summary = $('#super-tab-report-summary');
+		shell.ui.report_summary.on ('click', super_report_summary);
 
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });
 		newuser_layout_init ('newuser', {
@@ -96,6 +99,25 @@
 		ui.super_chpass_cancel = ui.section_super_chpass.find ('button[type="button"]');
 		ui.super_chpass_cancel.button ();
 		ui.super_chpass_cancel.on ('click', super_chpass_finish);
+
+		ui.section_report = $('#super-report');
+		ui.section_report.find ('button').button ();
+		ui.report = {};
+		ui.report.summary = $('#super-report-summary');
+		for (var c of ['shift_begin', 'shift_end', 'entry', 'exit', 'lost',
+					   'shift_begin_amount', 'charge', 'change', 'deposit', 'total'])
+			ui.report[c] = ui.report.summary.find ('.' + c);
+		ui.report.summary_reload = $('#super-report-summary-reload');
+		ui.report.summary_reload.on ('click', super_report_summary_reload);
+		ui.report.summary_print = $('#super-report-summary-print');
+		ui.report.summary_print.on ('click', super_report_summary_print);
+		ui.report.summary_close = $('#super-report-summary-close');
+		ui.report.summary_close.on ('click', super_report_summary_close);
+		
+		ui.tickets = {};
+		ui.tickets.report_summary = $('#super-ticket-report-summary');
+		ui.tickets.report_summary_term = ui.tickets.report_summary.find ('.term');
+		ui.tickets.report_summary_items = ui.tickets.report_summary.find ('.items span');
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -340,9 +362,103 @@
 		shell.setStatus (APP.config.establishment +
 						 ' Versión: ' + APP.config.version +
 						 ' Terminal: ' + APP.terminal.name, true);
+		shell.menuCollapse (false);
 
 		APP.history.setHome (MOD_NAME, ui.section_main);
 		APP.switchSection (ui.section_main);
+	}
+
+	function super_report_summary () {
+		APP.history.go (MOD_NAME, ui.section_report, 'super-report-summary');
+		shell.navShow ();
+		shell.menuCollapse ();
+
+		if (super_report_records) {
+			super_report_summary_do (super_report_records);
+			return;
+		}
+
+		super_report_summary_request ();
+	}
+
+	function super_report_summary_request () {
+		APP.charp.request ('supervisor_terminal_report', [APP.terminal.id], super_report_summary_do);
+	}
+
+	var super_report_records;
+
+	function super_report_summary_do (records) {
+		super_report_records = records;
+
+		var summary = {
+			shift_begin: '',
+			shift_end: '',
+			entry: 0,
+			exit: 0,
+			lost: 0,
+			shift_begin_amount: 0,
+			charge: 0,
+			change: 0,
+			deposit: 0,
+			total: 0
+		};
+		
+		for (var rec of records) {
+			switch (rec.concept) {
+			case 'shift_begin':
+				summary.shift_begin_amount = rec.amount;
+			case 'shift_end':
+				summary[rec.concept] = rec.start.toLocaleString ();
+				break;
+			case 'entry':
+				summary.entry ++;
+				if (rec.amount)
+					summary.charge += rec.amount;
+				if (rec.end)
+					summary.exit ++;
+				break;
+			case 'deposit':
+				summary.deposit += rec.amount;
+				break;
+			case 'lost':
+				summary.lost ++;
+				summary.charge += amount;
+				break;
+			}
+			if (rec.change)
+				summary.change += rec.change;
+		}
+		summary.total = summary.charge + summary.deposit + summary.shift_begin_amount;
+
+		var i = 0;
+		$.each (summary,
+				function (k, v) {
+					var str = ui.report[k].hasClass ('money')? APP.Util.asMoney (v): v.toString ();
+					ui.report[k].text (str);
+					$(ui.tickets.report_summary_items.get (i)).text (str);
+					i++;
+				});
+
+		ui.tickets.report_summary_term.text (APP.terminal.name);
+		APP.mod.devices.escposTicketLayout (ui.tickets.report_summary);
+	}
+
+	function super_report_summary_reload () {
+		ui.report.summary_reload.button ('disable');
+		super_report_summary_request ();
+		APP.later (function () {
+			ui.report.summary_reload.button ('enable');
+		}, 1000);
+	}
+
+	function super_report_summary_print () {
+		APP.mod.devices.print (ui.tickets.report_summary);
+	}
+
+	function super_report_summary_close () {
+		APP.history.back ('super-report-summary');
+		shell.navShow ();
+		shell.menuCollapse (false);
 	}
 
 	var mod = {

@@ -30,3 +30,29 @@
 #super-newuser .form-ver label.error {
 	z-index: 100;
 }
+
+#super-report-summary {
+	margin-bottom: 2em;
+}
+
+#super-report-summary th {
+	text-align: right;
+	padding-right: 0.5ex;
+}
+
+#super-report-summary td {
+	white-space: nowrap;
+}
+
+#super-report-summary td.money {
+	text-align: right;
+	line-height: unset;
+}
+
+#super-report button {
+	margin-left: 1ex;
+}
+
+#super-report button:first-child {
+	margin-left: 0;
+}

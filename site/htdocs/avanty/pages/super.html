@@ -3,19 +3,19 @@
 	<button class="shell-tool shell-back button-icon"><img src="img/icons/back.svg" /></button>
 	<div class="shell-tool shell-menu">
 	  <ul>
-		<li><a href="#super-tab-users"><span>Usuarios</span></a></li>
-		<li><a href="#super-tab-reports"><span>Reportes</span></a></li>
+		<li><a href="#super-tab-report"><span>Reportes</span></a></li>
+		<li><a href="#super-tab-user"><span>Usuarios</span></a></li>
 	  </ul>
-	  <div id="super-tab-users">
+	  <div id="super-tab-report">
 		<div>
-		  <button id="super-tab-users-create">Crear</button>
-		  <button id="super-tab-users-search">Buscar</button>
+		  <button id="super-tab-report-summary">Resumen</button>
+<!--		  <button id="super-tab-report-detail">Detallado</button>-->
 		</div>
 	  </div>
-	  <div id="super-tab-reports">
+	  <div id="super-tab-user">
 		<div>
-		  <button id="super-tab-reports-summary">Resumen</button>
-		  <button id="super-tab-reports-detail">Detallado</button>
+		  <button id="super-tab-user-create">Crear</button>
+<!--		  <button id="super-tab-user-search">Buscar</button>-->
 		</div>
 	  </div>
 	</div>
@@ -113,5 +113,78 @@
 	</form>
   </div>
   <div class="section" id="super-main">
+  </div>
+  <div class="section" id="super-report">
+	<h2>Resumen de operaciones</h2>
+	<table id="super-report-summary">
+	  <tbody>
+		<tr>
+		  <th>Inicio del turno:</th><td colspan="2" class="shift_begin" style="position: absolute"></td>
+		</tr>
+		<tr>
+		  <th>Fin del turno:</th><td colspan="2" class="shift_end" style="position: absolute"></td>
+		</tr>
+		<tr>
+		  <th>Entradas:</th><td colspan="2" class="entry"></td>
+		</tr>
+		<tr>
+		  <th>Salidas:</th><td colspan="2" class="exit"></td>
+		</tr>
+		<tr>
+		  <th>Perdidos:</th><td colspan="2" class="lost"></td>
+		</tr>
+		<tr>
+		  <th>Cant. inicial:</th><td><s/></td><td class="money shift_begin_amount"></td>
+		</tr>
+		<tr>
+		  <th>Cobros:</th><td><s/></td><td class="money charge"></td>
+		</tr>
+		<tr>
+		  <th>Cambio:</th><td><s/></td><td class="money change"></td>
+		</tr>
+		<tr>
+		  <th>Depósitos:</th><td><s/></td><td class="money deposit"></td>
+		</tr>
+		<tr>
+		  <th>Balance:</th><td><s/></td><td class="money total"></td>
+		</tr>
+	  </tbody>
+	</table>
+	<div>
+<!--	  <button id="super-report-summary-detail" class="button-icon"><img src="img/symbolic/detail.svg" />Ver detalle</button>-->
+	  <button id="super-report-summary-reload" class="button-icon"><img src="img/symbolic/reload.svg" />Actualizar</button>
+	  <button id="super-report-summary-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
+	  <button id="super-report-summary-close" class="button-icon"><img src="img/symbolic/close.svg" />Cerrar</button>
+	</div>
+  </div>
+  <div class="ticket-cont">
+	<article class="ticket" id="super-ticket-report-summary">
+	  <header>
+		<img src="img/logo_bw.png" />
+		<br />
+		<br />
+		<h1>Vips Eugenia</h1>
+		<br />
+		<h2>Resumen operaciones</h2>
+		<br />
+		<summary>Terminal <span class="term">XXX</span></summary>
+	  </header>
+	  <br />
+	  <div class="items">
+Inicio del turno: <span></span>
+   Fin del turno: <span></span>
+        Entradas: <span></span>
+         Salidas: <span></span>
+        Perdidos: <span></span>
+
+<div class="sum">Cant. inicial: $<span class="money"></span></div>
+<div class="sum">Cobros: $<span class="money"></span></div>
+<div class="sum">Cambio: $<span class="money"></span></div>
+<div class="sum">Depósitos: $<span class="money"></span></div>
+<div class="sum">Balance: $<span class="money"></span></div>
+	  </div>
+	  <br />
+	  <hr />
+	</article>
   </div>
 </div>

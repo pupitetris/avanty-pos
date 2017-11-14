@@ -76,6 +76,7 @@
 
 	function park_charge_layout_init (prefix) {
 		var id = prefix.replace (/_/g, '-');
+		var process = 'cash-' + id;
 
 		var section = ui['section_' + prefix + '_charge'] = $('#cash-'+ id + '-charge');
 		section.on ('avanty:switchSectionEnter', function () { cash_park_charge_reset (prefix); });
@@ -96,7 +97,7 @@
 			};
 
 		form.validate ({
-			submitHandler: function (form, evt) { cash_park_charge_submit (prefix, form, evt); },
+			submitHandler: function (form, evt) { cash_park_charge_submit (process, prefix, form, evt); },
 			rules: rules
 		});
 
@@ -113,7 +114,7 @@
 		ui[prefix + '_charge_print'].on ('click', cash_park_charge_print);
 
 		ui[prefix + '_charge_close'] = $('#cash-' + id + '-charge-close');
-		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close ('cash-' + id); });
+		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close (process); });
 
 		ui[prefix + '_charge_detail'] = section.find ('.detail');
 
@@ -259,8 +260,6 @@
 
 		APP.loadLayout (ui.sections_parent.find ('.ticket-cont'), 'cash-tickets.html', layout_tickets);
 		
-		$(document).on ('avanty:HID', cash_park_exit_hid);
-
 		mod.loaded = true;
 		mod.onLoad ();
 	}
@@ -414,6 +413,7 @@
 		APP.history.go (MOD_NAME, ui.section_park_exit, 'cash-park-exit');
 		shell.navShow ();
 		shell.menuCollapse ();
+		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); });
 	}
 
 	function cash_park_exit_reset () {
@@ -427,8 +427,8 @@
 		});
 	}
 
-	function cash_park_exit_hid (evt, str) {
-		APP.history.back ('cash-park-exit', false);
+	function cash_park_exit_hid (evt, str, process) {
+		APP.history.back (process, false);
 		shell.navShow ();
 
 		cash_park_exit ();
@@ -436,12 +436,8 @@
 		APP.later (function () {
 			if (ui.section_park_exit.is (':hidden')) return true;
 
-			if (str.substr (str.length - 1, 1) == '\r') {
-				str = str.substr (0, str.length - 1);
-				ui.park_exit_barcode.val (str);
-				ui.park_exit_form.trigger ('submit');
-			} else
-				ui.park_exit_barcode.val (str);
+			ui.park_exit_barcode.val (str);
+			ui.park_exit_form.trigger ('submit');
 		});
 	}
 
@@ -618,7 +614,7 @@
 		});
 	}
 
-	function cash_park_charge_submit (prefix, form, evt) {
+	function cash_park_charge_submit (process, prefix, form, evt) {
 		evt.originalEvent.preventDefault ();
 
 		var ui_amount = ui[prefix + '_charge_amount'];
@@ -651,7 +647,7 @@
 						   [ cash_entry_terminal, cash_entry_date, cash_charge_date,
 							 ticket_type, rate_name, 'tender', amount, change, null ],
 						   {
-							   success: function () { cash_park_charge_success (prefix); },
+							   success: function () { cash_park_charge_success (process, prefix); },
 							   error: function () {
 								   ui_submit.button ('enable');
 								   ui_amount.input ('enable');
@@ -660,10 +656,10 @@
 						   });
 	}
 
-	function cash_park_charge_success (prefix) {
-		APP.hidHandlerStart ();
+	function cash_park_charge_success (process, prefix) {
 		ui[prefix + '_charge_print'].button ('enable');
 		ui[prefix + '_charge_close'].button ('enable');
+		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, process); });
 	}
 
 	function cash_park_charge_print () {
@@ -758,8 +754,7 @@
 			// Open the menu to save the user from this chore.
 			shell.menuCollapse (false);
 
-			// Listen to any keyboard input sent from HID devices:
-			APP.hidHandlerStart ();
+			APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); });
 		}
 	}
 

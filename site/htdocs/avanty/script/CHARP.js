@@ -129,7 +129,7 @@ CHARP.ERRORS = {
 				break;
 			case 'parsererror':
 				err = CHARP.ERRORS['AJAX:JSON'];
-				if (APP.DEVEL)
+				if (APP.config.DEVEL)
 					err = CHARP.extendObj ({ msg: 'Datos: `' + req.responseText + '`.' }, err);
 				break;
 			default:

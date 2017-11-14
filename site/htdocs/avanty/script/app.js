@@ -627,55 +627,6 @@
 		}
 	}
 
-	var hid_handler;
-
-	function hid_handler_send () {
-		if (hid_handler.str.length > 0)
-			$(document).trigger ('avanty:HID', [ hid_handler.str ]);
-		
-		hid_handler.str = '';
-		hid_handler.timeoutH = undefined;
-	}
-
-	function hid_handler_keypress (evt) {
-		var c = String.fromCharCode (evt.which);
-		hid_handler.str += c;
-
-		if (c == '\r') {
-			if (hid_handler.timeoutH)
-				window.clearTimeout (hid_handler.timeoutH);
-			hid_handler_send ();
-			return;
-		}
-		
-		if (!hid_handler.timeoutH)
-			hid_handler.timeoutH = window.setTimeout (hid_handler_send, hid_handler.timeout);
-	}
-
-	function hid_handler_start (start) {
-		if (start === false) {
-			if (hid_handler) {
-				hid_handler.active = false;
-				if (hid_handler.timeoutH)
-					window.clearTimeout (hid_handler.timeoutH);
-				$(document).off ('keypress.hidHandler');
-			}
-			return;
-		}
-		
-		if (hid_handler && hid_handler.active)
-			return;
-		
-		hid_handler = {
-			active: true,
-			str: '',
-			timeout: 250,
-			timeoutH: undefined
-		};
-		
-		$(document).on ('keypress.hidHandler', hid_handler_keypress);
-	}
-
 	// Check that the amount received is not excessive, compared to the total. For validation.
 	function check_valid_amount_received_for_total (amount, total) {
 		// Trivial case: total is covered exactly.
@@ -762,7 +713,7 @@
 				if (cb) cb (APP.mod[name]);
 			} else {
 				var add = '';
-				if (APP.DEVEL)
+				if (APP.config.DEVEL)
 					add = '?' + Math.random ().toString ().substr (2);
 				else
 					add = '?' + APP.config.version;
@@ -793,7 +744,7 @@
 
 		loadLayout: function (div, html_file, cb) {
 			var add = '';
-			if (APP.DEVEL)
+			if (APP.config.DEVEL)
 				add = '?' + Math.random ().toString ().substr (2);
 			else
 				add = '?' + APP.config.version;
@@ -810,7 +761,7 @@
 		},
 
 		switchPage: function (page) {	
-			APP.hidHandlerStart (false);
+			APP.mod.devices.hidHandler.off ()
 
 			if (current_page == page)
 				return;
@@ -825,7 +776,7 @@
 		},
 
 		switchSection: function (div, do_trigger) {
-			APP.hidHandlerStart (false);
+			APP.mod.devices.hidHandler.off ()
 
 			div.parent ().find ('> .section').hide ();
 			div.show ();
@@ -955,9 +906,6 @@
 			div.remove ();
 		},
 
-		// attach to avanty:HID event on document to get notifications.
-		hidHandlerStart: hid_handler_start,
-
 		argsParse: function () {
 			var search = window.location.search;
 			var args = {};
@@ -969,12 +917,11 @@
 			return args;
 		},
 
-		DEVEL: true,
-
 		main: function () {
 			APP.config = {
-				establishment: 'Laboratorio',
+				DEVEL: true,
 				version: '0.8',
+				establishment: 'Laboratorio',
 				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
 				defaultRateName: 'test',
 				lostRateName: 'test-perdido',
@@ -998,6 +945,13 @@
 					{ denomination: 100000, type: 'bill' }
 				].sort (function (a, b) { return a.denomination - b.denomination; }) // Paranoia
 			};
+
+			if (document.documentElement.requestFullscreen)
+				document.documentElement.requestFullscreen ();
+			
+			if (!APP.config.DEVEL) {
+				window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
+			}
 
 			$.validator.addMethod ('money', function (val, ele) {
 				var re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
@@ -1059,22 +1013,14 @@
 			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
 
 			APP.loadModule ('devices', // Printer and HIDs.
-							function (mod) { mod.configure (dev_conf) });
+							function (mod) {
+								mod.hidHandler.start ();
+								mod.configure (dev_conf);
+							});
 
 			APP.loadModule ('activate');
 		}
 	};
 
-	$(document).ready (function () {
-		if (document.documentElement.requestFullscreen)
-			document.documentElement.requestFullscreen ();
-
-		if (!APP.DEVEL) {
-			window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
-		}
-
-		// This should be defined by you, it's your entry point.
-		if (APP.main)
-			APP.main ();
-	});
+	$(document).ready (APP.main);
 }) ();

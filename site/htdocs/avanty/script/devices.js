@@ -8,6 +8,106 @@
 
 	var devices_config = {};
 
+	function HidHandler () {
+		return this;
+	}
+
+	(function () {
+
+		function _reset () {
+			this.capturing = false;
+			this.str = '';
+			
+			if (this.timeoutH) {
+				window.clearTimeout (this.timeoutH);
+				this.timeoutH = undefined;
+			}
+		}
+
+		function _keypress (evt) {
+			var c = String.fromCharCode (evt.which);
+			switch (c) {
+			case '{':
+				if (this.capturing)
+					break; // treat '{' as normal char.
+				_reset.call (this);
+				this.capturing = true;
+				var that = this;
+				this.timeoutH = window.setTimeout (function () { _reset.call (that); }, this.timeout);
+				evt.preventDefault ();
+				return false;
+			case '}':
+				$(document).trigger ('avanty:HID', [ this.str ]);
+				_reset.call (this);
+				evt.preventDefault ();
+				return false;
+			}
+			
+			if (this.capturing) {
+				this.str += c;
+				evt.preventDefault ();
+				return false;
+			}
+
+			return true;
+		}
+
+		HidHandler.prototype = {
+
+			// Register an event listener.
+			on: function (func, id) {
+				if (!id) id = this.listeners.length;
+				this.listeners[id] = true;
+				$(document).on ('avanty:HID.' + id, func);
+				return id;
+			},
+
+			// Deregister event listener.
+			off: function (id) {
+				if (id) {
+					delete this.listeners[id];
+					$(document).off ('avanty:HID.' + id);
+				} else {
+					var that = this;
+					$.each (this.listeners, function (id) { that.off (id); });
+				}
+			},
+
+			stop: function () {
+				if (!this.active)
+					return;
+
+				_reset.call (this);
+				this.active = false;
+
+				$(document).off ('keypress.hidHandler');
+			},
+
+			// Start listening to key presses. Normally called once at the app startup.
+			start: function () {
+				if (this.active)
+					return;
+
+				_reset.call (this);
+				this.active = true;
+				
+				var that = this;
+				$(document).on ('keypress.hidHandler', function (evt) { _keypress.call (that, evt); });
+			},
+
+			init: function () {
+				this.active = false;
+				this.capturing = false;
+				this.str = '';
+				this.timeout = 2500;
+				this.timeoutH = undefined;
+				this.listeners = {};
+
+				return this;
+			}
+		}
+	}) ();
+
 	// ASCII control characters.
 	var A = {
 		NUL: '\x00',	SOH: '\x01',	STX: '\x02',	ETX: '\x03',
@@ -749,6 +849,8 @@
 
 		reset: function () {
 		},
+
+		hidHandler: new HidHandler ().init (),
 
 		// Dynamic layout and css adjustments to make tickets look good on screen.
 		escposTicketLayout: escpos_ticket_layout,

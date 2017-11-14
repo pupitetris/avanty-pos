@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="306,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="916,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -461,7 +461,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 		<type name="smallserial" length="0"/>
 	</column>
 	<column name="denomination" not-null="true">
-		<type name="smallint" length="0"/>
+		<type name="integer" length="0"/>
 		<comment><![CDATA[in cents]]></comment>
 	</column>
 	<column name="type" not-null="true">
@@ -2722,10 +2722,10 @@ BEGIN
 		ORDER BY timestamp DESC LIMIT 1;
 
 	-- not one shift has been begun on this terminal.
-	IF NOT FOUND  THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+	IF NOT FOUND THEN RETURN; END IF;
 
 	RETURN QUERY
-		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
+		SELECT 'shift_begin'::varchar, movement.amount, 0, _start, _start 
 			FROM user_activity AS ua 
 				JOIN ticket USING(user_id, timestamp)
 				JOIN movement USING (ticket_id)
@@ -2742,7 +2742,9 @@ BEGIN
 			ORDER BY t.timestamp;
 
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, 0, 0, ua.timestamp, ua.timestamp
+		SELECT 'shift_end'::varchar, 0, 0, 
+			ua.timestamp::timestamp with time zone, 
+			ua.timestamp::timestamp with time zone
 			FROM user_activity AS ua 
 			WHERE ua.terminal_id = _terminal_id 
 				AND ua.type = 'shift_end' AND ua.timestamp > _start;

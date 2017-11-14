@@ -206,6 +206,7 @@
 		ui.section_shift_end.find ('button').button ();
 		ui.shift_end_table = ui.section_shift_end.find ('tbody');
 		ui.shift_end_total = ui.section_shift_end.find ('.total');
+		ui.shift_end_received = ui.section_shift_end.find ('.received');
 		ui.shift_end_change = ui.section_shift_end.find ('.change');
 		ui.shift_end_tickets = ui.section_shift_end.find ('.tickets');
 		ui.shift_end_print = $('#cash-shift-end-print');
@@ -864,13 +865,19 @@
 			}
 		}
 
-		total = APP.Util.asMoney (total);
-		pre += '<br /><div class="sum">Balance: $' + total + '</div>\n';
-		ui.shift_end_total.text (total);
+		var received = total + change;
+
+		received = APP.Util.asMoney (received);
+		pre += '<div class="sum">Recibido: $' + received + '</div><br />\n';
+		ui.shift_end_received.text (received);
 
 		change = APP.Util.asMoney (change);
-		pre += '<div class="sum">Cambio: $' + change + '</div><br />\n';
+		pre += '<div class="sum">Devuelto: $' + change + '</div><br />\n';
 		ui.shift_end_change.text (change);
+
+		total = APP.Util.asMoney (total);
+		pre += '<br /><div class="sum">Cobrado: $' + total + '</div>\n';
+		ui.shift_end_total.text (total);
 
 		pre += '<div class="sum">Boletos cobrados: ' + tickets + '</div>';
 		ui.shift_end_tickets.text (tickets);

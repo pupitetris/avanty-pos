@@ -105,7 +105,7 @@
 		ui.report = {};
 		ui.report.summary = $('#super-report-summary');
 		for (var c of ['shift_begin', 'shift_end', 'entry', 'exit', 'lost',
-					   'shift_begin_amount', 'charge', 'change', 'deposit', 'total'])
+					   'shift_begin_amount', 'received', 'change', 'charge', 'deposit', 'total'])
 			ui.report[c] = ui.report.summary.find ('.' + c);
 		ui.report.summary_reload = $('#super-report-summary-reload');
 		ui.report.summary_reload.on ('click', super_report_summary_reload);
@@ -397,8 +397,9 @@
 			exit: 0,
 			lost: 0,
 			shift_begin_amount: 0,
-			charge: 0,
+			received: 0,
 			change: 0,
+			charge: 0,
 			deposit: 0,
 			total: 0
 		};
@@ -429,6 +430,7 @@
 				summary.change += rec.change;
 		}
 		summary.total = summary.charge + summary.deposit + summary.shift_begin_amount;
+		summary.received = summary.change + summary.charge;
 
 		var i = 0;
 		$.each (summary,

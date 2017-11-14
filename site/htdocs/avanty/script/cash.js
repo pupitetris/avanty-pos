@@ -88,7 +88,7 @@
 		var total = ui[prefix + '_charge_total'] = form.find ('.total');
 
 		var rules = {};
-		rules['cash-' + id + '-charge-amount'] =
+		rules['cash-' + id + '-charge-received'] =
 			{
 				required: true,
 				maxlength: 8,
@@ -104,9 +104,9 @@
 		ui[prefix + '_charge_table'] = form.find ('tbody');
 		ui[prefix + '_charge_change'] = form.find ('.change');
 
-		var amount = ui[prefix + '_charge_amount'] = form.find ('input[name="cash-' + id + '-charge-amount"]');
-		amount.on ('input', function () { cash_park_charge_amount_input (prefix); });
-		amount.on ('change', function () { cash_park_charge_amount_change (prefix); });
+		var received = ui[prefix + '_charge_received'] = form.find ('input[name="cash-' + id + '-charge-received"]');
+		received.on ('input', function () { cash_park_charge_received_input (prefix); });
+		received.on ('change', function () { cash_park_charge_received_change (prefix); });
 
 		ui[prefix + '_charge_submit'] = form.find ('button[type="submit"]');
 
@@ -582,51 +582,51 @@
 		ui.tickets.exit_items.html (pre);
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
 
-		ui[prefix + '_charge_amount'].val ('');
+		ui[prefix + '_charge_received'].val ('');
 
 		APP.history.go (MOD_NAME, ui['section_' + prefix + '_charge'], process);
 		shell.navShow ();
 	}
 
 	// Canonize value to include cents if none were introduced.
-	function cash_park_charge_amount_change (prefix) {
-		var amount = APP.Util.parseMoney (ui[prefix + '_charge_amount'].val ());
-		ui[prefix + '_charge_amount'].val (APP.Util.asMoney (amount));
+	function cash_park_charge_received_change (prefix) {
+		var received = APP.Util.parseMoney (ui[prefix + '_charge_received'].val ());
+		ui[prefix + '_charge_received'].val (APP.Util.asMoney (received));
 	}
 
-	function cash_park_charge_amount_input (prefix) {
+	function cash_park_charge_received_input (prefix) {
 		var total = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
-		var amount = APP.Util.parseMoney (ui[prefix + '_charge_amount'].val ());
-		var change = amount - total;
+		var received = APP.Util.parseMoney (ui[prefix + '_charge_received'].val ());
+		var change = received - total;
 		ui[prefix + '_charge_change'].text ((change < 0)? '-.--': APP.Util.asMoney (change));
 	}
 
 	function cash_park_charge_reset (prefix) {
 		ui[prefix + '_charge_form'].validate ().resetForm ();
-		ui[prefix + '_charge_amount'].input ('enable');
+		ui[prefix + '_charge_received'].input ('enable');
 		ui[prefix + '_charge_submit'].button ('enable');
 		ui[prefix + '_charge_print'].button ('disable');
 		ui[prefix + '_charge_close'].button ('disable');
 
 		APP.later (function () {
 			if (ui['section_' + prefix + '_charge'].is (':hidden')) return true;
-			ui[prefix + '_charge_amount'].focus ();
+			ui[prefix + '_charge_received'].focus ();
 		});
 	}
 
 	function cash_park_charge_submit (process, prefix, form, evt) {
 		evt.originalEvent.preventDefault ();
 
-		var ui_amount = ui[prefix + '_charge_amount'];
-		if (ui_amount.is (':disabled')) // avoid re-submitting.
+		var ui_received = ui[prefix + '_charge_received'];
+		if (ui_received.is (':disabled')) // avoid re-submitting.
 			return false;
 
 		var ui_submit = ui[prefix + '_charge_submit'];
 
-		ui_amount.input ('disable');
+		ui_received.input ('disable');
 		ui_submit.button ('disable');
 
-		var amount = APP.Util.parseMoney (ui_amount.val ());
+		var amount = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
 		var change = APP.Util.parseMoney (ui[prefix + '_charge_change'].text ());
  		
 		var rate_name;
@@ -650,7 +650,7 @@
 							   success: function () { cash_park_charge_success (process, prefix); },
 							   error: function () {
 								   ui_submit.button ('enable');
-								   ui_amount.input ('enable');
+								   ui_received.input ('enable');
 								   return true;
 							   }
 						   });

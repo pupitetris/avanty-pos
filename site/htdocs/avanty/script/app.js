@@ -953,15 +953,20 @@
 				window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
 			}
 
+			var money_re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
 			$.validator.addMethod ('money', function (val, ele) {
-				var re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
-				return re.exec (val);
+				return money_re.exec (val);
 			}, 'Pesos y centavos (opcionales).');
 			
+			var login_re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
 			$.validator.addMethod ('validate-login', function (val, ele) { 
-				var re = new RegExp ('^[a-zA-Z0-9_.áéíóúñÁÉÚÍÓÚÑüÜ]+$');
-				return re.exec (val);
+				return login_re.exec (val);
 			}, 'La clave tiene caracteres no válidos.');
+
+			var passwd_re = new RegExp ('[áéíóúñÁÉÚÍÓÚÑüÜ´¨]');
+			$.validator.addMethod ('passwd', function (val, ele) {
+				return !(passwd_re.exec (val));
+			}, 'No se permiten acentos ni eñes.');
 
 			$.validator.addMethod ('pass-confirm', function (val, ele, other_pass) {
 				return other_pass.val () == val;

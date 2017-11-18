@@ -59,6 +59,7 @@
 		};
 		rules[name + '-pass'] = {
 			required: true,
+			passwd: true,
 			minlength: 8,
 			maxlength: 255
 		};
@@ -335,6 +336,7 @@
 		
 		APP.later (function () {
 			if (ui.section_chpass.is (':hidden')) return true;
+			ui.chpass_orig_pass.val ('');
 			ui.chpass_orig_pass.focus ();
 		});
 	}

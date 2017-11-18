@@ -38,11 +38,12 @@
 		};
 		rules[name + '-pass'] = {
 			required: true,
+			passwd: true,
 			minlength: 8,
 			maxlength: 255
 		};
 		rules[name + '-pass2'] = {
-			'pass-confirm': { param: pass }
+			'pass-confirm': pass
 		};
 
 		validator_options.rules = rules;

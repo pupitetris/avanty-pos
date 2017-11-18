@@ -359,11 +359,11 @@
 
 		ui.chpass_submit.button ('disable');
 
-		var pass = ui.chpass_pass.val ();
-		APP.charp.request ('this_user_password_change', [pass],
+		var passwd = ui.chpass_pass.val ();
+		APP.charp.request ('this_user_password_change', [passwd],
 						   {
 							   success: function (salt) {
-								   cred.pass = APP.mod.login.passwordHash (pass, salt);
+								   cred.passwd = APP.mod.login.passwordHash (passwd, salt);
 								   cred.salt = salt;
 								   APP.charp.credentialsSet (cred);
 								   cash_chpass_success ();

@@ -33,8 +33,8 @@ body.avanty {
 	opacity: 0.125;
 	cursor: default;
 	pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .avanty > .watermark img {
@@ -53,8 +53,8 @@ h1 {
 .avanty .label, label, h1, h2, h3, h4, h5 {
 	cursor: default;
 	pointer-events: none;
-    user-select: none;
-    -webkit-user-select: none;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .numbers, .money {
@@ -101,7 +101,7 @@ h1 {
 	font-size: 1em;
 	padding: 0.75em;
 	border-radius: 0.5em;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 	cursor: pointer;
 }
 
@@ -262,7 +262,7 @@ form label.error {
 	z-index: 100;
 	height: 66px;
 	background-color: #f0f0d0;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .shell-tool {
@@ -278,12 +278,12 @@ form label.error {
 	left: 25%;
 	width: 50%;
 	z-index: 1;
-    user-select: none;
-    -webkit-user-select: none;
+	user-select: none;
+	-webkit-user-select: none;
 }
 
 .shell-menu > div {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
 .shell-menu .ui-tabs-panel > div {

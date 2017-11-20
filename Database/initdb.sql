@@ -2,6 +2,11 @@ BEGIN TRANSACTION;
 
 	SET CONSTRAINTS ALL DEFERRED;
     
+	DELETE FROM ticket;
+    DELETE FROM movement;
+    DELETE FROM cashier_shift;
+    DELETE FROM user_cashier;
+
     DELETE FROM account;
 	ALTER SEQUENCE account_user_id_seq RESTART;
     INSERT INTO account VALUES (DEFAULT, NULL, 'supervisor', '$2a$08$dcVj2sdh6IU5ixUg5m5i2e', 

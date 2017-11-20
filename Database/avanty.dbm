@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="916,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2174,7 +2174,9 @@ END
 	_terminal_id av.terminal.terminal_id%TYPE;
 BEGIN
 	SELECT terminal_id INTO _terminal_id FROM terminal WHERE ip_addr = _remote_addr;
-	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
+	IF NOT FOUND THEN 
+		PERFORM charp_raise ('ASSERT', _remote_addr::text || ' not registered.');
+	END IF;
 	RETURN _terminal_id;
 END;]]></definition>
 </function>

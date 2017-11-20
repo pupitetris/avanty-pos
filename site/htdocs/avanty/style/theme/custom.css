@@ -1,10 +1,6 @@
 .avanty .ui-widget {
-	font-family: 'Roboto', sans-serif;
+	font-family: unset;
 }
-
-/*.avanty .ui-widget button {
-	font-family: 'Roboto', sans-serif;
-}*/
 
 .avanty button.ui-widget.button-icon {
 	padding-left: 56px;
@@ -121,7 +117,7 @@
 
 .avanty .ui-dialog-content .msg.msg-mono {
     font-style: normal;
-    font-family: 'Ubuntu Mono Regular', monospace;
+    font-family: ibm-plex-mono;
 }
 
 .avanty .ui-dialog-content .error-sev {

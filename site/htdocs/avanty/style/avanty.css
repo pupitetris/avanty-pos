@@ -9,7 +9,7 @@
 @import url('ticket.css');
 
 body.avanty {
-	font-family: 'Open Sans', sans-serif;
+	font-family: ibm-plex-sans;
 	font-size: 1.5em;
 	margin: 0;
 	padding: 0;
@@ -58,7 +58,7 @@ h1 {
 }
 
 .numbers, .money {
-	font-family: 'Ubuntu Mono Regular', sans-serif !important;
+	font-family: ibm-plex-mono !important;
 	font-size: 120% !important;
 	line-height: 1.5em;
 }
@@ -131,7 +131,7 @@ h1 {
 #clock span {
 	display: block;
 	text-align: center;
-	font-size: small;
+	font-size: 0.55em;
 	white-space: nowrap;
 }
 
@@ -373,7 +373,7 @@ input[type="text"].money {
 /* Used to denote money symbol. */
 s {
 	text-decoration: unset;
-	font-family: 'Open Sans', sans-serif;
+	font-family: ibm-plex-sans;
 }
 
 s:before {

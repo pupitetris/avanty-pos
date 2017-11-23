@@ -1,89 +1,86 @@
 <?xml version="1.0" ?>
 <keyboard format="3.2" id="Avanty" section="system" summary="POS keyboard">
   <include file="key_defs.xml"/>
-  <box border="0.5" orientation="vertical" spacing="3">
-    <box spacing="3">
-      <panel>
-        <panel filename="Avanty.svg" layer="alpha">
-          <key group="alphanumeric" id="AB01"/>
-          <key group="alphanumeric" id="AE02"/>
-          <key group="alphanumeric" id="AE03"/>
-          <key group="alphanumeric" id="AD09"/>
-          <key group="alphanumeric" id="AE01"/>
-          <key group="alphanumeric" id="AE06"/>
-          <key group="alphanumeric" id="AE07"/>
-          <key group="alphanumeric" id="AE04"/>
-          <key group="alphanumeric" id="AE05"/>
-          <key group="alphanumeric" id="AD03"/>
-          <key group="alphanumeric" id="AD02"/>
-          <key group="alphanumeric" id="AD01"/>
-          <key group="alphanumeric" id="AE09"/>
-          <key group="alphanumeric" id="AD07"/>
-          <key group="alphanumeric" id="AD06"/>
-          <key group="alphanumeric" id="AD05"/>
-          <key group="alphanumeric" id="AD04"/>
-          <key group="alphanumeric" id="AB10"/>
-          <key group="alphanumeric" id="AC11"/>
-          <key group="alphanumeric" id="AC10"/>
-          <key group="alphanumeric" id="AD10"/>
-          <key group="alphanumeric" id="AD11"/>
-          <key group="alphanumeric" id="AD12"/>
-          <key group="alphanumeric" id="AB08"/>
-          <key group="alphanumeric" id="AE11"/>
-          <key group="alphanumeric" id="AE10"/>
-          <key group="alphanumeric" id="AE12"/>
-          <key group="alphanumeric" id="AC04"/>
-          <key group="alphanumeric" id="AC05"/>
-          <key group="alphanumeric" id="AC06"/>
-          <key group="alphanumeric" id="AC07"/>
-          <key group="alphanumeric" id="AB09"/>
-          <key group="alphanumeric" id="AC01"/>
-          <key group="alphanumeric" id="AC02"/>
-          <key group="alphanumeric" id="AC03"/>
-          <key group="alphanumeric" id="AB05"/>
-          <key group="alphanumeric" id="AB04"/>
-          <key group="alphanumeric" id="AE08"/>
-          <key group="alphanumeric" id="AB06"/>
-          <key group="alphanumeric" id="AC08"/>
-          <key group="alphanumeric" id="AC09"/>
-          <key group="alphanumeric" id="AB03"/>
-          <key group="alphanumeric" id="AB02"/>
-          <key group="alphanumeric" id="AD08"/>
-          <key group="alphanumeric" id="AB07"/>
+  <box border="0.5" spacing="3">
+    <panel filename="Avanty.svg">
+      <key group="alphanumeric" id="AB01"/>
+      <key group="alphanumeric" id="AE02"/>
+      <key group="alphanumeric" id="AE03"/>
+      <key group="alphanumeric" id="AD09"/>
+      <key group="alphanumeric" id="AE01"/>
+      <key group="alphanumeric" id="AE06"/>
+      <key group="alphanumeric" id="AE07"/>
+      <key group="alphanumeric" id="AE04"/>
+      <key group="alphanumeric" id="AE05"/>
+      <key group="alphanumeric" id="AD03"/>
+      <key group="alphanumeric" id="AD02"/>
+      <key group="alphanumeric" id="AD01"/>
+      <key group="alphanumeric" id="AE09"/>
+      <key group="alphanumeric" id="AD07"/>
+      <key group="alphanumeric" id="AD06"/>
+      <key group="alphanumeric" id="AD05"/>
+      <key group="alphanumeric" id="AD04"/>
+      <key group="alphanumeric" id="AB10"/>
+      <key group="alphanumeric" id="AC11"/>
+      <key group="alphanumeric" id="ntilde" keysym="0xf1" label="ñ" shift_label="Ñ"/>
+      <key group="alphanumeric" id="AD10"/>
+      <key group="alphanumeric" id="acute" keysym="0xfe51" label="´" cap_label="¨" shift_label="´"/>
+      <key group="alphanumeric" id="AD12"/>
+      <key group="alphanumeric" id="AB08"/>
+      <key group="alphanumeric" id="AE11"/>
+      <key group="alphanumeric" id="AE10"/>
+      <key group="alphanumeric" id="AE12"/>
+      <key group="alphanumeric" id="AC04"/>
+      <key group="alphanumeric" id="AC05"/>
+      <key group="alphanumeric" id="AC06"/>
+      <key group="alphanumeric" id="AC07"/>
+      <key group="alphanumeric" id="AB09"/>
+      <key group="alphanumeric" id="AC01"/>
+      <key group="alphanumeric" id="AC02"/>
+      <key group="alphanumeric" id="AC03"/>
+      <key group="alphanumeric" id="AB05"/>
+      <key group="alphanumeric" id="AB04"/>
+      <key group="alphanumeric" id="AE08"/>
+      <key group="alphanumeric" id="AB06"/>
+      <key group="alphanumeric" id="AC08"/>
+      <key group="alphanumeric" id="AC09"/>
+      <key group="alphanumeric" id="AB03"/>
+      <key group="alphanumeric" id="AB02"/>
+      <key group="alphanumeric" id="AD08"/>
+      <key group="alphanumeric" id="AB07"/>
 
-          <key group="keypadnumber" id="KP0" scan_priority="1"/>
-          <key group="keypadnumber" id="KP1" scan_priority="1"/>
-          <key group="keypadnumber" id="KP2" scan_priority="1"/>
-          <key group="keypadnumber" id="KP3" scan_priority="1"/>
-          <key group="keypadnumber" id="KP4" scan_priority="1"/>
-          <key group="keypadnumber" id="KP5" scan_priority="1"/>
-          <key group="keypadnumber" id="KP6" scan_priority="1"/>
-          <key group="keypadnumber" id="KP7" scan_priority="1"/>
-          <key group="keypadnumber" id="KP8" scan_priority="1"/>
-          <key group="keypadnumber" id="KP9" scan_priority="1"/>
-          <key group="keypadmisc" id="KPDL" scan_priority="1"/>
-          <key group="keypadmisc" id="KPEN" scan_priority="1" label="Intro"/>
+      <key group="keypadnumber" id="KP0" scan_priority="1"/>
+      <key group="keypadnumber" id="KP1" scan_priority="1"/>
+      <key group="keypadnumber" id="KP2" scan_priority="1"/>
+      <key group="keypadnumber" id="KP3" scan_priority="1"/>
+      <key group="keypadnumber" id="KP4" scan_priority="1"/>
+      <key group="keypadnumber" id="KP5" scan_priority="1"/>
+      <key group="keypadnumber" id="KP6" scan_priority="1"/>
+      <key group="keypadnumber" id="KP7" scan_priority="1"/>
+      <key group="keypadnumber" id="KP8" scan_priority="1"/>
+      <key group="keypadnumber" id="KP9" scan_priority="1"/>
+      <key group="keypadmisc" id="KPDL" scan_priority="1"/>
+      <key group="keypadmisc" id="KPEN" scan_priority="1" label="Intro"/>
 
-          <key group="misc" id="CAPS"/>
-          <key group="shifts" id="LFSH"/>
-          <key group="shifts" id="RTSH"/>
-          <key group="misc" id="TAB"/>
-          <key group="backspace" id="BKSP"/>
-          <key group="misc" id="RTRN"/>
-          <key group="bottomrow" id="SPCE"/>
-          <key group="editing" id="DELE" image="" label="Supr" scan_priority="3"/>
+      <key group="misc" id="CAPS"/>
+      <key group="shifts" id="LFSH"/>
+      <key group="shifts" id="RTSH"/>
+      <key group="misc" id="TAB"/>
+      <key group="backspace" id="BKSP"/>
+      <key group="misc" id="RTRN"/>
+      <key group="bottomrow" id="SPCE"/>
+      <key group="editing" id="DELE" image="" label="Supr" scan_priority="3"/>
 
-          <key group="directions" id="LEFT" scan_priority="3"/>
-          <key group="directions" id="RGHT" scan_priority="3"/>
-          <key group="editing" id="HOME" scan_priority="3" label="Inicio"/>
-          <key group="editing" id="END" scan_priority="3" label="Fin"/>
+      <key group="directions" id="LEFT" scan_priority="3"/>
+      <key group="directions" id="RGHT" scan_priority="3"/>
+      <key group="editing" id="HOME" scan_priority="3" label="Inicio"/>
+      <key group="editing" id="END" scan_priority="3" label="Fin"/>
 
-          <key group="bottomrow" id="briup" image="brightness-up.svg" button="true" tooltip="Brillo +" keysym="0x1008ff02"/>
-          <key group="bottomrow" id="bridwn" image="brightness-down.svg" button="true" tooltip="Brillo -" keysym="0x1008ff03"/>
-		  <key group="bottomrow" id="hide"/>
-          <key group="misc" id="BKSP2" keycode="22" label="" image="erase-left.svg" action="single-stroke"/>
-        </panel>
-      </panel>
-    </box>
+      <key group="bottomrow" id="briup" image="brightness-up.svg" button="true" tooltip="Brillo +" keysym="0x1008ff17"/>
+      <key group="bottomrow" id="bridwn" image="brightness-down.svg" button="true" tooltip="Brillo -" keysym="0x1008ff16"/>
+      <key group="bottomrow" id="hide"/>
+      <key group="bottomrow" id="move"/>
+      <key group="misc" id="BKSP2" keycode="22" label="" image="erase-left.svg" action="single-stroke"/>
+    </panel>
   </box>
 </keyboard>

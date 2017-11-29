@@ -829,6 +829,22 @@
 		return { type: 'raw', format: 'hex', data: data };
 	}
 
+	function qz_connect (cb) {
+		if (qz.websocket.isActive ()) {
+			if (cb)
+				cb (qz_conf);
+		} else {
+			qz.websocket.connect (devices_config.qz_connect).then (
+				function () {
+					qz_conf = qz.configs.create (devices_config.printer.name,
+												 devices_config.printer.qz_options);
+					if (cb)
+						cb (qz_conf);
+				})
+				.catch (qz_error_handler);
+		}
+	}
+
 	var qz_conf;
 
 	var mod = {
@@ -869,17 +885,14 @@
 				qz.print (conf, data).catch (qz_error_handler).then (cb);
 			}
 
-			if (qz.websocket.isActive ())
-				do_print (qz_conf);
-			else
-				qz.websocket.connect (devices_config.qz_connect).then (
-					function () {
-						qz_conf = qz.configs.create (devices_config.printer.name,
-													 devices_config.printer.qz_options);
-						do_print (qz_conf);
-					})
-				.catch (qz_error_handler);
+			qz_connect (do_print);
 		},
+
+		display: function (text, options) {
+			if (!devices_config.display)
+				throw 'devices: no display configured';
+			
+		}
 
 		configure: function (new_config) {
 			devices_config = new_config;

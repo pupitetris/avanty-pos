@@ -22,9 +22,9 @@
       <key group="alphanumeric" id="AD04"/>
       <key group="alphanumeric" id="AB10"/>
       <key group="alphanumeric" id="AC11"/>
-      <key group="alphanumeric" id="ntilde" keysym="0xf1" label="ñ" shift_label="Ñ"/>
+      <key group="alphanumeric" id="AC10"/>
       <key group="alphanumeric" id="AD10"/>
-      <key group="alphanumeric" id="acute" keysym="0xfe51" label="´" cap_label="¨" shift_label="´"/>
+      <key group="alphanumeric" id="AC11"/>
       <key group="alphanumeric" id="AD12"/>
       <key group="alphanumeric" id="AB08"/>
       <key group="alphanumeric" id="AE11"/>

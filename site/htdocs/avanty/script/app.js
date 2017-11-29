@@ -581,7 +581,7 @@
 		// parse a string containing pesos / cents representation and return integer in cents.
 		parseMoney: function (str) {
 			var match = str.match (util_money_re);
-			if (!match)
+			if (!match || str.length == 0)
 				return 0;
 
 			var num = parseInt (match[1] + match[2]) * Math.pow (10, 2 - match[2].length);
@@ -1023,10 +1023,18 @@
 						qz_options: {
 							baudRate: 9600,
 							dataBits: 8,
-							stopBits: 'NONE',
-							parity: 1,
-							flowControl: 'NONE'
+							parity: 'NONE',
+							stopBits: 1,
+							flowControl: 'RTSCTS_OUT'
 						}
+					}
+				},
+				drawers: {
+					main: {
+						type: 'printer', // only supported type for the moment.
+						line: 0,
+						on: 200, // msecs, max 510.
+						off: 200 // msecs, max 510
 					}
 				}
 			};

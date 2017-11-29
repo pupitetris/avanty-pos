@@ -581,7 +581,9 @@
 		total = APP.Util.asMoney (total);
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
 		ui[prefix + '_charge_total'].text (total);
-		APP.mod.devices.display ('client', 'Tarifa:\nTotal: $' + total);
+		APP.mod.devices.display ('client',
+								 'Tarifa:\n' +
+								 ' Total: $' + total);
 
 		ui.tickets.exit_items.html (pre);
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
@@ -630,8 +632,18 @@
 		ui_received.input ('disable');
 		ui_submit.button ('disable');
 
+		var received_val = ui_received.val ();
+		var change_val = ui[prefix + '_charge_change'].text ();
+
+		var width = (received_val.length > change_val.length)? received_val.length: change_val.length;
+		APP.mod.devices.openDrawer ('main', function () {
+			APP.mod.devices.display ('client',
+									 'Recibido: $' + APP.Util.padString (received_val, width) + '\n' +
+									 '  Cambio: $' + APP.Util.padString (change_val, width));
+		});
+
 		var amount = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
-		var change = APP.Util.parseMoney (ui[prefix + '_charge_change'].text ());
+		var change = APP.Util.parseMoney (change_val);
  		
 		var rate_name;
 		var ticket_type;
@@ -671,6 +683,7 @@
 	}
 
 	function cash_park_charge_close (process) {
+		APP.mod.devices.display ('client', '');
 		APP.history.back (process);
 		shell.navShow ();
 		shell.menuCollapse (false);
@@ -759,6 +772,7 @@
 			shell.menuCollapse (false);
 
 			APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); });
+			APP.mod.devices.display ('client', 'Bienvenido', null, { align: 'center' });
 		}
 	}
 

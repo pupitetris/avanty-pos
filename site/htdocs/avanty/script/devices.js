@@ -484,6 +484,14 @@
 				chr(escpos_vertical_pixels_to_units (state, state.printer.cutter_distance));
 		case 'partial_cut'	: return A.GS  + 'VB' +
 				chr(escpos_vertical_pixels_to_units (state, state.printer.cutter_distance));
+		case 'pulse'		:
+			var drawer = state.printer.drawers[state[key]];
+			var on = (drawer.on > 510)? 510: drawer.on;
+			if (!on) on = 200;
+			var off = (drawer.off > 510)? 510: drawer.off;
+			if (!off) off = 0;
+
+			return A.ESC + 'p' + chr(drawer.line) + chr(Math.floor (on / 2)) + chr(Math.floor (off / 2));
 		}
 		return '';
 	}
@@ -697,8 +705,15 @@
 		return null;
 	}
 
+	function escpos_send_pulse (printer, name) {
+		return [ escpos_print_cmd ('pulse', { pulse: name, printer: printer }) ];
+	}
+
 	var print_methods = {
-		ESCPOS: escpos_print
+		ESCPOS: {
+			print: escpos_print,
+			sendPulse: escpos_send_pulse
+		}
 	};
 
 	function escpos_ticket_layout (ticket) {
@@ -775,8 +790,19 @@
 	// Very simple text render. Always clears and then sends text. All LF generate CR as well.
 	// No geometry checks. An empty string text will implicitly clear the screen.
 	function epson_display (display, text, options) {
-		text = text.replace (/\n/g, '\r\n');
-		return A.FF + text;
+		var lines = text.split ('\n').map (
+			function (line) {
+				if (!options)
+					return line;
+				switch (options.align) {
+				case undefined:
+				case 'left': return line;
+				case 'right': return APP.Util.padString (line, display.width);
+				case 'center': return APP.Util.padString (line, Math.floor ((display.width - line.length) / 2) + line.length);
+				default: throw 'epson_display: unknown alignment ' + options.align;
+				}
+			});
+		return A.FF + lines.join ('\r\n');
 	}
 
 	var display_methods = {
@@ -888,7 +914,7 @@
 				throw 'devices: no printer configured';
 
 			function do_print (conf) {
-				var data = print_methods[printer.type] (printer, element);
+				var data = print_methods[printer.type].print (printer, element);
 
 				for (var i = 0; i < data.length; i++)
 					if (typeof data[i] == 'string')
@@ -900,6 +926,34 @@
 			qz_connect (do_print);
 		},
 
+		openDrawer: function (drawer_name, cb) {
+			if (!devices_config.drawers)
+				throw 'devices: no drawers configured';
+
+			var drawer = devices_config.drawers[drawer_name];
+			if (!drawer)
+				throw 'devices: drawer ' + drawer_name + ' not configured';
+			
+			if (drawer.type != 'printer')
+				throw 'unknown drawer type ' + drawer.type + ' for drawer ' + drawer_name;
+
+			var printer = devices_config.printer;
+			if (!printer)
+				throw 'devices: no printer configured';
+
+			function do_open (conf) {
+				var data = print_methods[printer.type].sendPulse (printer, drawer_name);
+
+				for (var i = 0; i < data.length; i++)
+					if (typeof data[i] == 'string')
+						data[i] = qz_str_encode_to_raw_hex (printer.qz_options.encoding, data[i]);
+
+				qz.print (conf, data).catch (qz_error_handler).then (cb);
+			}
+
+			qz_connect (do_open);
+		},
+
 		display: function (disp_name, text, cb, options) {
 			if (!devices_config.displays)
 				throw 'devices: no displays configured';
@@ -908,16 +962,45 @@
 			if (!display)
 				throw 'devices: display ' + disp_name + ' not configured';
 			
+			function retry () {
+				window.setTimeout (do_display, 250);
+			}
+
+			function error_handler (err) {
+				display.isOpen = false;
+				qz_error_handler (err);
+			}
+
 			function do_display () {
 				var data = display_methods[display.type] (display, text, options);
+
+				if (display.isOpen) {
+					retry ();
+					return;
+				}
+				display.isOpen = true;
 
 				//var raw = qz_str_encode_to_raw_hex (display.encoding, data);
 				var bounds = { start: '', end: '', width: null };
 				qz.serial.openPort (display.port, bounds)
+					.catch (function (err) {
+						if (err.message.substr (-16) == 'is already open.') // another display command is in course. Retry.
+							retry ();
+						else
+							error_handler (err);
+					})
 					.then (() => qz.serial.sendData (display.port, data, display.qz_options))
-					.then (() => qz.serial.closePort (display.port))
-					.catch (qz_error_handler)
-					.then (cb);
+					.catch (error_handler)
+					.then (() => {
+						window.setTimeout (function () {
+							qz.serial.closePort (display.port)
+								.catch (error_handler)
+								.then (() => {
+									display.isOpen = false;
+									if (cb) cb ();
+								});
+						}, 250);
+					});
 			}
 
 			qz_connect (do_display);
@@ -925,6 +1008,21 @@
 
 		configure: function (new_config) {
 			devices_config = new_config;
+
+			var drawers = devices_config.drawers;
+			if (drawers) {
+				var printer = devices_config.printer;
+				if (printer) {
+					for (var name of Object.keys (drawers)) {
+						var drawer = drawers[name];
+						if (drawer.type == 'printer') {
+							if (!printer.drawers)
+								printer.drawers = {};
+							printer.drawers[name] = drawer;
+						}
+					}
+				}
+			}
 		},
 
 		setQzCredentials: function (key, cert) {

@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="608,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -13,7 +13,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<appended-sql><![CDATA[ALTER USER avanty SET search_path TO av,public;]]></appended-sql>
 </role>
 
-<database name="avanty" encoding="UTF8" template="template0" lc-collate="Spanish_Mexico" lc-ctype="Spanish_Mexico" append-at-eod="true">
+<database name="avanty" encoding="UTF8" template="template0" append-at-eod="true">
 	<appended-sql><![CDATA[ALTER DATABASE avanty SET search_path TO av,public;
 
 GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;

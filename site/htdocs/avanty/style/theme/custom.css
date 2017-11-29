@@ -131,7 +131,7 @@
 	box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.2), 0 3px 10px 0 rgba(0, 0, 0, 0.19);
 }
 
-.avanty .ui-button.ui-state-disabled {
+.avanty .ui-state-disabled {
 	background-color: white;
 	border-color: #e8e8e8;
 	box-shadow: none;

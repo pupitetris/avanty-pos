@@ -581,6 +581,7 @@
 		total = APP.Util.asMoney (total);
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
 		ui[prefix + '_charge_total'].text (total);
+		APP.mod.devices.display ('client', 'Tarifa:\nTotal: $' + total);
 
 		ui.tickets.exit_items.html (pre);
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);

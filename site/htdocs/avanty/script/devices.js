@@ -772,6 +772,17 @@
 		return APP.Util.mapReplace (encodeURIComponent (str), map);
 	}
 
+	// Very simple text render. Always clears and then sends text. All LF generate CR as well.
+	// No geometry checks. An empty string text will implicitly clear the screen.
+	function epson_display (display, text, options) {
+		text = text.replace (/\n/g, '\r\n');
+		return A.FF + text;
+	}
+
+	var display_methods = {
+		EPSON: epson_display
+	};
+
 	var qz_private_key;
 	var qz_certificate;
 
@@ -821,9 +832,9 @@
 		});
 	}
 
-	function qz_str_encode_to_raw_hex (printer, str) {
+	function qz_str_encode_to_raw_hex (encoding, str) {
 		var data = '';
-		var bytes = iconv.encode (str, printer.qz_options.encoding);
+		var bytes = iconv.encode (str, encoding);
 		for (var b of bytes)
 			data += ((b < 16)? '0': '') + b.toString (16);
 		return { type: 'raw', format: 'hex', data: data };
@@ -834,8 +845,8 @@
 			if (cb)
 				cb (qz_conf);
 		} else {
-			qz.websocket.connect (devices_config.qz_connect).then (
-				function () {
+			qz.websocket.connect (devices_config.qz_connect)
+				.then (function () {
 					qz_conf = qz.configs.create (devices_config.printer.name,
 												 devices_config.printer.qz_options);
 					if (cb)
@@ -872,15 +883,16 @@
 		escposTicketLayout: escpos_ticket_layout,
 
 		print: function (element, cb) {
-			if (!devices_config.printer)
+			var printer = devices_config.printer;
+			if (!printer)
 				throw 'devices: no printer configured';
 
 			function do_print (conf) {
-				var data = print_methods[devices_config.printer.type] (devices_config.printer, element);
+				var data = print_methods[printer.type] (printer, element);
 
 				for (var i = 0; i < data.length; i++)
 					if (typeof data[i] == 'string')
-						data[i] = qz_str_encode_to_raw_hex (devices_config.printer, data[i]);
+						data[i] = qz_str_encode_to_raw_hex (printer.qz_options.encoding, data[i]);
 
 				qz.print (conf, data).catch (qz_error_handler).then (cb);
 			}
@@ -888,11 +900,28 @@
 			qz_connect (do_print);
 		},
 
-		display: function (text, options) {
-			if (!devices_config.display)
-				throw 'devices: no display configured';
+		display: function (disp_name, text, cb, options) {
+			if (!devices_config.displays)
+				throw 'devices: no displays configured';
+
+			var display = devices_config.displays[disp_name];
+			if (!display)
+				throw 'devices: display ' + disp_name + ' not configured';
 			
-		}
+			function do_display () {
+				var data = display_methods[display.type] (display, text, options);
+
+				//var raw = qz_str_encode_to_raw_hex (display.encoding, data);
+				var bounds = { start: '', end: '', width: null };
+				qz.serial.openPort (display.port, bounds)
+					.then (() => qz.serial.sendData (display.port, data, display.qz_options))
+					.then (() => qz.serial.closePort (display.port))
+					.catch (qz_error_handler)
+					.then (cb);
+			}
+
+			qz_connect (do_display);
+		},
 
 		configure: function (new_config) {
 			devices_config = new_config;
@@ -901,6 +930,19 @@
 		setQzCredentials: function (key, cert) {
 			qz_private_key = key;
 			qz_certificate = cert;
+
+			var displays = devices_config.displays;
+			if (displays) {
+				window.setTimeout (function () {
+					var names = Object.keys (displays);
+					var i = 0;
+					function salute_next () {
+						if (i == names.length) return;
+						mod.display (names[i++], 'Avanty', salute_next, function () {});
+					}
+					salute_next ();
+				}, 50);
+			}
 		}
 	};
 

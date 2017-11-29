@@ -991,7 +991,7 @@
 
 			var dev_conf = {
 				qz_connect: {
-					host: 'localhost.qz.io',
+					host: 'www.avanty.local',
 					port: { secure: [8181] },
 					usingSecure: true,
 					keepAlive: 60,
@@ -1001,7 +1001,7 @@
 				printer: {
 					name: 'BTP-R180',
 					type: 'ESCPOS',
-					basedir: 'file:///C:/avanty/site/htdocs/avanty',
+					basedir: 'file:///avanty/site/htdocs/avanty',
 					qz_type: 'escp',
 					qz_options: {
 						encoding: 'cp437'
@@ -1013,11 +1013,21 @@
 						    page: { line_spacing: 30 }  // 1/6 in
 					}
 				},
-				display: {
-					type: 'EPSON',
-					port: '/dev/ttyS0',
-					width: 20,
-					height: 2
+				displays: {
+					client: {
+						type: 'EPSON',
+						port: '/dev/ttyS0',
+						width: 20,
+						height: 2,
+						encoding: 'cp437',
+						qz_options: {
+							baudRate: 9600,
+							dataBits: 8,
+							stopBits: 'NONE',
+							parity: 1,
+							flowControl: 'NONE'
+						}
+					}
 				}
 			};
 

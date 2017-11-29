@@ -1012,6 +1012,12 @@
 						standard: { line_spacing: 30 }, // 1/6 in
 						    page: { line_spacing: 30 }  // 1/6 in
 					}
+				},
+				display: {
+					type: 'EPSON',
+					port: '/dev/ttyS0',
+					width: 20,
+					height: 2
 				}
 			};
 

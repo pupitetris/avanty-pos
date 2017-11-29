@@ -57,7 +57,7 @@ input[name="shift-begin-amount"] {
 	padding-right: 0.25em;
 }
 
-.cash-park-charge tbody td, .cash-park-charge tfoot td {
+.cash-park-charge tbody td, .cash-park-charge tfoot td, .cash-park-charge tfoot td:last-child {
 	position: relative;
 	padding: 0;
 	text-align: right;

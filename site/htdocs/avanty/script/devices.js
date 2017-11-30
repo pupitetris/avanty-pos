@@ -866,20 +866,49 @@
 		return { type: 'raw', format: 'hex', data: data };
 	}
 
+	function qz_open_serial (device, cb) {
+		var bounds = { start: '', end: '', width: null };
+		qz.serial.openPort (device.port, bounds)
+			.then (cb)
+			.catch (function (err) {
+				console.error (err);
+				if (cb)
+					cb ();
+			});
+	}
+
+	function qz_open_serial_devices (devices, cb) {
+		var names = Object.keys (devices);
+		var i = 0;
+		function open_next () {
+			if (i < names.length)
+				qz_open_serial (devices[names[i++]], open_next);
+			else
+				if (cb)	cb ();
+		}
+		open_next ();
+	}
+
 	function qz_connect (cb) {
-		if (qz.websocket.isActive ()) {
-			if (cb)
-				cb (qz_conf);
-		} else {
+		function finish () {
+			if (cb) cb (qz_conf);
+		}
+		
+		if (qz.websocket.isActive ())
+			finish ();
+		else
 			qz.websocket.connect (devices_config.qz_connect)
-				.then (function () {
+			.then (function () {
+				if (devices_config.printer)
 					qz_conf = qz.configs.create (devices_config.printer.name,
 												 devices_config.printer.qz_options);
-					if (cb)
-						cb (qz_conf);
-				})
-				.catch (qz_error_handler);
-		}
+				
+				if (devices_config.displays)
+					qz_open_serial_devices (devices_config.displays, finish);
+				else
+					finish ();
+			})
+			.catch (qz_error_handler);
 	}
 
 	var qz_conf;
@@ -962,44 +991,25 @@
 			if (!display)
 				throw 'devices: display ' + disp_name + ' not configured';
 			
-			function retry () {
-				window.setTimeout (do_display, 250);
-			}
-
-			function error_handler (err) {
-				display.isOpen = false;
-				qz_error_handler (err);
-			}
+			var data = display_methods[display.type] (display, text, options);
+			//var raw = qz_str_encode_to_raw_hex (display.encoding, data);
 
 			function do_display () {
-				var data = display_methods[display.type] (display, text, options);
-
-				if (display.isOpen) {
-					retry ();
+				if (display.isBusy) {
+					// retry a little bit later.
+					window.setTimeout (do_display, 250);
 					return;
 				}
-				display.isOpen = true;
+				display.isBusy = true;
 
-				//var raw = qz_str_encode_to_raw_hex (display.encoding, data);
-				var bounds = { start: '', end: '', width: null };
-				qz.serial.openPort (display.port, bounds)
-					.catch (function (err) {
-						if (err.message.substr (-16) == 'is already open.') // another display command is in course. Retry.
-							retry ();
-						else
-							error_handler (err);
+				qz.serial.sendData (display.port, data, display.qz_options)
+					.catch ((err) => {
+						display.isBusy = false;
+						qz_error_handler (err);
 					})
-					.then (() => qz.serial.sendData (display.port, data, display.qz_options))
-					.catch (error_handler)
 					.then (() => {
-						window.setTimeout (function () {
-							qz.serial.closePort (display.port)
-								.catch (error_handler)
-								.then (() => {
-									display.isOpen = false;
-									if (cb) cb ();
-								});
-						}, 250);
+						display.isBusy = false;
+						if (cb) cb ();
 					});
 			}
 
@@ -1036,7 +1046,7 @@
 					var i = 0;
 					function salute_next () {
 						if (i == names.length) return;
-						mod.display (names[i++], 'Avanty', salute_next, function () {});
+						mod.display (names[i++], 'Avanty', salute_next);
 					}
 					salute_next ();
 				}, 50);

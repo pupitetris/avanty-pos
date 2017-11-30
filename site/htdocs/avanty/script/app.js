@@ -1015,17 +1015,17 @@
 				},
 				displays: {
 					client: {
-						type: 'EPSON',
-						port: '/dev/ttyS0',
-						width: 20,
-						height: 2,
-						encoding: 'cp437',
+						type		: 'EPSON',
+						port		: '/dev/ttyS0',
+						width		: 20,
+						height		: 2,
+						encoding	: 'cp437',
 						qz_options: {
-							baudRate: 9600,
-							dataBits: 8,
-							parity: 'NONE',
-							stopBits: 1,
-							flowControl: 'RTSCTS_OUT'
+							baudRate	: 9600,
+							dataBits	: 8,
+							parity		: 'NONE',
+							stopBits	: 1,
+							flowControl	: 'RTSCTS_IN'
 						}
 					}
 				},

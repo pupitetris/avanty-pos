@@ -558,9 +558,11 @@
 				i = -1;
 			}
 		
-		ui[prefix + '_charge_table'].empty ();
 		var pre = '';
 		var total = 0;
+		var table = ui[prefix + '_charge_table'];
+
+		table.empty ();
 		for (var rec of records) {
 			var subtotal = rec[1] * rec[2];
 			total += subtotal;
@@ -570,12 +572,12 @@
 				APP.Util.asMoney (rec[1]) + ' = ' +
 				APP.Util.padString (APP.Util.asMoney (subtotal), 6) + '</div>\n';
 
-			ui[prefix + '_charge_table'].append ($('<tr>' +
-												'<th><span>' + rec[0] + '</span></th>' +
-												'<td><s/></td><td class="money">' + APP.Util.asMoney (rec[1]) + '</td>' +
-												'<td class="qty">' + rec[2] + '</td>' +
-												'<td><s/></td><td class="money"><span>' + APP.Util.asMoney (subtotal) + '</span></td>' +
-												'</tr>'));
+			table.append ($('<tr>' +
+							'<th><span>' + rec[0] + '</span></th>' +
+							'<td><s/></td><td class="money">' + APP.Util.asMoney (rec[1]) + '</td>' +
+							'<td class="qty">' + rec[2] + '</td>' +
+							'<td><s/></td><td class="money"><span>' + APP.Util.asMoney (subtotal) + '</span></td>' +
+							'</tr>'));
 		}
 
 		total = APP.Util.asMoney (total);
@@ -589,6 +591,7 @@
 		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
 
 		ui[prefix + '_charge_received'].val ('');
+		ui[prefix + '_charge_change'].text ('');
 
 		APP.history.go (MOD_NAME, ui['section_' + prefix + '_charge'], process);
 		shell.navShow ();
@@ -802,6 +805,7 @@
 	function cash_shift_begin_success () {
 		var amount = ui.shift_begin_amount.val ();
 		var suffix = (parseFloat (amount) == 0)? 'sin dotación.': 'con <s/>' + amount + ' de dotación.';
+		APP.mod.devices.openDrawer ('main');
 		APP.toast ('Se inició el turno ' + suffix);
 
 		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
@@ -917,7 +921,10 @@
 		ui.shift_end_continue.button ('enable');
 		ui.shift_end_quit.button ('enable');
 
-		APP.mod.devices.print (ui.tickets.shift_end);
+		APP.mod.devices.print (ui.tickets.shift_end,
+							   function () {
+								   APP.mod.devices.openDrawer ('main');
+							   });
 	}
 
 	function cash_shift_end_continue () {

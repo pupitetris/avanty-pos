@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="608,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -365,30 +365,39 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 <usertype name="rate_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="regular,lost,rent"/>
+	<enumeration values="regular,lost,rent,fragment"/>
 </usertype>
 
 <table name="rate">
 	<schema name="av"/>
 	<role name="postgres"/>
+	<comment><![CDATA[Rate scripts written in Forth for rate processing. Fragment type scripts are not final scripts, they are to be included from other scripts.]]></comment>
 	<position x="980" y="720"/>
 	<column name="rate_id" not-null="true">
 		<type name="smallserial" length="0"/>
-	</column>
-	<column name="type" not-null="true">
-		<type name="av.rate_type" length="0"/>
 	</column>
 	<column name="name" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[For UI purposes, for the rate selector.]]></comment>
 	</column>
+	<column name="type" not-null="true">
+		<type name="av.rate_type" length="0"/>
+	</column>
+	<column name="is_active" not-null="true">
+		<type name="boolean" length="0"/>
+		<comment><![CDATA[Rates may be deactivated and not used any more, but we keep them for bookkeeping.]]></comment>
+	</column>
 	<column name="script" not-null="true">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[a DSL to be executed to itemize the payment and generate a total.]]></comment>
 	</column>
-	<column name="description">
+	<column name="description" not-null="true">
 		<type name="varchar" length="0"/>
-		<comment><![CDATA[documentation]]></comment>
+		<comment><![CDATA[documentation text for the management console.]]></comment>
+	</column>
+	<column name="label">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[Name that appears on the UI for rate selection.]]></comment>
 	</column>
 	<constraint name="rate_pk" type="pk-constr" table="av.rate">
 		<columns names="rate_id" ref-type="src-columns"/>

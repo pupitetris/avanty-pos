@@ -171,27 +171,27 @@ zozCzYdSCBfnRztD8A==
     
 	DELETE FROM rate;
     ALTER SEQUENCE rate_rate_id_seq RESTART;
-	INSERT INTO rate VALUES (DEFAULT, 'regular', 'test', '// Fuente: http://www.oma.aero/es/aeropuertos/monterrey/pasajeros/servicios/estacionamiento.htm
+	INSERT INTO rate VALUES (DEFAULT, 'test', 'regular', TRUE, '// Fuente: http://www.oma.aero/es/aeropuertos/monterrey/pasajeros/servicios/estacionamiento.htm
 
-incluir test-desc.fth
-incluir test-param.fth
-incluir test-calcular.fth
+incluir test-desc
+incluir test-param
+incluir test-calcular
 
 calcular
-', NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'regular', 'test-desc', 'define desc_primera_hora " La primera hora o fracción " ;
+', '', 'Sin boleto sellado');
+   INSERT INTO rate VALUES (DEFAULT, 'test-desc', 'fragment', TRUE, 'define desc_primera_hora " La primera hora o fracción " ;
 define desc_fracción " Fracción de 30min " ;
 define desc_tarifa_diaria_máxima " Cobro máximo permitido " ;
 define desc_extraviado " Boleto extraviado " ;
-', NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'regular', 'test-param', 'define costo_primera_hora 32 pesos ;
+', '', NULL);
+   INSERT INTO rate VALUES (DEFAULT, 'test-param', 'fragment', TRUE, 'define costo_primera_hora 32 pesos ;
 define costo_fracción 16 pesos ;
 define costo_extraviado 360 pesos ;
 
 define duración_fracción 30 minutos ; 
 define tarifa_diaria_máxima 360 pesos ;
-', NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'regular', 'test-calcular', '// Declaramos las variables que vamos a usar:
+', '', NULL);
+   INSERT INTO rate VALUES (DEFAULT, 'test-calcular', 'fragment', TRUE, '// Declaramos las variables que vamos a usar:
 
 variable restante   // Será el tiempo registrado menos la primer hora.
 variable fracciones // Número de fracciones de tiempo por cobrar.
@@ -238,14 +238,14 @@ si total valor tarifa_diaria_máxima > entonces
 fin
 
 ;
-', NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'regular', 'test-perdido', 'incluir test-desc.fth
-incluir test-param.fth
-incluir test-calcular-perdido.fth
+', '', NULL);
+   INSERT INTO rate VALUES (DEFAULT, 'test-perdido', 'lost', TRUE, 'incluir test-desc.fth
+incluir test-param
+incluir test-calcular-perdido
 
 calcular
-', NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'regular', 'test-calcular-perdido', '// Declaramos las variables que vamos a usar:
+', '', 'Boleto perdido');
+   INSERT INTO rate VALUES (DEFAULT, 'test-calcular-perdido', 'fragment', TRUE, '// Declaramos las variables que vamos a usar:
 
 variable noches // Número de noches transcurridos desde que el auto ingresó
 
@@ -269,6 +269,6 @@ fin
 noches valor costo_extraviado_día desc_extraviado_día registra
 
 ;
-', NULL);
+', '', NULL);
 
 COMMIT TRANSACTION;

@@ -889,26 +889,46 @@
 		open_next ();
 	}
 
+	var qz_connecting = false;
+
 	function qz_connect (cb) {
 		function finish () {
+			qz_connecting = false;
 			if (cb) cb (qz_conf);
 		}
 		
-		if (qz.websocket.isActive ())
-			finish ();
-		else
+		function error_handler (err) {
+			qz_connecting = false;
+			qz_error_handler (err);
+		}
+
+		function do_connect () {
+			if (qz_connecting) {
+				window.setTimeout (do_connect, 250);
+				return;
+			}
+
+			if (qz.websocket.isActive ()) {
+				finish ();
+				return;
+			}
+
+			qz_connecting = true;
 			qz.websocket.connect (devices_config.qz_connect)
-			.then (function () {
-				if (devices_config.printer)
-					qz_conf = qz.configs.create (devices_config.printer.name,
-												 devices_config.printer.qz_options);
-				
-				if (devices_config.displays)
-					qz_open_serial_devices (devices_config.displays, finish);
-				else
-					finish ();
-			})
-			.catch (qz_error_handler);
+				.then (function () {
+					if (devices_config.printer)
+						qz_conf = qz.configs.create (devices_config.printer.name,
+													 devices_config.printer.qz_options);
+					
+					if (devices_config.displays)
+						qz_open_serial_devices (devices_config.displays, finish);
+					else
+						finish ();
+				})
+				.catch (error_handler);
+		}
+
+		do_connect ();
 	}
 
 	var qz_conf;

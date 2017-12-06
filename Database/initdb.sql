@@ -171,7 +171,8 @@ zozCzYdSCBfnRztD8A==
     
 	DELETE FROM rate;
     ALTER SEQUENCE rate_rate_id_seq RESTART;
-	INSERT INTO rate VALUES (DEFAULT, 'standard', 'system', TRUE, ': \ #10 parse 2drop ; immediate \ Single line comments
+	INSERT INTO rate VALUES (DEFAULT, 'standard', 'system', TRUE, '
+: \ #10 parse 2drop ; immediate \ Single line comments
 
 : binary #2 base ! ;
 : octal #8 base ! ;
@@ -476,7 +477,7 @@ create pad 1000 cells allot
 : residuo mod ;
 : incrementa 1 swap +! ;
 : está #32 word find swap drop ; immediate
-: verdadero 1 ;
+: verdadero -1 ;
 : falso 0 ;
 : es = ;
 
@@ -500,19 +501,25 @@ define cancela_anteriores 0 0 _desc_cancel registra ;
 // Call the truncDate method
 define truncar_fecha js /APP.Util.truncDate{2} ;
 ', '', 0, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-desc', 'fragment', TRUE, 'define desc_primera_hora " La primera hora o fracción " ;
-define desc_fracción " Fracción de 30min " ;
+   INSERT INTO rate VALUES (DEFAULT, 'vips-desc', 'fragment', TRUE, '
+define desc_primera_fracción " Primeras dos horas o fracción " ;
+define desc_primera_fracción_sellado " Boleto sellado " ;
+define desc_fracción " Fracción de 15min " ;
 define desc_tarifa_diaria_máxima " Cobro máximo permitido " ;
-define desc_extraviado " Boleto extraviado " ;
+define desc_perdido " Boleto perdido " ;
 ', '', 0, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-param', 'fragment', TRUE, 'define costo_primera_hora 32 pesos ;
-define costo_fracción 16 pesos ;
-define costo_extraviado 360 pesos ;
+   INSERT INTO rate VALUES (DEFAULT, 'vips-param', 'fragment', TRUE, '
+define costo_primera_fracción 24 pesos ;
+define costo_primera_fracción_sellado 6 pesos ;
+define costo_fracción 6 pesos ;
+define costo_perdido 150 pesos ;
 
-define duración_fracción 30 minutos ; 
-define tarifa_diaria_máxima 360 pesos ;
+define duración_primera_fracción 2 horas ;
+define duración_fracción 15 minutos ; 
+define tarifa_diaria_máxima 0 pesos ;
 ', '', 0, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular', 'fragment', TRUE, '// Declaramos las variables que vamos a usar:
+   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular', 'fragment', TRUE, '
+// Declaramos las variables que vamos a usar:
 
 variable restante   // Será el tiempo registrado menos la primer hora.
 variable fracciones // Número de fracciones de tiempo por cobrar.
@@ -520,23 +527,20 @@ variable total      // El total, para ver si nos pasamos de la tarifa diara máx
 
 define calcular
 
-// Checa la existencia de la constante "extraviado" y si es así, se cobra el concepto
-// de boleto extraviado y termina.
-si está extraviado entonces
-	1 costo_extraviado desc_extraviado registra
-	salir
+// Se cobra la primera fracción:
+si está sellado entonces
+	1 costo_primera_fracción_sellado desc_primera_fracción_sellado registra
+si_no
+	1 costo_primera_fracción desc_primera_fracción registra
 fin
 
-// Se cobra la primer hora o fracción:
-1 costo_primera_hora desc_primera_hora registra
-
-// Si el tiempo registrado es menor a una hora, terminamos.
-si tiempo_registrado 1hr <= entonces
+// Si el tiempo registrado es menor a la primer fracción, terminamos.
+si tiempo_registrado duración_primera_fracción <= entonces
 	salir
 fin
 
 // El tiempo restante es el tiempo registrado menos una hora.
-tiempo_registrado 1hr - restante guarda
+tiempo_registrado duración_primera_fracción - restante guarda
 
 // Calculamos cuántas fracciones adicionales se registraron:
 restante valor duración_fracción / fracciones guarda
@@ -548,8 +552,13 @@ fin
 
 fracciones valor costo_fracción desc_fracción registra
 
+// Se considera una tarifa diaria máxima de 0 como desactivada, y terminamos.
+si tarifa_diaria_máxima 0 = entonces
+	salir
+fin
+
 // Calcula el total: número de fracciones por su costo mas lo de la primer hora.
-fracciones valor costo_fracción * costo_primera_hora + total guarda
+fracciones valor costo_fracción * costo_primera_fracción + total guarda
 
 // Si el total obtenido es mayor a la tarifa máxima diaria, marcamos lo ya reportado como cancelado
 // y reportamos la tarifa máxima
@@ -560,14 +569,15 @@ fin
 
 ;
 ', '', 0, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular-perdido', 'fragment', TRUE, '// Declaramos las variables que vamos a usar:
+   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular-perdido', 'fragment', TRUE, '
+// Declaramos las variables que vamos a usar:
 
 variable noches // Número de noches transcurridos desde que el auto ingresó
 
 define calcular
 
-// Cobrar costo base del boleto extraviado
-1 costo_extraviado desc_extraviado registra
+// Cobrar costo base del boleto perdido
+1 costo_perdido desc_perdido registra
 
 // Calcular las noches transcurridas desde el día que ingresó el auto
 2 ahora truncar_fecha         // Se trunca la hora actual hasta días.
@@ -581,30 +591,32 @@ si noches valor 1 < entonces
 fin
 
 // Se cobra el número de noches transcurridas que se calculó.
-noches valor costo_extraviado_día desc_extraviado_día registra
+noches valor costo_perdido_día desc_perdido_día registra
 
 ;
 ', '', 0, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-perdido', 'lost', TRUE, 'incluir vips-desc
+   INSERT INTO rate VALUES (DEFAULT, 'perdido', 'lost', TRUE, '
+incluir vips-desc
 incluir vips-param
 incluir vips-calcular-perdido
 
 calcular
 ', '', 0, 'Boleto perdido');
-	INSERT INTO rate VALUES (DEFAULT, 'vips-sellado', 'regular', TRUE, 'incluir vips-desc
+	INSERT INTO rate VALUES (DEFAULT, 'vips-sellado', 'regular', TRUE, '
+incluir vips-desc
 incluir vips-param
-incluir vips-calcular
 
 define sellado verdadero ;
+                             
+incluir vips-calcular
 
 calcular
 ', '', 0, 'Con boleto sellado');
-	INSERT INTO rate VALUES (DEFAULT, 'vips-sin-sello', 'regular', TRUE, 'incluir vips-desc
+	INSERT INTO rate VALUES (DEFAULT, 'vips-sin-sello', 'regular', TRUE, '
+incluir vips-desc
 incluir vips-param
 incluir vips-calcular
-
-define sellado falso ;
-
+                             
 calcular
 ', '', 1, 'Sin boleto sellado');
 

@@ -124,17 +124,6 @@
 		APP.terminal.shiftUser = info.shift_user;
 
 		APP.mod.devices.setQzCredentials (info.qz_private_key, info.qz_certificate);
-	}
-
-	function login_success (is_first) {
-		mod.isFirst = is_first;
-		mod.isLoggedIn = true;
-
-		APP.charp.request ('this_terminal_info_get', [],
-						   {
-							   asObject: true,
-							   success: login_configure_terminal
-						   });
 
 		APP.charp.request ('this_user_types_get', [],
 						   {
@@ -155,6 +144,17 @@
 									   return;
 								   }
 							   }
+						   });
+	}
+
+	function login_success (is_first) {
+		mod.isFirst = is_first;
+		mod.isLoggedIn = true;
+
+		APP.charp.request ('this_terminal_info_get', [],
+						   {
+							   asObject: true,
+							   success: login_configure_terminal
 						   });
 	}
 

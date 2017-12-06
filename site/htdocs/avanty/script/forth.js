@@ -12,7 +12,6 @@
 	var Forth;
 	var file_cache = {};
 	var has_run;
-	var forth_base = '';
 
 	function forth_new_res () {
 		var res = {
@@ -64,33 +63,26 @@
 	}
 
 	function forth_load (script_name, cb, error_cb) {
-		var fullname = forth_base + script_name;
-		if (file_cache[fullname])
-			return file_cache[fullname];
+		if (file_cache[script_name])
+			return file_cache[script_name];
 
-		function success (data, status) {
+		function success (data) {
 			data = forth_preprocess (data, success, error_cb);
 			if (!data) // Async loading due to includes.
 				return;
 
-			file_cache[fullname] = data;
+			file_cache[script_name] = data;
 			if (cb) cb (data);
 		}
 
-		function error (res, status, error) {
-			if (error_cb)
-				error_cb ('Ajax(' + status + '): ' + error);
+		function error (err) {
+			if (!error_cb)
+				return true;
+			error_cb (err);
 		}
 			
-		$.ajax ({
-				type: 'GET',
-				 url: 'forth/' + fullname,
-			   cache: true,
-			dataType: 'text',
-			  global: false,
-			 success: success,
-			   error: error
-		});
+		APP.charp.request ('rate_get_script', [script_name],
+						   { success: success, error: error });
 	}
 
 	function forth_reset (cb, error_cb) {
@@ -115,7 +107,7 @@
 			if (cb) cb (res);
 		}
 
-		var script = forth_load ('avanty.fth', run, error_cb);
+		var script = forth_load ('avanty', run, error_cb);
 		if (script)	run (script);
 	}
 
@@ -132,8 +124,9 @@
 				mod.reset ()
 		},
 		
-		reset: function (cb, error_cb) {
-			forth_base = '';
+		reset: function (cb, error_cb, empty_cache) {
+			if (empty_cache)
+				file_cache = {};
 			forth_reset (cb, error_cb);
 		},
 
@@ -147,7 +140,6 @@
 		},
 
 		load: function (script_name, cb, error_cb) {
-			forth_base = 'usr/';
 			var script = forth_load (script_name, cb, error_cb);
 			if (script) cb (script);
 		},

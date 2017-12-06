@@ -239,6 +239,7 @@
 		park_charge_layout_init ('park_exit');
 
 		ui.section_park_rate = $('#cash-park-rate');
+		ui.section_park_rate.on ('avanty:switchSectionEnter', cash_park_exit_rate_reset);
 		ui.park_rate_form = ui.section_park_rate.find ('form');
 		ui.park_rate_buttons = ui.park_rate_form.find ('div');
 
@@ -451,6 +452,8 @@
 	function cash_forth_error (error) {
 		console.error (error);
 
+		forth.reset ();
+
 		APP.msgDialog ({
 			icon: 'error',
 			desc: 'Falla interna al evaluar tarifa.',
@@ -464,14 +467,14 @@
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
-		forth.reset (cash_park_exit_rate, cash_forth_error);
-	}
-
-	function cash_park_exit_rate () {
 		APP.history.go (MOD_NAME, ui.section_park_rate, 'cash-park-rate');
 
 		APP.charp.request ('cashier_park_get_rates', [],
 						   cash_park_exit_rate_success);
+	}
+
+	function cash_park_exit_rate_reset () {
+		forth.reset (null, cash_forth_error);
 	}
 
 	function cash_park_exit_rate_success (rates) {
@@ -481,7 +484,7 @@
 			ui.park_rate_buttons.append (button);
 			button.button ();
 			button.val (rate.name);
-			button.bind ('click', function () {
+			button.on ('click', function () {
 				cash_park_exit_charge ($(this).val ());
 			});
 		}
@@ -529,8 +532,8 @@
 			var weeks = (duration - days) / 7;
 
 			duration =
-				((weeks > 0)? weeks + ' semanas ': '') +
-				((days > 0)? days + ' días ': '') +
+				((weeks > 0)? weeks + ' semana' + ((weeks == 1)? '': 's') + ' ': '') +
+				((days > 0)? days + ' día' + ((days == 1)? '': 's') + ' ': '') +
 				((hrs > 0)? hrs + ' hr. ': '') +
 				mins + ' mins. ' + segs + ' seg.';
 
@@ -594,7 +597,7 @@
 			pre += '<div class="desc">' + APP.Util.padString (rec[0], 30) + '</div>\n' +
 				'<div class="sum">' + rec[2] + ' x ' +
 				APP.Util.asMoney (rec[1]) + ' = ' +
-				APP.Util.padString (APP.Util.asMoney (subtotal), 6) + '</div>\n';
+				APP.Util.padString (APP.Util.asMoney (subtotal), 7) + '</div>\n';
 
 			table.append ($('<tr>' +
 							'<th><span>' + rec[0] + '</span></th>' +
@@ -605,7 +608,7 @@
 		}
 
 		total = APP.Util.asMoney (total);
-		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 6) + '</div>';
+		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 7) + '</div>';
 		ui[prefix + '_charge_total'].text (total);
 		APP.mod.devices.display ('client',
 								 'Tarifa:\n' +
@@ -741,7 +744,7 @@
 		};
 
 		forth.setConstants (cons, cash_forth_error);
-		forth.load ('test-perdido.fth',
+		forth.load ('perdido',
 					function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
 					cash_forth_error);
 

@@ -477,7 +477,7 @@
 	function cash_park_exit_rate_success (rates) {
 		ui.park_rate_buttons.empty ();
 		for (var rate of rates) {
-			var button = $('<button>' + rate.label + '</button>')
+			var button = $('<button type="button">' + rate.label + '</button>')
 			ui.park_rate_buttons.append (button);
 			button.button ();
 			button.val (rate.name);

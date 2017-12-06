@@ -920,8 +920,8 @@
 		main: function () {
 			APP.config = {
 				DEVEL: true,
-				version: '0.8',
-				establishment: 'Laboratorio',
+				version: '0.85',
+				establishment: 'Piloto VIPS',
 				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
 				defaultRateName: 'test',
 				lostRateName: 'test-perdido',

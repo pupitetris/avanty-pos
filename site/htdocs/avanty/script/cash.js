@@ -239,10 +239,10 @@
 
 		park_charge_layout_init ('park_exit');
 
-		ui.section_park_rate = $('#cash-park-rate');
-		ui.section_park_rate.on ('avanty:switchSectionEnter', cash_park_exit_rate_reset);
-		ui.park_rate_form = ui.section_park_rate.find ('form');
-		ui.park_rate_buttons = ui.park_rate_form.find ('div');
+		ui.section_park_exit_rate = $('#cash-park-rate');
+		ui.section_park_exit_rate.on ('avanty:switchSectionEnter', cash_park_exit_rate_reset);
+		ui.park_exit_rate_form = ui.section_park_exit_rate.find ('form');
+		ui.park_exit_rate_buttons = ui.park_exit_rate_form.find ('div');
 
 		ui.section_park_lost = $('#cash-park-lost');
 		ui.section_park_lost.on ('avanty:switchSectionEnter', cash_park_lost_reset);
@@ -468,7 +468,7 @@
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
-		APP.history.go (MOD_NAME, ui.section_park_rate, 'cash-park-rate');
+		APP.history.go (MOD_NAME, ui.section_park_exit_rate, 'cash-park-exit');
 
 		APP.charp.request ('cashier_park_get_rates', [],
 						   cash_park_exit_rate_success);
@@ -479,10 +479,10 @@
 	}
 
 	function cash_park_exit_rate_success (rates) {
-		ui.park_rate_buttons.empty ();
+		ui.park_exit_rate_buttons.empty ();
 		for (var rate of rates) {
 			var button = $('<button type="button">' + rate.label + '</button>')
-			ui.park_rate_buttons.append (button);
+			ui.park_exit_rate_buttons.append (button);
 			button.button ();
 			button.val (rate.name);
 			button.on ('click', function () {
@@ -494,8 +494,9 @@
 	var cash_charge_date;
 	var cash_entry_terminal;
 	var cash_entry_date;
+	var cash_rate_name;
 
-	function cash_park_exit_charge (script) {
+	function cash_park_exit_charge (rate_name) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
 		function check_error (err) {
@@ -546,8 +547,10 @@
 				tiempo_registrado: delta_secs,
 			};
 
+			cash_rate_name = rate_name;
+
 			forth.setConstants (cons, cash_forth_error);
-			forth.load (script,
+			forth.load (rate_name,
 						function (script) { cash_park_charge_rate ('park_exit', script, 'cash-park-exit'); },
 						cash_forth_error);
 		}
@@ -677,23 +680,20 @@
 		var amount = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
 		var change = APP.Util.parseMoney (change_val);
  		
-		var rate_name;
 		var ticket_type;
 
 		switch (prefix) {
 		case 'park_exit':
-			rate_name = APP.config.defaultRateName;
 			ticket_type = 'entry';
 			break;
 		case 'park_lost':
-			rate_name = APP.config.lostRateName;
 			ticket_type = 'lost';
 			break;
 		}
 
 		APP.charp.request ('cashier_park_charge',
 						   [ cash_entry_terminal, cash_entry_date, cash_charge_date,
-							 ticket_type, rate_name, 'tender', amount, change, null ],
+							 ticket_type, cash_rate_name, 'tender', amount, change, null ],
 						   {
 							   success: function () { cash_park_charge_success (process, prefix); },
 							   error: function () {
@@ -745,8 +745,11 @@
 			ahora: APP.Util.getTimeSecs ()
 		};
 
+		cash_entry_terminal = APP.terminal.id;
+		cash_rate_name = APP.config.lostRateName;
+
 		forth.setConstants (cons, cash_forth_error);
-		forth.load ('perdido',
+		forth.load (cash_rate_name,
 					function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
 					cash_forth_error);
 

@@ -595,7 +595,7 @@ calcular
 incluir vips-param
 incluir vips-calcular
 
-define sellado verdadero;
+define sellado verdadero ;
 
 calcular
 ', '', 0, 'Con boleto sellado');
@@ -603,7 +603,7 @@ calcular
 incluir vips-param
 incluir vips-calcular
 
-define sellado falso;
+define sellado falso ;
 
 calcular
 ', '', 1, 'Sin boleto sellado');

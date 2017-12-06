@@ -6,6 +6,7 @@ BEGIN TRANSACTION;
     DELETE FROM movement;
     DELETE FROM cashier_shift;
     DELETE FROM user_cashier;
+    DELETE FROM supervisor_challenge;
 
     DELETE FROM account;
 	ALTER SEQUENCE account_user_id_seq RESTART;
@@ -459,7 +460,8 @@ create pad 1000 cells allot
 
 : [THEN] ( -- ) ; immediate
 ', '', 0, NULL);
-	INSERT INTO rate VALUES (DEFAULT, 'avanty', 'system', TRUE, 'incluir standard
+	INSERT INTO rate VALUES (DEFAULT, 'avanty', 'system', TRUE, '
+incluir standard
 
 \ Some definitions to make Forth more pallatable:
 : // #10 parse 2drop ; immediate            // C-style single line comments

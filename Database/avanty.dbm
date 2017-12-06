@@ -365,7 +365,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 <usertype name="rate_type" configuration="enumeration">
 	<schema name="av"/>
 	<role name="postgres"/>
-	<enumeration values="regular,lost,rent,fragment"/>
+	<enumeration values="regular,lost,rent,fragment,system"/>
 </usertype>
 
 <table name="rate">
@@ -395,12 +395,20 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[documentation text for the management console.]]></comment>
 	</column>
+	<column name="position" not-null="true">
+		<type name="smallint" length="0"/>
+		<comment><![CDATA[Order in which an active rate will appear on the interface.]]></comment>
+	</column>
 	<column name="label">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[Name that appears on the UI for rate selection.]]></comment>
 	</column>
 	<constraint name="rate_pk" type="pk-constr" table="av.rate">
 		<columns names="rate_id" ref-type="src-columns"/>
+	</constraint>
+	<constraint name="check_rate_label_not_null_if_not_fragment" type="ck-constr" table="av.rate">
+			<expression><![CDATA[type = 'fragment' OR type = 'system' OR (label IS NOT NULL AND label <> '')]]></expression>
+		<comment><![CDATA[Rates that are not fragments need a label to be defined and not empty string so they can be shown on ui.]]></comment>
 	</constraint>
 </table>
 
@@ -2759,6 +2767,78 @@ BEGIN
 			FROM user_activity AS ua 
 			WHERE ua.terminal_id = _terminal_id 
 				AND ua.type = 'shift_end' AND ua.timestamp > _start;
+END;]]></definition>
+</function>
+
+<function name="cashier_park_get_rates"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get active regular rates for the rate selection screen.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="label">
+		<type name="varchar" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM cashier_shift_assert (_uid, _remote_addr);
+
+	RETURN QUERY 
+		SELECT r.name, r.label FROM rate AS r
+			WHERE type = 'regular' AND is_active = TRUE
+			ORDER BY position;
+END;]]></definition>
+</function>
+
+<function name="cashier_rate_get_script"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get active regular rates for the rate selection screen.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<type name="text" length="0"/>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_script text;
+BEGIN
+	PERFORM cashier_shift_assert (_uid, _remote_addr);
+
+	SELECT r.script INTO STRICT _script FROM rate AS r
+		WHERE is_active = TRUE AND r.name = _name;
+
+	RETURN _script;
 END;]]></definition>
 </function>
 

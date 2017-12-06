@@ -141,6 +141,7 @@
 		ui.tickets.shift_end = $('#cash-ticket-shift-end');
 		ui.tickets.shift_end_begin_time = ui.tickets.shift_end.find ('time:eq(0)');
 		ui.tickets.shift_end_time = ui.tickets.shift_end.find ('time:eq(1)');
+		ui.tickets.shift_end_num = ui.tickets.shift_end.find ('.num');
 		ui.tickets.shift_end_terminal = ui.tickets.shift_end.find ('.term');
 		ui.tickets.shift_end_user = ui.tickets.shift_end.find ('.user');
 		ui.tickets.shift_end_items = ui.tickets.shift_end.find ('.items');
@@ -520,6 +521,7 @@
 			ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
 			ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
 			ui.tickets.exit_terminal.text (APP.terminal.name);
+			ui.tickets.exit_terminal.text (APP.terminal.name);
 
 			var duration = delta_secs;
 			var segs = duration % 60;
@@ -889,17 +891,20 @@
 		var pre = '';
 		ui.shift_end_table.empty ();
 		for (var rec of records) {
-			total += rec.amount;
 			if (rec.change) change += rec.change;
+
 			switch (rec.concept) {
 			case 'exit':
 			case 'lost':
 				tickets ++;
+				total += rec.amount;
 				break;
 			case 'shift_begin':
+				total += rec.amount;
 				ui.tickets.shift_end_begin_time.text (rec.timestamp.toLocaleString ());
 				break;
 			case 'shift_end':
+				ui.tickets.shift_end_num.text (rec.amount);
 				ui.tickets.shift_end_time.text (rec.timestamp.toLocaleString ());
 			}
 			if (desc[rec.concept]) {

@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,390" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2652,7 +2652,8 @@ BEGIN
 			ORDER BY m.timestamp;
 
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, 0, 0, CURRENT_TIMESTAMP;
+		SELECT 'shift_end'::varchar, COUNT(*), 0, CURRENT_TIMESTAMP
+			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
 

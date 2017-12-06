@@ -2806,7 +2806,7 @@ END;]]></definition>
 END;]]></definition>
 </function>
 
-<function name="cashier_rate_get_script"
+<function name="rate_get_script"
 		window-func="false"
 		returns-setof="false"
 		behavior-type="CALLED ON NULL INPUT"
@@ -2821,20 +2821,12 @@ END;]]></definition>
 	<return-type>
 	<type name="text" length="0"/>
 	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
-	<parameter name="_remote_addr">
-		<type name="av.remote_addr" length="0"/>
-	</parameter>
 	<parameter name="_name">
 		<type name="varchar" length="0"/>
 	</parameter>
 	<definition><![CDATA[DECLARE
 	_script text;
 BEGIN
-	PERFORM cashier_shift_assert (_uid, _remote_addr);
-
 	SELECT r.script INTO STRICT _script FROM rate AS r
 		WHERE is_active = TRUE AND r.name = _name;
 

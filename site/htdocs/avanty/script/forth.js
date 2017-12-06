@@ -42,15 +42,15 @@
 		data = data.replace (/\r\n/g, '\n').replace (/\t/g, '    ');
 
 		var match = data.match (include_re);
-		if (!match)
-			return data;
+		if (!match) {
+			if (cb) cb (data);
+			return;
+		}
 
 		function match_replace (loaded_data) {
 			var start = match.index + match[0].indexOf (match[1]);
 			var replaced = data.substr (0, start) + loaded_data + data.substr (start + match[1].length);
-
-			if (!cb) return replaced;
-			cb (replaced);
+			forth_preprocess (replaced, cb, error_cb);
 		}
 
 		var script_name = match[2].replace (/\.+\/+/g, '');
@@ -58,21 +58,20 @@
 		if (!load) // Cache miss: async loading.
 			return;
 
-		cb = undefined;
-		return match_replace (load);
+		match_replace (load);
 	}
 
 	function forth_load (script_name, cb, error_cb) {
 		if (file_cache[script_name])
 			return file_cache[script_name];
 
-		function success (data) {
-			data = forth_preprocess (data, success, error_cb);
-			if (!data) // Async loading due to includes.
-				return;
-
+		function preprocess_done (data) {
 			file_cache[script_name] = data;
 			if (cb) cb (data);
+		}
+
+		function success (data) {
+			forth_preprocess (data, preprocess_done, error_cb);
 		}
 
 		function error (err) {

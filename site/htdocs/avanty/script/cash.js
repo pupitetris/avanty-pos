@@ -238,6 +238,10 @@
 
 		park_charge_layout_init ('park_exit');
 
+		ui.section_park_rate = $('#cash-park-rate');
+		ui.park_rate_form = ui.section_park_rate.find ('form');
+		ui.park_rate_buttons = ui.park_rate_form.find ('div');
+
 		ui.section_park_lost = $('#cash-park-lost');
 		ui.section_park_lost.on ('avanty:switchSectionEnter', cash_park_lost_reset);
 		ui.section_park_lost.find ('button').button ();
@@ -460,14 +464,34 @@
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
 
-		forth.reset (cash_park_exit_charge, cash_forth_error);
+		forth.reset (cash_park_exit_rate, cash_forth_error);
+	}
+
+	function cash_park_exit_rate () {
+		APP.history.go (MOD_NAME, ui.section_park_rate, 'cash-park-rate');
+
+		APP.charp.request ('cashier_park_get_rates', [],
+						   cash_park_exit_rate_success);
+	}
+
+	function cash_park_exit_rate_success (rates) {
+		ui.park_rate_buttons.empty ();
+		for (var rate of rates) {
+			var button = $('<button>' + rate.label + '</button>')
+			ui.park_rate_buttons.append (button);
+			button.button ();
+			button.val (rate.name);
+			button.bind ('click', function () {
+				cash_park_exit_charge ($(this).val ());
+			});
+		}
 	}
 
 	var cash_charge_date;
 	var cash_entry_terminal;
 	var cash_entry_date;
 
-	function cash_park_exit_charge () {
+	function cash_park_exit_charge (script) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
 		function check_error (err) {
@@ -518,7 +542,7 @@
 			};
 
 			forth.setConstants (cons, cash_forth_error);
-			forth.load ('test.fth',
+			forth.load (script,
 						function (script) { cash_park_charge_rate ('park_exit', script, 'cash-park-exit'); },
 						cash_forth_error);
 		}

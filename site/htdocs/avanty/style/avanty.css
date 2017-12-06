@@ -345,7 +345,7 @@ button.shell-tool img {
 
 .shell-status {
 	position: absolute;
-	top: 66px;
+	top: 70px;
 	left: 0.5em;
 	width: calc(100% - 1em);
 	font-size: 75%;

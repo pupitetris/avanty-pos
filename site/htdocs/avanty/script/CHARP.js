@@ -52,11 +52,36 @@ CHARP.ERRORS = {
 		err.key = key;
 	}
 
+	var timestamptz_re = new RegExp ('[+-]\\d{2}$');
+	var bad_date_parser;
+	
 	function cast_datum (datum, type) {
 		switch (type) {
 		case 'bool': return (datum)? true: false;
 		case 'timestamp':
-		case 'timestamptz': return new Date (datum);
+		case 'timestamptz':
+			switch (bad_date_parser) {
+			case 0:
+				// Compliant browser
+				return new Date (datum);
+			case 1:
+				// Firefox
+				return new Date (datum + '00');
+			case 2:
+				// Surf
+				var parts = datum.split (/[ +-]/);
+				return new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + parts[3]);
+			default:
+				bad_date_parser = 0;
+				var d = new Date (datum);
+				if (!isNaN (d)) return d;
+				bad_date_parser = 1;
+				d = new Date (datum + '00');
+				if (!isNaN (d)) return d;
+				bad_date_parser = 2;
+				var parts = datum.split (/[ +-]/);
+				return new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + parts[3]);
+			}
 		}
 		// text or a number or some other thing.
 		return datum;

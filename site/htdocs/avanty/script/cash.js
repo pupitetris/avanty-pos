@@ -481,12 +481,13 @@
 	function cash_park_exit_rate_success (rates) {
 		ui.park_exit_rate_buttons.empty ();
 		for (var rate of rates) {
-			var button = $('<button type="button">' + rate.label + '</button>')
+			var button = $('<button type="button">' + rate.label + '</button>');
 			ui.park_exit_rate_buttons.append (button);
 			button.button ();
 			button.val (rate.name);
+			button.data ('label', rate.label_client);
 			button.on ('click', function () {
-				cash_park_exit_charge ($(this).val ());
+				cash_park_exit_charge ($(this).val (), $(this).data ('label'));
 			});
 		}
 	}
@@ -495,8 +496,9 @@
 	var cash_entry_terminal;
 	var cash_entry_date;
 	var cash_rate_name;
+	var cash_rate_label;
 
-	function cash_park_exit_charge (rate_name) {
+	function cash_park_exit_charge (rate_name, rate_label) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
 		function check_error (err) {
@@ -548,6 +550,7 @@
 			};
 
 			cash_rate_name = rate_name;
+			cash_rate_label = rate_label;
 
 			forth.setConstants (cons, cash_forth_error);
 			forth.load (rate_name,
@@ -616,7 +619,7 @@
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 7) + '</div>';
 		ui[prefix + '_charge_total'].text (total);
 		APP.mod.devices.display ('client',
-								 'Tarifa:\n' +
+								 'Tarifa: ' + cash_rate_label + '\n' +
 								 ' Total: $' + total);
 
 		ui.tickets.exit_items.html (pre);
@@ -747,6 +750,7 @@
 
 		cash_entry_terminal = APP.terminal.id;
 		cash_rate_name = APP.config.lostRateName;
+		cash_rate_label = APP.config.lostRateLabel;
 
 		forth.setConstants (cons, cash_forth_error);
 		forth.load (cash_rate_name,

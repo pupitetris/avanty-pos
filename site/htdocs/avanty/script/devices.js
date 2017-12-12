@@ -790,19 +790,33 @@
 	// Very simple text render. Always clears and then sends text. All LF generate CR as well.
 	// No geometry checks. An empty string text will implicitly clear the screen.
 	function epson_display (display, text, options) {
-		var lines = text.split ('\n').map (
+		var i = 0;
+		var lines = text.split ('\n');
+		lines = lines.map (
 			function (line) {
-				if (!options)
-					return line;
-				switch (options.align) {
-				case undefined:
-				case 'left': return line;
-				case 'right': return APP.Util.padString (line, display.width);
-				case 'center': return APP.Util.padString (line, Math.floor ((display.width - line.length) / 2) + line.length);
-				default: throw 'epson_display: unknown alignment ' + options.align;
+				i++;
+				if (options) {
+					switch (options.align) {
+					case undefined:
+					case 'left':
+						break;
+					case 'right':
+						line = APP.Util.padString (line, display.width);
+						break;
+					case 'center':
+						line = APP.Util.padString (line, Math.floor ((display.width - line.length) / 2) + line.length);
+						break;
+					default:
+						throw 'epson_display: unknown alignment ' + options.align;
+					}
 				}
+				if (i < lines.length && line.length < display.width)
+					line += '\r\n';
+				if (line.length > display.width)
+					line = line.substr (0, display.width);
+				return line;
 			});
-		return A.FF + lines.join ('\r\n');
+		return A.FF + lines.join ('');
 	}
 
 	var display_methods = {

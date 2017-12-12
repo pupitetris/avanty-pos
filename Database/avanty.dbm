@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,390" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -402,6 +402,10 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 	<column name="label">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[Name that appears on the UI for rate selection.]]></comment>
+	</column>
+	<column name="label_client">
+		<type name="varchar" length="0"/>
+		<comment><![CDATA[Label to be displayed on the client's screen (VFD)]]></comment>
 	</column>
 	<constraint name="rate_pk" type="pk-constr" table="av.rate">
 		<columns names="rate_id" ref-type="src-columns"/>
@@ -2790,6 +2794,9 @@ END;]]></definition>
 	<parameter name="label">
 		<type name="varchar" length="0"/>
 	</parameter>
+	<parameter name="label_client">
+		<type name="varchar" length="0"/>
+	</parameter>
 	</return-type>
 	<parameter name="_uid">
 		<type name="av.uid" length="0"/>
@@ -2801,7 +2808,7 @@ END;]]></definition>
 	PERFORM cashier_shift_assert (_uid, _remote_addr);
 
 	RETURN QUERY 
-		SELECT r.name, r.label FROM rate AS r
+		SELECT r.name, r.label, r.label_client FROM rate AS r
 			WHERE type = 'regular' AND is_active = TRUE
 			ORDER BY position;
 END;]]></definition>

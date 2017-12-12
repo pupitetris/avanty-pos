@@ -459,7 +459,7 @@ create pad 1000 cells allot
 ; immediate
 
 : [THEN] ( -- ) ; immediate
-', '', 0, NULL);
+', '', 0, NULL, NULL);
 	INSERT INTO rate VALUES (DEFAULT, 'avanty', 'system', TRUE, '
 incluir standard
 
@@ -502,14 +502,14 @@ define cancela_anteriores 0 0 _desc_cancel registra ;
 
 // Call the truncDate method
 define truncar_fecha js /APP.Util.truncDate{2} ;
-', '', 0, NULL);
+', '', 0, NULL, NULL);
    INSERT INTO rate VALUES (DEFAULT, 'vips-desc', 'fragment', TRUE, '
 define desc_primera_fracción " Primeras dos horas o fracción " ;
 define desc_primera_fracción_sellado " Boleto sellado " ;
 define desc_fracción " Fracción de 15min " ;
 define desc_tarifa_diaria_máxima " Cobro máximo permitido " ;
 define desc_perdido " Boleto perdido " ;
-', '', 0, NULL);
+', '', 0, NULL, NULL);
    INSERT INTO rate VALUES (DEFAULT, 'vips-param', 'fragment', TRUE, '
 define costo_primera_fracción 24 pesos ;
 define costo_primera_fracción_sellado 6 pesos ;
@@ -519,7 +519,7 @@ define costo_perdido 150 pesos ;
 define duración_primera_fracción 2 horas ;
 define duración_fracción 15 minutos ; 
 define tarifa_diaria_máxima 0 pesos ;
-', '', 0, NULL);
+', '', 0, NULL, NULL);
    INSERT INTO rate VALUES (DEFAULT, 'vips-calcular', 'fragment', TRUE, '
 // Declaramos las variables que vamos a usar:
 
@@ -570,7 +570,7 @@ si total valor tarifa_diaria_máxima > entonces
 fin
 
 ;
-', '', 0, NULL);
+', '', 0, NULL, NULL);
    INSERT INTO rate VALUES (DEFAULT, 'vips-calcular-perdido', 'fragment', TRUE, '
 // Declaramos las variables que vamos a usar:
 
@@ -596,14 +596,14 @@ fin
 noches valor costo_perdido_día desc_perdido_día registra
 
 ;
-', '', 0, NULL);
+', '', 0, NULL, NULL);
    INSERT INTO rate VALUES (DEFAULT, 'perdido', 'lost', TRUE, '
 incluir vips-desc
 incluir vips-param
 incluir vips-calcular-perdido
 
 calcular
-', '', 0, 'Boleto perdido');
+', '', 0, 'Boleto perdido', 'Bol. perdido');
 	INSERT INTO rate VALUES (DEFAULT, 'vips-sellado', 'regular', TRUE, '
 incluir vips-desc
 incluir vips-param
@@ -613,14 +613,14 @@ define sellado verdadero ;
 incluir vips-calcular
 
 calcular
-', '', 0, 'Con boleto sellado');
+', '', 0, 'Con boleto sellado', 'Bol. sellado');
 	INSERT INTO rate VALUES (DEFAULT, 'vips-sin-sello', 'regular', TRUE, '
 incluir vips-desc
 incluir vips-param
 incluir vips-calcular
                              
 calcular
-', '', 1, 'Sin boleto sellado');
+', '', 1, 'Sin boleto sellado', 'Normal');
 
 
 COMMIT TRANSACTION;

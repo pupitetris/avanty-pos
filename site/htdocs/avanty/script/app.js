@@ -1025,7 +1025,7 @@
 							dataBits	: 8,
 							parity		: 'NONE',
 							stopBits	: 1,
-							flowControl	: 'RTSCTS'
+							flowControl	: 'NONE'
 						}
 					}
 				},

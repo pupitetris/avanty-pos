@@ -1,1 +1,9 @@
-{}
+{
+	"DEVEL": true,
+	"establishment": "Piloto VIPS",
+	"firstWeekDay": 1,
+	"lostRateName": "perdido",
+	"lostRateLabel": "Boleto perdido",
+	"barcodeSecret": "secret",
+	"maxTender": 100000
+}

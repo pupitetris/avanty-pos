@@ -2,6 +2,8 @@ BEGIN TRANSACTION;
 
 	SET CONSTRAINTS ALL DEFERRED;
     
+	DELETE FROM request;
+	DELETE FROM request_log;
 	DELETE FROM ticket;
     DELETE FROM movement;
     DELETE FROM cashier_shift;
@@ -85,7 +87,7 @@ zozCzYdSCBfnRztD8A==
 -----END CERTIFICATE-----
 ');
 
-    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS2', '192.168.137.184', 
+    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS2', '192.168.137.1', 
 '-----BEGIN RSA PRIVATE KEY-----
 MIIEpgIBAAKCAQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQX
 bTSkWyhZF5y48kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPil

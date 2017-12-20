@@ -23,6 +23,41 @@
 		};
 	} (jQuery));
 
+	function configure (cb) {
+		function send_error (error_msg) {
+			console.error (error_msg);
+
+			APP.msgDialog ({
+				icon: 'error',
+				desc: 'Falla interna al configurar.',
+				msg: error_msg,
+				sev: CHARP.ERROR_SEV['INTERNAL'],
+				title: 'Falla en configuración',
+				opts: { width: '75%' }
+			});
+		}
+
+		function error (res, status, error) {
+			send_error ('configure: Ajax(' + status + '): ' + error);
+		}
+
+		function success (data) {
+			$.extend (APP.config, data);
+			if (cb)
+				cb (APP.config);
+		}
+
+		$.ajax ({
+			type: 'GET',
+			url: 'config.json',
+			cache: false,
+			dataType: 'json',
+			global: false,
+			success: success,
+			error: error
+		});
+	}
+
 	function msg_dialog_append_p (parent, contents, className) {
 		if (contents && typeof contents.selector != 'undefined') {
 			contents.addClass (className);
@@ -999,7 +1034,7 @@
 					delay: 0
 				},
 				printer: {
-					name: 'BTP-R180',
+					name: 'thermal',
 					type: 'ESCPOS',
 					basedir: 'file:///avanty/site/htdocs/avanty',
 					qz_type: 'escp',
@@ -1047,7 +1082,9 @@
 								mod.configure (dev_conf);
 							});
 
-			APP.loadModule ('activate');
+			configure (function () {
+				APP.loadModule ('activate');
+			});
 		}
 	};
 

@@ -1,7 +1,7 @@
 BEGIN TRANSACTION;
 
 	SET CONSTRAINTS ALL DEFERRED;
-    
+
 	DELETE FROM request;
 	DELETE FROM request_log;
 	DELETE FROM ticket;
@@ -21,73 +21,7 @@ BEGIN TRANSACTION;
     
     DELETE FROM terminal;
     ALTER SEQUENCE terminal_terminal_id_seq RESTART;
-    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS1', '127.0.0.1', 
-'-----BEGIN RSA PRIVATE KEY-----
-MIIEpgIBAAKCAQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQX
-bTSkWyhZF5y48kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPil
-Y0wvbWFEVqSprrN6pxP61h8CLzo4BXkBCbayuUnM1HlhshOzf+Vo2I/lDa7NxcRk
-2N38lHlwIyo1NZ6Kypb19fbraE+LnwJvYbF4mdDp10/xtAntMpmXMQdy0q1KMyvn
-/v3Gj5tymSbmVsDbe1mJevfkI0SquY4b1nvH5GTHOidjA7+1ID0otVjWCuDjEu1g
-Zzcrj9s0DnwBGRmzisu3I/mqyd7g3EIZLlCKPQIDAQABAoIBAQC7VOJEBPyy5ntz
-cQPWjrQ0uoPViKdb6yruvrFQGI4oS4D9TO4gFHRSrYq6andP+b/MkhBLPUgSapYj
-AFc5fIZW4ymhPMBLqpquzzqSyZMmujfSDToiox/NviY/2FecF5H05nR8vTLQWFOu
-7gdWO57GfLZ7JWcRQBjNDFq1clZ8zmDSK5/ZXkUtDQDkqEOuJrecat+GEKRsy/Ew
-QQWg7nB4u289y+Vun1rgQAKSzkitEWr9xU1Gz4GZT9khYmWwSZf6FX8b+CqJJ7yR
-/mpPMdL3d1BC178s0I7cmONItGr++el6FFPL71toM5LDgQZIYqkgymiiQaqa3dNj
-Hfg7HF45AoGBAPtjDuyyJWHwGA9kHwLMaLC/8sfmHVorWr4/eodzi9v0Wb7Jtfgv
-5PBLxDEBgZt/P2Prfmon9MOwxxSA9YpVDq2nVbS82DrWbjsHzapwJ+XoY0G1Rdzz
-QGsQGssOQBOdctakMeTNAa+tpUE/SKP9w6xpOnyyBD1nFRyjA+IvgLivAoGBAMRG
-3Rqyw/WgS+BuHPvGh3QoAH7rcgdfsdiqaVBoTp2jaox51ey1rdf8LcPM1GXbaBRv
-4dq97fpe/Q/TARRMKYqMB4YPwHM1JhXSxo8BRje2NiORd+OfqW738vmEkSUOJxRy
-RyJhXCxRZT1hhiGQbcYbQmcTvKTWYT+P1IbW/U7TAoGBAIReo8Q1BgQtFa49DSs/
-ET1IxYFHBVuuioi1CkL6r8FxSDRzKFN4fLefXb5kSafkeC+YGCezxGmq0xlT0nc1
-1JXSEAosijtpIAALWtuNVST1mhZGanQuzlPR1hnn9gueE5M8QF13KZUk/Wh+9zQK
-8pb9jeONJThj6DT9DZVzZ/dXAoGBAKVTEzZD0W95n6/g0CT66mlasGA3rYqsfj8D
-+0UxNtbtKPg+P4Ts2wuMbHf6dgV9s8NTIih/xo4XqIzFrKkOJgd/P28aoX3pDLVh
-HsKhziVrI1r+Ur+2Yp8H1u95TFCsBRrhzy0UWPEzdlUnajWnU++EUoBETaeCs9M4
-MUmKmT7lAoGBAJzwWdqAvuPtMjucKk5fe+w5grOPUC2PYeShrTfrGql6KXZOVO+y
-4hgRRuEqF8p8woXTMskoOOmy6aU7VtOYKFLse/SgGRhOVm7eMn5MxYgZeO6nLbk1
-iwxRWT0UqyggORJJjW5UAA1t2XDAGGvR0ZigdIwSXzjRpLZes24qUcfm
------END RSA PRIVATE KEY-----
-',
-'-----BEGIN CERTIFICATE-----
-MIIGCTCCA/GgAwIBAgICEAAwDQYJKoZIhvcNAQELBQAwgaIxCzAJBgNVBAYTAk1Y
-MQ8wDQYDVQQIDAZNZXhpY28xHzAdBgNVBAoMFk1pY3Jvc2FmZSBTLkEuIGRlIEMu
-Vi4xETAPBgNVBAsMCEZpcm13YXJlMSIwIAYDVQQDDBlNaWNyb3NhZmUgSW50ZXJt
-ZWRpYXRlIENBMSowKAYJKoZIhvcNAQkBFhtwcm9ibGVzZ2lsQG1pY3Jvc2FmZS5j
-b20ubXgwHhcNMTcxMDMwMDMwOTI0WhcNMjMwNDIyMDMwOTI0WjCBqjELMAkGA1UE
-BhMCTVgxDzANBgNVBAgMBk1leGljbzEVMBMGA1UEBwwMVGxhbG5lcGFudGxhMRww
-GgYDVQQKDBNBdmFudHkgVGVjaG5vbG9naWVzMRQwEgYDVQQLDAtEZXZlbG9wbWVu
-dDEZMBcGA1UEAwwQd3d3LmF2YW50eS5sb2NhbDEkMCIGCSqGSIb3DQEJARYVYXJ0
-dXJvZWFAYXZhbnR5LmxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
-AQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQXbTSkWyhZF5y4
-8kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPilY0wvbWFEVqSp
-rrN6pxP61h8CLzo4BXkBCbayuUnM1HlhshOzf+Vo2I/lDa7NxcRk2N38lHlwIyo1
-NZ6Kypb19fbraE+LnwJvYbF4mdDp10/xtAntMpmXMQdy0q1KMyvn/v3Gj5tymSbm
-VsDbe1mJevfkI0SquY4b1nvH5GTHOidjA7+1ID0otVjWCuDjEu1gZzcrj9s0DnwB
-GRmzisu3I/mqyd7g3EIZLlCKPQIDAQABo4IBPTCCATkwCQYDVR0TBAIwADARBglg
-hkgBhvhCAQEEBAMCBkAwDwYJYIZIAYb4QgENBAIWADAdBgNVHQ4EFgQUYnQDuHGn
-CecW54+B5o9Ndi4rJN8wgcMGA1UdIwSBuzCBuIAUFYA71zyeFQx8kvUHk5JU+GRL
-UW6hgZukgZgwgZUxCzAJBgNVBAYTAk1YMQ8wDQYDVQQIDAZNZXhpY28xFTATBgNV
-BAcMDFRsYWxuZXBhbnRsYTEfMB0GA1UECgwWTWljcm9zYWZlIFMuQS4gZGUgQy5W
-LjERMA8GA1UECwwIRmlybXdhcmUxKjAoBgkqhkiG9w0BCQEWG3Byb2JsZXNnaWxA
-bWljcm9zYWZlLmNvbS5teIICEAAwDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoG
-CCsGAQUFBwMBMA0GCSqGSIb3DQEBCwUAA4ICAQCldYBKE9PX1T2gV6iFLfGo4pq5
-5M8iuK6EuPvVsFFQoKWz4DMdgntCSrSI0EfXC39QJFo3i3gLbe7fCAdKJRgVxGSX
-6UdbvMe42oGdFSdscNsHf3516TtS8/gbHe/z834q+S2doytxsW437AacWl3vgUoN
-AmA8bOQo4Lvzv5JEK/tvkjK6+8W98r6+oCzKA/qj2lCoLpTUwXM+Z+kParMAM1ac
-7lDqVtnb96x75YH2DAOX1YoJWXZG7XGK8j2lLQwlVaLudxk+ereYeK4aPvZu29e3
-ODvgNMKxDS0YFdK9680R7vXvnJb+RANW4KYe0zFEuOq9vq7d+pDXcQAuNVHiXSRg
-OcZCwq56+UULDwjYKaL4YCKCZvovIoTL/BMi2ALt1ajFJpdpfjtCJVlwFCcjkCB4
-03q0fuPdKHc0AxWW0rKbo7flXZSjIjnmwjzBcmNm/IfysjnpjAyrz774DOi7lvdp
-U2bqk506bOY9dAE8UMd0wJriwP1WHE+LJhTSMZsqVbaDm2ZObgKvKb8WPAIG0nch
-ShBRsnQFT3fQbfwBB48Rjh+nx/RXt17WZyGqxQlMcgMtX/39yZB2slAUL/CRq9Lh
-qyggkrzF8BoHCRCvSRMUDmipczEsLDh93H+p8R/K8Ob7qtct0sZthwWBU2ZJXvhX
-zozCzYdSCBfnRztD8A==
------END CERTIFICATE-----
-');
-
-    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS2', '192.168.137.1', 
+    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS1', '127.0.0.1', 0,
 '-----BEGIN RSA PRIVATE KEY-----
 MIIEpgIBAAKCAQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQX
 bTSkWyhZF5y48kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPil
@@ -505,124 +439,5 @@ define cancela_anteriores 0 0 _desc_cancel registra ;
 // Call the truncDate method
 define truncar_fecha js /APP.Util.truncDate{2} ;
 ', '', 0, NULL, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-desc', 'fragment', TRUE, '
-define desc_primera_fracción " Primeras dos horas o fracción " ;
-define desc_primera_fracción_sellado " Boleto sellado " ;
-define desc_fracción " Fracción de 15min " ;
-define desc_tarifa_diaria_máxima " Cobro máximo permitido " ;
-define desc_perdido " Boleto perdido " ;
-', '', 0, NULL, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-param', 'fragment', TRUE, '
-define costo_primera_fracción 24 pesos ;
-define costo_primera_fracción_sellado 6 pesos ;
-define costo_fracción 6 pesos ;
-define costo_perdido 150 pesos ;
-
-define duración_primera_fracción 2 horas ;
-define duración_fracción 15 minutos ; 
-define tarifa_diaria_máxima 0 pesos ;
-', '', 0, NULL, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular', 'fragment', TRUE, '
-// Declaramos las variables que vamos a usar:
-
-variable restante   // Será el tiempo registrado menos la primer hora.
-variable fracciones // Número de fracciones de tiempo por cobrar.
-variable total      // El total, para ver si nos pasamos de la tarifa diara máxima.
-
-define calcular
-
-// Se cobra la primera fracción:
-si está sellado entonces
-	1 costo_primera_fracción_sellado desc_primera_fracción_sellado registra
-si_no
-	1 costo_primera_fracción desc_primera_fracción registra
-fin
-
-// Si el tiempo registrado es menor a la primer fracción, terminamos.
-si tiempo_registrado duración_primera_fracción <= entonces
-	salir
-fin
-
-// El tiempo restante es el tiempo registrado menos una hora.
-tiempo_registrado duración_primera_fracción - restante guarda
-
-// Calculamos cuántas fracciones adicionales se registraron:
-restante valor duración_fracción / fracciones guarda
-
-// Si no se registró la salida en el minuto exacto de la última fracción, sumar una fracción adicional.
-si restante valor duración_fracción residuo 0 > entonces
-	fracciones incrementa
-fin
-
-fracciones valor costo_fracción desc_fracción registra
-
-// Se considera una tarifa diaria máxima de 0 como desactivada, y terminamos.
-si tarifa_diaria_máxima 0 = entonces
-	salir
-fin
-
-// Calcula el total: número de fracciones por su costo mas lo de la primer hora.
-fracciones valor costo_fracción * costo_primera_fracción + total guarda
-
-// Si el total obtenido es mayor a la tarifa máxima diaria, marcamos lo ya reportado como cancelado
-// y reportamos la tarifa máxima
-si total valor tarifa_diaria_máxima > entonces
-	cancela_anteriores
-	1 tarifa_diaria_máxima desc_tarifa_diaria_máxima registra
-fin
-
-;
-', '', 0, NULL, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'vips-calcular-perdido', 'fragment', TRUE, '
-// Declaramos las variables que vamos a usar:
-
-variable noches // Número de noches transcurridos desde que el auto ingresó
-
-define calcular
-
-// Cobrar costo base del boleto perdido
-1 costo_perdido desc_perdido registra
-
-// Calcular las noches transcurridas desde el día que ingresó el auto
-2 ahora truncar_fecha         // Se trunca la hora actual hasta días.
-2 fecha_ingreso truncar_fecha // Se trunca la hora del ingreso hasta días.
-- 24 horas /                  // Se restan los resultados y dividen entre 24 horas.
-noches guarda                 // El resultado es el número de noches. Guardar en variable "noches".
-
-// Si no pasó ni una noche, terminamos.
-si noches valor 1 < entonces
-	salir
-fin
-
-// Se cobra el número de noches transcurridas que se calculó.
-noches valor costo_perdido_día desc_perdido_día registra
-
-;
-', '', 0, NULL, NULL);
-   INSERT INTO rate VALUES (DEFAULT, 'perdido', 'lost', TRUE, '
-incluir vips-desc
-incluir vips-param
-incluir vips-calcular-perdido
-
-calcular
-', '', 0, 'Boleto perdido', 'Bol. perdido');
-	INSERT INTO rate VALUES (DEFAULT, 'vips-sellado', 'regular', TRUE, '
-incluir vips-desc
-incluir vips-param
-
-define sellado verdadero ;
-                             
-incluir vips-calcular
-
-calcular
-', '', 0, 'Con boleto sellado', 'Bol. sellado');
-	INSERT INTO rate VALUES (DEFAULT, 'vips-sin-sello', 'regular', TRUE, '
-incluir vips-desc
-incluir vips-param
-incluir vips-calcular
-                             
-calcular
-', '', 1, 'Sin boleto sellado', 'Normal');
-
 
 COMMIT TRANSACTION;

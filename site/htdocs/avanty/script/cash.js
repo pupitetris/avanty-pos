@@ -129,14 +129,19 @@
 		ui.tickets.entry = $('#cash-ticket-entry');
 		ui.tickets.entry_time = ui.tickets.entry.find ('time');
 		ui.tickets.entry_terminal = ui.tickets.entry.find ('.term');
+		ui.tickets.entry_consecutive = ui.tickets.entry.find ('.consecutive');
 		ui.tickets.entry_barcode = ui.tickets.entry.find ('figure');
+		ui.tickets.entry.find ('h1').text (APP.config.establishment);
 
 		ui.tickets.exit = $('#cash-ticket-exit');
 		ui.tickets.exit_entry_time = ui.tickets.exit.find ('time:eq(0)');
 		ui.tickets.exit_charge_time = ui.tickets.exit.find ('time:eq(1)');
 		ui.tickets.exit_duration = ui.tickets.exit.find ('time:eq(2)');
-		ui.tickets.exit_terminal = ui.tickets.exit.find ('.term');
 		ui.tickets.exit_items = ui.tickets.exit.find ('.items');
+		ui.tickets.exit.find ('h1').text (APP.config.establishment);
+		ui.tickets.exit.find ('address').text (APP.config.fiscal_address);
+		ui.tickets.exit.find ('.fiscal').text (APP.config.fiscal_code);
+		ui.tickets.exit.find ('.tax').text (APP.config.tax_percent);
 
 		ui.tickets.shift_end = $('#cash-ticket-shift-end');
 		ui.tickets.shift_end_begin_time = ui.tickets.shift_end.find ('time:eq(0)');
@@ -145,6 +150,7 @@
 		ui.tickets.shift_end_terminal = ui.tickets.shift_end.find ('.term');
 		ui.tickets.shift_end_user = ui.tickets.shift_end.find ('.user');
 		ui.tickets.shift_end_items = ui.tickets.shift_end.find ('.items');
+		ui.tickets.shift_end.find ('h1').text (APP.config.establishment);
 	}
 
 	function layout_init () {
@@ -397,10 +403,11 @@
 	function cash_park_entry () {
 		var entry_date = new Date ();
 
-		APP.charp.request ('cashier_park_entry', [entry_date], function () { cash_park_entry_print (entry_date); });
+		APP.charp.request ('cashier_park_entry', [entry_date],
+						   function (entry_consecutive) { cash_park_entry_print (entry_date, entry_consecutive); });
 	}
 
-	function cash_park_entry_print (entry_date) {
+	function cash_park_entry_print (entry_date, entry_consecutive) {
 		var barcode_fields = {
 			terminalId: APP.terminal.id,
 			entryDate: entry_date
@@ -410,6 +417,7 @@
 
 		ui.tickets.entry_time.text (barcode_fields.entryDate.toLocaleString ());
 		ui.tickets.entry_terminal.text (APP.terminal.name);
+		ui.tickets.entry_consecutive.text (entry_consecutive);
 		ui.tickets.entry_barcode.attr ('data-chars', barcode);
 
 		APP.mod.devices.escposTicketLayout (ui.tickets.entry);
@@ -523,8 +531,6 @@
 
 			ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
 			ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
-			ui.tickets.exit_terminal.text (APP.terminal.name);
-			ui.tickets.exit_terminal.text (APP.terminal.name);
 
 			var duration = delta_secs;
 			var segs = duration % 60;

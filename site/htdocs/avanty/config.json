@@ -1,6 +1,9 @@
 {
 	"DEVEL": true,
 	"establishment": "Piloto VIPS",
+	"fiscal_address": "Avanty Technologies S.A. de C.V.\nAv. Mario Colín #315\nCol. Industrial la Loma,\nTlalnepantla de Baz C.P. 54050\nTlalnepantla Edo.Méx.",
+	"fiscal_code": "MIC9611127P7",
+	"tax_percent": 16,
 	"firstWeekDay": 1,
 	"lostRateName": "perdido",
 	"lostRateLabel": "Boleto perdido",

@@ -66,10 +66,10 @@ def barcode_calc_checksum (secret, barcode):
     
     # Convert to Base64 and trim trailing padding chars (=). For 16 bytes, that's always two:
     # Also non-conformingly replace + with . or bcrypt will complain.
-    base64 = base64.b64encode (_bytes)[0:22].replace ('+', '.')
+    _base64 = base64.b64encode (_bytes)[0:22].replace ('+', '.')
 
     # OK, we got our proper salt, configured for 2^8 bcrypt iterations:
-    salt = '$2a$08$' + base64
+    salt = '$2a$08$' + _base64
 
     # Now encrypt our secret with the salt.
     crypt = bcrypt.hashpw (secret.encode ('utf-8'), salt)
@@ -94,7 +94,11 @@ def barcode_generate (fields):
     barcode += '%09d' % (entry_time - AVANTY_EPOCH)
 
     # Fields 3 & 4: ticket type and stay length
-    exit_time = (fields.get ('exitDate'))? 0: (fields['exitDate'] - EPOCH).total_seconds ()
+    if fields.get ('exitDate'):
+        exit_time = (fields['exitDate'] - EPOCH).total_seconds () 
+    else: 
+        exit_time = 0
+
     barcode += barcode_get_type_and_length (entry_time, exit_time)
 
     # Field 5: signature
@@ -104,3 +108,8 @@ def barcode_generate (fields):
 	barcode += '0'
 		
     return barcode
+
+if __name__ == "__main__":
+    time = datetime.datetime.now ()
+    fields = {"terminalId": 2, "entryDate": time, "secret": "vaquita"}
+    print barcode_generate (fields)

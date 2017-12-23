@@ -78,7 +78,7 @@
 		// OK, we got our proper salt, configured for 2^8 bcrypt iterations:
 		var salt = '$2a$08$' + base64;
 
-		// Now encrypt our secret with the salt. FIXME: we need to set a sensible secret, parametrically.
+		// Now encrypt our secret with the salt.
 		var crypt = dcodeIO.bcrypt.hashSync (APP.config.barcodeSecret, salt);
 
 		// Get hash part and fix non-conforming use of . for +

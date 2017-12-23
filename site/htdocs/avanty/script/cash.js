@@ -475,11 +475,36 @@
 
 	function cash_park_exit_submit (form, evt) {
 		if (evt.originalEvent) evt.originalEvent.preventDefault ();
+	
+		function check_error (err) {
+			if (err.key == 'SQL:DATADUP') { // ticket already charged
+				APP.msgDialog ({
+					icon: 'no',
+					desc: 'El ticket que presentó ya fue cobrado con anterioridad.',
+					sev: CHARP.ERROR_SEV['USER'],
+					title: 'Ticket ya procesado',
+					opts: { width: '75%' }
+				});
+				return;
+			}
+			return true;
+		}
 
-		APP.history.go (MOD_NAME, ui.section_park_exit_rate, 'cash-park-exit');
+		function check_success () {
+			APP.history.go (MOD_NAME, ui.section_park_exit_rate, 'cash-park-exit');
 
-		APP.charp.request ('cashier_park_get_rates', [],
-						   cash_park_exit_rate_success);
+			APP.charp.request ('cashier_park_get_rates', ['regular'],
+							   cash_park_exit_rate_success);
+		}
+
+		// Before displaying, register on DB that we will start charging. Optionally, if the ticket has
+		// already been charged, an error will rise.
+		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
+		APP.charp.request ('cashier_park_charge_check', [barcode_fields.terminalId, barcode_fields.entryDate],
+						   {
+							   success: check_success,
+							   error: check_error
+						   });
 	}
 
 	function cash_park_exit_rate_reset () {
@@ -509,72 +534,43 @@
 	function cash_park_exit_charge (rate_name, rate_label) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
-		function check_error (err) {
-			if (err.key == 'SQL:DATADUP') { // ticket already charged
-				APP.msgDialog ({
-					icon: 'no',
-					desc: 'El ticket que presentó ya fue cobrado con anterioridad.',
-					sev: CHARP.ERROR_SEV['USER'],
-					title: 'Ticket ya procesado',
-					opts: { width: '75%' }
-				});
-				return;
-			}
-			return true;
-		}
-
-		function check_success () {
-			var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
-
-			ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
-			ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
-
-			ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
-			ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
-
-			var duration = delta_secs;
-			var segs = duration % 60;
-			duration = (duration - segs) / 60;
-			var mins = duration % 60;
-			duration = (duration - mins) / 60;
-			var hrs = duration % 24;
-			duration = (duration - hrs) / 24;
-			var days = duration % 7;
-			var weeks = (duration - days) / 7;
-
-			duration =
-				((weeks > 0)? weeks + ' semana' + ((weeks == 1)? '': 's') + ' ': '') +
-				((days > 0)? days + ' día' + ((days == 1)? '': 's') + ' ': '') +
-				((hrs > 0)? hrs + ' hr. ': '') +
-				mins + ' mins. ' + segs + ' seg.';
-
-			ui.park_exit_duration.text (duration);
-			ui.tickets.exit_duration.text (duration);
-
-			var cons = {
-				tiempo_registrado: delta_secs,
-			};
-
-			cash_rate_name = rate_name;
-			cash_rate_label = rate_label;
-
-			forth.setConstants (cons, cash_forth_error);
-			forth.load (rate_name,
-						function (script) { cash_park_charge_rate ('park_exit', script, 'cash-park-exit'); },
-						cash_forth_error);
-		}
-
 		cash_entry_date = barcode_fields.entryDate;
 		cash_entry_terminal = barcode_fields.terminalId;
 		cash_charge_date = new Date ();
+		cash_rate_name = rate_name;
+		cash_rate_label = rate_label;
 
-		// Before displaying, register on DB that we will start charging. Optionally, if the ticket has
-		// already been charged, an error will rise.
-		APP.charp.request ('cashier_park_charge_check', [barcode_fields.terminalId, barcode_fields.entryDate],
-						   {
-							   success: check_success,
-							   error: check_error
-						   });
+		var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
+
+		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
+		ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
+
+		ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
+		ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
+
+		var duration = delta_secs;
+		var segs = duration % 60;
+		duration = (duration - segs) / 60;
+		var mins = duration % 60;
+		duration = (duration - mins) / 60;
+		var hrs = duration % 24;
+		duration = (duration - hrs) / 24;
+		var days = duration % 7;
+		var weeks = (duration - days) / 7;
+
+		duration =
+			((weeks > 0)? weeks + ' semana' + ((weeks == 1)? '': 's') + ' ': '') +
+			((days > 0)? days + ' día' + ((days == 1)? '': 's') + ' ': '') +
+			((hrs > 0)? hrs + ' hr. ': '') +
+			mins + ' mins. ' + segs + ' seg.';
+
+		ui.park_exit_duration.text (duration);
+		ui.tickets.exit_duration.text (duration);
+
+		forth.setConstants ({ tiempo_registrado: delta_secs }, cash_forth_error);
+		forth.load (rate_name,
+					function (script) { cash_park_charge_rate ('park_exit', script, 'cash-park-exit'); },
+					cash_forth_error);
 	}
 
 	function cash_park_charge_rate (prefix, script, process) {
@@ -746,29 +742,48 @@
 	}
 
 	function cash_park_lost_charge () {
-		cash_entry_date = ui.park_lost_date.datepicker ('getDate');
-		cash_charge_date = new Date ();
+		function success (rate) {
+			if (!rate) {
+				APP.msgDialog ({
+					icon: 'error',
+					desc: 'No se encontró la tarifa de boleto perdido.',
+					msg: 'La configuración no cuenta con una tarifa para boletos perdidos.',
+					sev: CHARP.ERROR_SEV['INTERNAL'],
+					title: 'Falla en tarifa',
+					opts: { width: '75%' }
+				});
+				return;
+			}
 
-		var cons = {
-			fecha_ingreso: APP.Util.getTimeSecs (cash_entry_date),
-			ahora: APP.Util.getTimeSecs ()
-		};
+			cash_entry_date = ui.park_lost_date.datepicker ('getDate');
+			cash_charge_date = new Date ();
+			cash_entry_terminal = APP.terminal.id;
+			cash_rate_name = rate.name;
+			cash_rate_label = rate.label_client;
 
-		cash_entry_terminal = APP.terminal.id;
-		cash_rate_name = APP.config.lostRateName;
-		cash_rate_label = APP.config.lostRateLabel;
+			var cons = {
+				fecha_ingreso: APP.Util.getTimeSecs (cash_entry_date),
+				ahora: APP.Util.getTimeSecs ()
+			};
 
-		forth.setConstants (cons, cash_forth_error);
-		forth.load (cash_rate_name,
-					function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
-					cash_forth_error);
+			forth.setConstants (cons, cash_forth_error);
+			forth.load (cash_rate_name,
+						function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
+						cash_forth_error);
 
-		// The entry date comes from the date picker without HMS, so we set those of the
-		// charge date so that it is unique when it goes into the database. Otherwise, you
-		// would only be able to charge one lost ticket per day.
-		cash_entry_date.setHours (cash_charge_date.getHours ());
-		cash_entry_date.setMinutes (cash_charge_date.getMinutes ());
-		cash_entry_date.setSeconds (cash_charge_date.getSeconds ());
+			// The entry date comes from the date picker without HMS, so we set those of the
+			// charge date so that it is unique when it goes into the database. Otherwise, you
+			// would only be able to charge one lost ticket per day.
+			cash_entry_date.setHours (cash_charge_date.getHours ());
+			cash_entry_date.setMinutes (cash_charge_date.getMinutes ());
+			cash_entry_date.setSeconds (cash_charge_date.getSeconds ());
+		}
+
+		APP.charp.request ('cashier_park_get_rates', ['lost'],
+						   {
+							   asObject: true,
+							   success: success
+						   });
 	}
 
 	function cash_main () {

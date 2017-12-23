@@ -958,8 +958,6 @@
 				version: '0.85',
 				establishment: 'Piloto VIPS',
 				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
-				lostRateName: 'perdido',
-				lostRateLabel: 'Boleto perdido',
 				barcodeSecret: 'secret',
 				maxTender: 100000, // Biggest tender (in cents) that can be received by the POS.
 				tender: [ // Watch out: this array needs to be in ascending order.

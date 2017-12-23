@@ -391,7 +391,7 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 		<type name="boolean" length="0"/>
 		<comment><![CDATA[Rates may be deactivated and not used any more, but we keep them for bookkeeping.]]></comment>
 	</column>
-	<column name="script" not-null="true">
+	<column name="script" not-null="true" default-value="''">
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[a DSL to be executed to itemize the payment and generate a total.]]></comment>
 	</column>
@@ -2785,45 +2785,6 @@ BEGIN
 END;]]></definition>
 </function>
 
-<function name="cashier_park_get_rates"
-		window-func="false"
-		returns-setof="false"
-		behavior-type="CALLED ON NULL INPUT"
-		function-type="VOLATILE"
-		security-type="SECURITY INVOKER"
-		execution-cost="1"
-		row-amount="0">
-	<schema name="rp"/>
-	<role name="postgres"/>
-	<comment><![CDATA[Get active regular rates for the rate selection screen.]]></comment>
-	<language name="plpgsql" sql-disabled="true"/>
-	<return-type>
-	<parameter name="name">
-		<type name="varchar" length="0"/>
-	</parameter>
-	<parameter name="label">
-		<type name="varchar" length="0"/>
-	</parameter>
-	<parameter name="label_client">
-		<type name="varchar" length="0"/>
-	</parameter>
-	</return-type>
-	<parameter name="_uid">
-		<type name="av.uid" length="0"/>
-	</parameter>
-	<parameter name="_remote_addr">
-		<type name="av.remote_addr" length="0"/>
-	</parameter>
-	<definition><![CDATA[BEGIN
-	PERFORM cashier_shift_assert (_uid, _remote_addr);
-
-	RETURN QUERY 
-		SELECT r.name, r.label, r.label_client FROM rate AS r
-			WHERE type = 'regular' AND is_active = TRUE
-			ORDER BY position;
-END;]]></definition>
-</function>
-
 <function name="rate_get_script"
 		window-func="false"
 		returns-setof="false"
@@ -2849,6 +2810,48 @@ BEGIN
 		WHERE is_active = TRUE AND r.name = _name;
 
 	RETURN _script;
+END;]]></definition>
+</function>
+
+<function name="cashier_park_get_rates"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get active rates for the rate selection screen.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="label">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="label_client">
+		<type name="varchar" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_remote_addr">
+		<type name="av.remote_addr" length="0"/>
+	</parameter>
+	<parameter name="_type">
+		<type name="av.rate_type" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM cashier_shift_assert (_uid, _remote_addr);
+
+	RETURN QUERY 
+		SELECT r.name, r.label, r.label_client FROM rate AS r
+			WHERE type = _type AND is_active = TRUE
+			ORDER BY position;
 END;]]></definition>
 </function>
 

@@ -1,2 +1,6 @@
 *~
 /site/htdocs/avanty/script/_newmod.js
+/scripts/activationSovler/build
+/scripts/activationSovler/__pycache__
+/scripts/activationSovler/dist
+/scripts/activationSovler/solver.spec

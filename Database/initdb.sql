@@ -425,9 +425,13 @@ incluir standard
 
 // Standard calculations will make things very pleasant to read.
 define pesos 100 * ;
+define peso 100 * ;
 define centavos + ;
+define centavo + ;
 define minutos 1min * ;
+define minuto 1min * ;
 define horas 1hr * ;
+define hora 1hr * ;
 
 // Report an account item 
 define registra type " | " type . " | " type . #10 emit ;

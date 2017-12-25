@@ -142,6 +142,7 @@
 		ui.tickets.exit.find ('address').text (APP.config.fiscal_address);
 		ui.tickets.exit.find ('.fiscal').text (APP.config.fiscal_code);
 		ui.tickets.exit.find ('.tax').text (APP.config.tax_percent);
+		ui.tickets.exit.find ('.closing').text (APP.config.ticket_closing);
 
 		ui.tickets.shift_end = $('#cash-ticket-shift-end');
 		ui.tickets.shift_end_begin_time = ui.tickets.shift_end.find ('time:eq(0)');

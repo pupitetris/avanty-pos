@@ -4,8 +4,10 @@ import bcrypt
 import base64
 import datetime
 
-# Secs since epoch for 2017-01-01 00:00:00-00:00
-AVANTY_EPOCH = 1483228800
+EPOCH = datetime.datetime.utcfromtimestamp (0)
+EPOCH_LOCAL = datetime.datetime.fromtimestamp (0)
+# Secs since epoch for 2017-01-01 00:00:00-00:00, plus local timezone+DST offset:
+AVANTY_EPOCH = 1483228800 + (EPOCH_LOCAL - EPOCH).total_seconds ()
 
 # entry and exit in seconds since epoch.
 def barcode_get_type_and_length (entry, _exit):
@@ -81,8 +83,6 @@ def barcode_calc_checksum (secret, barcode):
     c = ord (base64.b64decode (hash64)[10])
 
     return '%03d' % c
-
-EPOCH = datetime.datetime.utcfromtimestamp (0)
 
 def barcode_generate (fields):
     # Field 1: terminal ID

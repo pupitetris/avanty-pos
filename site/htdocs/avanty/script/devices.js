@@ -787,6 +787,11 @@
 		return APP.Util.mapReplace (encodeURIComponent (str), map);
 	}
 
+	function dummy_display (display, text, options) {
+		console.log ('display: ' + display.port + ' "' + text + '"');
+		return text;
+	}
+
 	// Very simple text render. Always clears and then sends text. All LF generate CR as well.
 	// No geometry checks. An empty string text will implicitly clear the screen.
 	function epson_display (display, text, options) {
@@ -820,7 +825,8 @@
 	}
 
 	var display_methods = {
-		EPSON: epson_display
+		EPSON: epson_display,
+		DUMMY: dummy_display
 	};
 
 	var qz_private_key;
@@ -881,13 +887,18 @@
 	}
 
 	function qz_open_serial (device, cb) {
+		if (device.type == 'DUMMY') {
+			console.log ('device: ' + device.port + ' open');
+			if (cb) cb ();
+			return;
+		}
+
 		var bounds = { start: '', end: '', width: null };
 		qz.serial.openPort (device.port, bounds)
 			.then (cb)
 			.catch (function (err) {
 				console.error (err);
-				if (cb)
-					cb ();
+				if (cb)	cb ();
 			});
 	}
 
@@ -1027,6 +1038,11 @@
 			
 			var data = display_methods[display.type] (display, text, options);
 			//var raw = qz_str_encode_to_raw_hex (display.encoding, data);
+
+			if (display.type == 'DUMMY') {
+				if (cb) cb ();
+				return;
+			}
 
 			function do_display () {
 				if (display.isBusy) {

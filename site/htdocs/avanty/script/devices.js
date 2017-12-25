@@ -1091,15 +1091,13 @@
 
 			var displays = devices_config.displays;
 			if (displays) {
-				window.setTimeout (function () {
-					var names = Object.keys (displays);
-					var i = 0;
-					function salute_next () {
-						if (i == names.length) return;
-						mod.display (names[i++], 'Avanty', salute_next);
-					}
-					salute_next ();
-				}, 50);
+				var names = Object.keys (displays);
+				var i = 0;
+				function salute_next () {
+					if (i == names.length) return;
+					mod.display (names[i++], 'Avanty', salute_next);
+				}
+				salute_next ();
 			}
 		}
 	};

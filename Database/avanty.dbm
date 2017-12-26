@@ -2609,6 +2609,7 @@ BEGIN
 		WHERE user_id = _uid AND (type = 'shift_begin' OR type = 'shift_end')
 		ORDER BY timestamp DESC LIMIT 1;
 
+	-- No shifts ever begun (so no last shift), or last shift has already been ended.
 	IF NOT FOUND OR _type = 'shift_end' THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_end', NULL);
@@ -2616,21 +2617,11 @@ BEGIN
 	DELETE FROM cashier_shift WHERE terminal_id = _terminal_id AND user_id = _uid;
 
 	RETURN QUERY
-		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
-			FROM user_activity AS ua 
-				JOIN ticket USING(user_id, timestamp)
-				JOIN movement USING (ticket_id)
-			WHERE ua.user_id = _uid AND ticket.terminal_id = _terminal_id 
-				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
+		SELECT * FROM av.cashier_shift_report(_uid, _start);
 
+	-- Provide the shift number by countingh the number of shifts for the user.
 	RETURN QUERY
-		SELECT t.type::varchar, m.amount, m.change, m.timestamp::timestamp with time zone
-			FROM ticket AS t JOIN movement AS m USING (ticket_id)
-			WHERE t.user_id = _uid AND t.terminal_id = _terminal_id AND m.timestamp > _start
-			ORDER BY m.timestamp;
-
-	RETURN QUERY
-		SELECT 'shift_end'::varchar, COUNT(*), 0, CURRENT_TIMESTAMP
+		SELECT 'shift_end'::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
@@ -2824,6 +2815,110 @@ END;]]></definition>
 		SELECT r.name, r.label, r.label_client FROM rate AS r
 			WHERE type = _type::av.rate_type AND is_active = TRUE
 			ORDER BY position;
+END;]]></definition>
+</function>
+
+<function name="cashier_shift_report"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Return accounting for the shift starting at _start for the given user.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_user_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="_start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_end timestamp with time zone;
+BEGIN
+	SELECT ua.timestamp INTO _end FROM user_activity AS ua
+		WHERE user_id = _user_id AND type = 'shift_end' AND ua.timestamp > _start
+		ORDER BY timestamp LIMIT 1;
+
+	IF NOT FOUND THEN _end = CURRENT_TIMESTAMP; END IF;
+
+	RETURN QUERY
+		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
+			FROM user_activity AS ua 
+				JOIN ticket USING(user_id, timestamp)
+				JOIN movement USING (ticket_id)
+			WHERE ua.user_id = _user_id
+				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
+
+	RETURN QUERY
+		SELECT t.type::varchar, m.amount, m.change, m.timestamp::timestamp with time zone
+			FROM ticket AS t JOIN movement AS m USING (ticket_id)
+			WHERE t.user_id = _user_id AND _start < m.timestamp AND m.timestamp <= _end
+			ORDER BY m.timestamp;
+END;]]></definition>
+</function>
+
+<function name="cashier_shift_report"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Remove corresponding cashier_shift and return accounting for the shift.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[DECLARE
+	_start timestamp with time zone;
+BEGIN
+	SELECT ua.timestamp, type INTO _start FROM user_activity AS ua
+		WHERE user_id = _uid AND type = 'shift_begin'
+		ORDER BY timestamp DESC LIMIT 1;
+
+	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
+
+	RETURN QUERY
+		SELECT * FROM av.cashier_shift_report (_uid, _start);
+
+	RETURN QUERY
+		SELECT 'shift_end'::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
 

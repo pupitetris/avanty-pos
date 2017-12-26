@@ -152,6 +152,15 @@
 		ui.tickets.shift_end_user = ui.tickets.shift_end.find ('.user');
 		ui.tickets.shift_end_items = ui.tickets.shift_end.find ('.items');
 		ui.tickets.shift_end.find ('h1').text (APP.config.establishment);
+
+		ui.tickets.shift_report = $('#cash-ticket-shift-report');
+		ui.tickets.shift_report_begin_time = ui.tickets.shift_report.find ('time:eq(0)');
+		ui.tickets.shift_report_time = ui.tickets.shift_report.find ('time:eq(1)');
+		ui.tickets.shift_report_num = ui.tickets.shift_report.find ('.num');
+		ui.tickets.shift_report_terminal = ui.tickets.shift_report.find ('.term');
+		ui.tickets.shift_report_user = ui.tickets.shift_report.find ('.user');
+		ui.tickets.shift_report_items = ui.tickets.shift_report.find ('.items');
+		ui.tickets.shift_report.find ('h1').text (APP.config.establishment);
 	}
 
 	function layout_init () {
@@ -178,6 +187,9 @@
 		shell.ui.user_chpass = $('#cash-tab-user-chpass');
 		shell.ui.user_chpass.on ('click', cash_chpass);
 
+		shell.ui.user_shift_begin = $('#cash-tab-user-shift-report');
+		shell.ui.user_shift_begin.on ('click', cash_shift_report);
+
 		shell.ui.user_shift_begin = $('#cash-tab-user-shift-begin');
 		shell.ui.user_shift_begin.on ('click', cash_shift_begin);
 
@@ -192,6 +204,18 @@
 
 		ui.main_noshift = $('#cash-main-noshift');
 		ui.main_noshift.on ('click', cash_shift_begin);
+
+		ui.section_shift_report = $('#cash-shift-report');
+		ui.section_shift_report.find ('button').button ();
+		ui.shift_report_table = ui.section_shift_report.find ('tbody');
+		ui.shift_report_total = ui.section_shift_report.find ('.total');
+		ui.shift_report_received = ui.section_shift_report.find ('.received');
+		ui.shift_report_change = ui.section_shift_report.find ('.change');
+		ui.shift_report_tickets = ui.section_shift_report.find ('.tickets');
+		ui.shift_report_print = $('#cash-shift-report-print');
+		ui.shift_report_print.on ('click', cash_shift_report_print);
+		ui.shift_report_continue = $('#cash-shift-report-continue');
+		ui.shift_report_continue.on ('click', cash_shift_report_continue);
 
 		ui.section_shift_begin = $('#cash-shift-begin');
 		ui.section_shift_begin.find ('button').button ();
@@ -837,6 +861,89 @@
 		}
 	}
 
+	function cash_shift_report () {
+		APP.charp.request ('cashier_shift_report', [], cash_shift_report_success);
+	}
+
+	function cash_shift_report_success (records) {
+		cash_shift_do_report (records, 'shift_report');
+
+		APP.history.go (MOD_NAME, ui.section_shift_report, 'cash-shift-report');
+		shell.navShow ();
+		shell.menuCollapse ();
+	}
+
+	function cash_shift_do_report (records, prefix) {
+		var desc = {
+			shift_begin: 'Dotación inicial:',
+			deposit: 'Depósito:'
+		};
+
+		var total = 0;
+		var change = 0;
+		var tickets = 0;
+		var pre = '';
+		ui[prefix + '_table'].empty ();
+		for (var rec of records) {
+			if (rec.change) change += rec.change;
+
+			switch (rec.concept) {
+			case 'exit':
+			case 'lost':
+				tickets ++;
+				total += rec.amount;
+				break;
+			case 'shift_begin':
+				total += rec.amount;
+				ui.tickets[prefix + '_begin_time'].text (rec.timestamp.toLocaleString ());
+				break;
+			case 'shift_end':
+				ui.tickets[prefix + '_num'].text (rec.amount);
+				ui.tickets[prefix + '_time'].text (rec.timestamp.toLocaleString ());
+			}
+			if (desc[rec.concept]) {
+				pre += '<div class="desc">' + rec.timestamp.toLocaleString () + ' ' + desc[rec.concept] + '</div>\n' +
+					'<div class="sum">$' + APP.Util.asMoney (rec.amount) + '</div>\n';
+				ui[prefix + '_table'].append ($('<tr>' +
+											 '<td>' + rec.timestamp.toLocaleString () + '</td>' +
+											 '<th>' + desc[rec.concept] + '</th>' +
+											 '<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
+											 '</tr>'));
+			}
+		}
+
+		var received = total + change;
+
+		received = APP.Util.asMoney (received);
+		pre += '<div class="sum">Recibido: $' + received + '</div><br />\n';
+		ui[prefix + '_received'].text (received);
+
+		change = APP.Util.asMoney (change);
+		pre += '<div class="sum">Devuelto: $' + change + '</div><br />\n';
+		ui[prefix + '_change'].text (change);
+
+		total = APP.Util.asMoney (total);
+		pre += '<br /><div class="sum">Cobrado: $' + total + '</div>\n';
+		ui[prefix + '_total'].text (total);
+
+		pre += '<div class="sum">Boletos cobrados: ' + tickets + '</div>';
+		ui[prefix + '_tickets'].text (tickets);
+
+		ui.tickets[prefix + '_terminal'].text (APP.terminal.name);
+		ui.tickets[prefix + '_user'].text (APP.charp.credentialsGet ().login);
+		ui.tickets[prefix + '_items'].html (pre);
+		APP.mod.devices.escposTicketLayout (ui.tickets[prefix]);
+	}
+
+	function cash_shift_report_print () {
+		APP.mod.devices.print (ui.tickets.shift_report);
+	}
+
+	function cash_shift_report_continue () {
+		APP.history.back ('cash-shift-report');
+		shell.navShow ();
+	}
+
 	function cash_shift_begin () {
 		APP.history.go (MOD_NAME, ui.section_shift_begin, 'cash-shift-begin');
 		shell.navShow ();
@@ -909,65 +1016,7 @@
 		APP.terminal.shiftUser = null;
 		shell.setStatus ('');
 
-		var desc = {
-			shift_begin: 'Dotación inicial:',
-			deposit: 'Depósito:'
-		};
-
-		var total = 0;
-		var change = 0;
-		var tickets = 0;
-		var pre = '';
-		ui.shift_end_table.empty ();
-		for (var rec of records) {
-			if (rec.change) change += rec.change;
-
-			switch (rec.concept) {
-			case 'exit':
-			case 'lost':
-				tickets ++;
-				total += rec.amount;
-				break;
-			case 'shift_begin':
-				total += rec.amount;
-				ui.tickets.shift_end_begin_time.text (rec.timestamp.toLocaleString ());
-				break;
-			case 'shift_end':
-				ui.tickets.shift_end_num.text (rec.amount);
-				ui.tickets.shift_end_time.text (rec.timestamp.toLocaleString ());
-			}
-			if (desc[rec.concept]) {
-				pre += '<div class="desc">' + rec.timestamp.toLocaleString () + ' ' + desc[rec.concept] + '</div>\n' +
-					'<div class="sum">$' + APP.Util.asMoney (rec.amount) + '</div>\n';
-				ui.shift_end_table.append ($('<tr>' +
-											 '<td>' + rec.timestamp.toLocaleString () + '</td>' +
-											 '<th>' + desc[rec.concept] + '</th>' +
-											 '<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
-											 '</tr>'));
-			}
-		}
-
-		var received = total + change;
-
-		received = APP.Util.asMoney (received);
-		pre += '<div class="sum">Recibido: $' + received + '</div><br />\n';
-		ui.shift_end_received.text (received);
-
-		change = APP.Util.asMoney (change);
-		pre += '<div class="sum">Devuelto: $' + change + '</div><br />\n';
-		ui.shift_end_change.text (change);
-
-		total = APP.Util.asMoney (total);
-		pre += '<br /><div class="sum">Cobrado: $' + total + '</div>\n';
-		ui.shift_end_total.text (total);
-
-		pre += '<div class="sum">Boletos cobrados: ' + tickets + '</div>';
-		ui.shift_end_tickets.text (tickets);
-
-		ui.tickets.shift_end_terminal.text (APP.terminal.name);
-		ui.tickets.shift_end_user.text (APP.charp.credentialsGet ().login);
-		ui.tickets.shift_end_items.html (pre);
-		APP.mod.devices.escposTicketLayout (ui.tickets.shift_end);
+		cash_shift_do_report (records, 'shift_end');
 
 		ui.shift_end_print.button ('enable');
 		ui.shift_end_continue.button ('disable');
@@ -975,6 +1024,7 @@
 
 		APP.history.go (MOD_NAME, ui.section_shift_end, 'cash-shift-end');
 		shell.navShow ();
+		shell.menuCollapse ();
 	}
 
 	function cash_shift_end_print () {

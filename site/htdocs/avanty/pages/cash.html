@@ -39,6 +39,9 @@
 		<div>
 		  <h4>Turno</h4>
 		  <div>
+			<button class="requires-shift" id="cash-tab-user-shift-report">Corte parcial (Arqueo)</button>
+		  </div>
+		  <div>
 			<button id="cash-tab-user-shift-begin">Iniciar</button>
 			<button class="requires-shift" id="cash-tab-user-shift-end">Finalizar</button>
 		  </div>			
@@ -87,6 +90,35 @@
 	  </table>
 	</form>
   </div>
+  <div class="section shift-report cash-park-charge" id="cash-shift-report">
+	<h3>Corte parcial (Arqueo)</h3>
+	<table>
+	  <tbody>
+	  </tbody>
+	  <tfoot>
+		<tr>
+		  <th colspan="2">Recibido:</th>
+		  <td><s/></td><td class="money received"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Devuelto:</th>
+		  <td><s/></td><td class="money change"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Cobrado:</th>
+		  <td><s/></td><td class="money total"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Boletos cobrados:</th>
+		  <td colspan="2" class="tickets"></td>
+		</tr>
+	  </tfoot>
+	</table>
+	<div>
+	  <button id="cash-shift-report-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
+	  <button id="cash-shift-report-continue" class="button-icon"><img src="img/symbolic/yes.svg" />Continuar</button>
+	</div>
+  </div>
   <div class="section" id="cash-shift-begin">
 	<form>
 	  <h2>Ingresa la dotación para el cambio e inicia el turno</h2>
@@ -103,7 +135,7 @@
 	  </table>
 	</form>
   </div>
-  <div class="section cash-park-charge" id="cash-shift-end">
+  <div class="section shift-report cash-park-charge" id="cash-shift-end">
 	<h3>Corte de caja</h3>
 	<table>
 	  <tbody>

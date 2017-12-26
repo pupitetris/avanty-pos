@@ -287,10 +287,14 @@ form label.error {
 }
 
 .shell-menu .ui-tabs-panel > div {
+	margin-top: 2em;
+}
+
+.shell-menu .ui-tabs-panel > div > div {
 	margin-top: 1em;
 }
 
-.shell-menu .ui-tabs-panel > div:first-child {
+.shell-menu .ui-tabs-panel div:first-child {
 	margin-top: 0;
 }
 

@@ -164,32 +164,32 @@ input[name="shift-begin-amount"] {
 	margin-top: 1em;
 }
 
-#cash-shift-end td:first-child {
+.shift-report td:first-child {
 	padding-right: 1em;
 }
 
-#cash-shift-end th {
+.shift-report th {
 	padding-right: 1ex;
 }
 
-#cash-shift-end table .money {
+.shift-report table .money {
 	text-align: right;
 	line-height: unset;
 	width: auto;
 }
 
-#cash-shift-end td.tickets {
+.shift-report td.tickets {
 	text-align: left;
 }
 
-#cash-shift-end > div {
+.shift-report > div {
 	margin-top: 2em;
 }
 
-#cash-shift-end > div button {
+.shift-report > div button {
 	margin-left: 1ex;
 }
 
-#cash-shift-end > div button:first-child {
+.shift-report > div button:first-child {
 	margin-left: 0;
 }

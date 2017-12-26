@@ -1024,6 +1024,7 @@
 
 			var dev_conf = {
 				qz_connect: {
+//					host: 'localhost.qz.io',
 					host: 'www.avanty.local',
 					port: { secure: [8181] },
 					usingSecure: true,
@@ -1048,6 +1049,7 @@
 				},
 				displays: {
 					client: {
+//						type		: 'DUMMY',
 						type		: 'EPSON',
 						port		: '/dev/ttyS0',
 						width		: 20,
@@ -1068,6 +1070,14 @@
 						line: 0,
 						on: 200, // msecs, max 510.
 						off: 200 // msecs, max 510
+					}
+				},
+				booms: {
+					exit: {
+						type: 'printer', // only supported type for the moment.
+						line: 1,
+						on: 510, // msecs, max 510.
+						off: 510 // msecs, max 510
 					}
 				}
 			};

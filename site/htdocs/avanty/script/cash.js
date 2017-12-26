@@ -705,6 +705,7 @@
 			APP.mod.devices.display ('client',
 									 'Recibido: $' + APP.Util.padString (received_val, width) + '\n' +
 									 '  Cambio: $' + APP.Util.padString (change_val, width));
+			APP.mod.devices.openBoom ('exit');
 		});
 
 		var amount = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());

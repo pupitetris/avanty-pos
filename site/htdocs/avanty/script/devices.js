@@ -465,7 +465,7 @@
 		return new_state;
 	}
 
-	function escpos_print_cmd (key, state) {
+	function escpos_print_cmd (key, state, options) {
 		switch (key) {
 		case 'char_spacing'	: return A.ESC + ' ' + chr(state[key]);
 		case 'underline'	: return A.ESC + '-' + chr(state[key]);
@@ -485,13 +485,13 @@
 		case 'partial_cut'	: return A.GS  + 'VB' +
 				chr(escpos_vertical_pixels_to_units (state, state.printer.cutter_distance));
 		case 'pulse'		:
-			var drawer = state.printer.drawers[state[key]];
-			var on = (drawer.on > 510)? 510: drawer.on;
+			var device = options.device;
+			var on = (device.on > 510)? 510: device.on;
 			if (!on) on = 200;
-			var off = (drawer.off > 510)? 510: drawer.off;
+			var off = (device.off > 510)? 510: device.off;
 			if (!off) off = 0;
 
-			return A.ESC + 'p' + chr(drawer.line) + chr(Math.floor (on / 2)) + chr(Math.floor (off / 2));
+			return A.ESC + 'p' + chr(device.line) + chr(Math.floor (on / 2)) + chr(Math.floor (off / 2));
 		}
 		return '';
 	}
@@ -705,8 +705,8 @@
 		return null;
 	}
 
-	function escpos_send_pulse (printer, name) {
-		return [ escpos_print_cmd ('pulse', { pulse: name, printer: printer }) ];
+	function escpos_send_pulse (printer, device) {
+		return [ escpos_print_cmd ('pulse', { printer: printer, device: device }) ];
 	}
 
 	var print_methods = {
@@ -958,6 +958,34 @@
 
 	var qz_conf;
 
+	function send_device_pulse (devices_key, type, device_name, cb) {
+		if (!devices_config[devices_key])
+			throw 'devices: no ' + type + ' configured';
+
+		var device = devices_config[devices_key][device_name];
+		if (!device)
+			throw 'devices: ' + type + ' ' + device_name + ' not configured';
+		
+		if (device.type != 'printer')
+			throw 'unknown ' + type + ' type ' + device.type + ' for ' + type + ' ' + device_name;
+
+		var printer = devices_config.printer;
+		if (!printer)
+			throw 'devices: no printer configured';
+
+		function do_open (conf) {
+			var data = print_methods[printer.type].sendPulse (printer, device);
+
+			for (var i = 0; i < data.length; i++)
+				if (typeof data[i] == 'string')
+					data[i] = qz_str_encode_to_raw_hex (printer.qz_options.encoding, data[i]);
+
+			qz.print (conf, data).catch (qz_error_handler).then (cb);
+		}
+
+		qz_connect (do_open);
+	}
+
 	var mod = {
 		init: function () {
 			qz.api.setSha256Type (qz_sha_get_hash);
@@ -1001,31 +1029,11 @@
 		},
 
 		openDrawer: function (drawer_name, cb) {
-			if (!devices_config.drawers)
-				throw 'devices: no drawers configured';
+			send_device_pulse ('drawers', 'drawer', drawer_name, cb);
+		},
 
-			var drawer = devices_config.drawers[drawer_name];
-			if (!drawer)
-				throw 'devices: drawer ' + drawer_name + ' not configured';
-			
-			if (drawer.type != 'printer')
-				throw 'unknown drawer type ' + drawer.type + ' for drawer ' + drawer_name;
-
-			var printer = devices_config.printer;
-			if (!printer)
-				throw 'devices: no printer configured';
-
-			function do_open (conf) {
-				var data = print_methods[printer.type].sendPulse (printer, drawer_name);
-
-				for (var i = 0; i < data.length; i++)
-					if (typeof data[i] == 'string')
-						data[i] = qz_str_encode_to_raw_hex (printer.qz_options.encoding, data[i]);
-
-				qz.print (conf, data).catch (qz_error_handler).then (cb);
-			}
-
-			qz_connect (do_open);
+		openBoom: function (boom_name, cb) {
+			send_device_pulse ('booms', 'boom', boom_name, cb);
 		},
 
 		display: function (disp_name, text, cb, options) {
@@ -1069,20 +1077,25 @@
 		configure: function (new_config) {
 			devices_config = new_config;
 
-			var drawers = devices_config.drawers;
-			if (drawers) {
-				var printer = devices_config.printer;
-				if (printer) {
-					for (var name of Object.keys (drawers)) {
-						var drawer = drawers[name];
-						if (drawer.type == 'printer') {
-							if (!printer.drawers)
-								printer.drawers = {};
-							printer.drawers[name] = drawer;
+			function add_devices_to_printer (key) {
+				var devices = devices_config[key];
+				if (devices) {
+					var printer = devices_config.printer;
+					if (printer) {
+						for (var name of Object.keys (devices)) {
+							var device = devices[name];
+							if (device.type == 'printer') {
+								if (!printer[key])
+									printer[key] = {};
+								printer[key][name] = device;
+							}
 						}
 					}
 				}
 			}
+
+			add_devices_to_printer ('drawers');
+			add_devices_to_printer ('booms');
 		},
 
 		setQzCredentials: function (key, cert) {

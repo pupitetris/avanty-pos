@@ -1082,7 +1082,7 @@
 				}
 			};
 
-			// APP.loadModule ('fetch'); // You may want to load this module for a cached catalog fetcher.
+			APP.loadModule ('fetch'); // Catalog loading with a cache.
 
 			APP.loadModule ('devices', // Printer and HIDs.
 							function (mod) {

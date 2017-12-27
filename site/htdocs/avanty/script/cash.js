@@ -940,7 +940,7 @@
 												'</tr>'));
 			}
 
-			var received = charged + depost + change;
+			var received = charged + deposit + change;
 
 			received = APP.Util.asMoney (received);
 			pre += '<div class="sum">Recibido: $' + received + '</div><br />\n';

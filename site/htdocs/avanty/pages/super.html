@@ -114,44 +114,33 @@
   </div>
   <div class="section" id="super-main">
   </div>
-  <div class="section" id="super-report">
-	<h2>Resumen de operaciones</h2>
-	<table id="super-report-summary">
+  <div class="section shift-report" id="super-report-summary">
+	<h3>Resumen de operaciones</h3>
+	<table>
 	  <tbody>
-		<tr>
-		  <th>Inicio del turno:</th><td colspan="2" class="shift_begin" style="position: absolute"></td>
-		</tr>
-		<tr>
-		  <th>Fin del turno:</th><td colspan="2" class="shift_end" style="position: absolute"></td>
-		</tr>
-		<tr>
-		  <th>Entradas:</th><td colspan="2" class="entry"></td>
-		</tr>
-		<tr>
-		  <th>Salidas:</th><td colspan="2" class="exit"></td>
-		</tr>
-		<tr>
-		  <th>Perdidos:</th><td colspan="2" class="lost"></td>
-		</tr>
-		<tr>
-		  <th>Cant. inicial:</th><td><s/></td><td class="money shift_begin_amount"></td>
-		</tr>
-		<tr>
-		  <th>Recibido:</th><td><s/></td><td class="money received"></td>
-		</tr>
-		<tr>
-		  <th>Devuelto:</th><td><s/></td><td class="money change"></td>
-		</tr>
-		<tr>
-		  <th>Cobrado:</th><td><s/></td><td class="money charge"></td>
-		</tr>
-		<tr>
-		  <th>Depósitos:</th><td><s/></td><td class="money deposit"></td>
-		</tr>
-		<tr>
-		  <th>Balance:</th><td><s/></td><td class="money total"></td>
-		</tr>
 	  </tbody>
+	  <tfoot>
+		<tr>
+		  <th colspan="2">Recibido:</th>
+		  <td><s/></td><td class="money received"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Devuelto:</th>
+		  <td><s/></td><td class="money change"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Cobrado:</th>
+		  <td><s/></td><td class="money charged"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Boletos cobrados:</th>
+		  <td colspan="2" class="charged-tickets"></td>
+		</tr>
+		<tr>
+		  <th colspan="2">Boletos emitidos:</th>
+		  <td colspan="2" class="printed-tickets"></td>
+		</tr>
+	  </tfoot>
 	</table>
 	<div>
 <!--	  <button id="super-report-summary-detail" class="button-icon"><img src="img/symbolic/detail.svg" />Ver detalle</button>-->

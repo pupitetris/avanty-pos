@@ -105,9 +105,12 @@
 		ui.section_report.find ('button').button ();
 		ui.report = {};
 		ui.report.summary = $('#super-report-summary');
-		for (var c of ['shift_begin', 'shift_end', 'entry', 'exit', 'lost',
-					   'shift_begin_amount', 'received', 'change', 'charge', 'deposit', 'total'])
-			ui.report[c] = ui.report.summary.find ('.' + c);
+		ui.report.summary_table = ui.report.summary.find ('tbody');
+		ui.report.summary_charged = ui.report.summary.find ('.charged');
+		ui.report.summary_received = ui.report.summary.find ('.received');
+		ui.report.summary_change = ui.report.summary.find ('.change');
+		ui.report.summary_charged_tickets = ui.report.summary.find ('.charged-tickets');
+		ui.report.summary_printed_tickets = ui.report.summary.find ('.printed-tickets');
 		ui.report.summary_reload = $('#super-report-summary-reload');
 		ui.report.summary_reload.on ('click', super_report_summary_reload);
 		ui.report.summary_print = $('#super-report-summary-print');
@@ -386,61 +389,8 @@
 		APP.charp.request ('supervisor_terminal_report', [APP.terminal.id], super_report_summary_do);
 	}
 
-	var super_report_records;
-
 	function super_report_summary_do (records) {
-		super_report_records = records;
-
-		var summary = {
-			shift_begin: '',
-			shift_end: '',
-			entry: 0,
-			exit: 0,
-			lost: 0,
-			shift_begin_amount: 0,
-			received: 0,
-			change: 0,
-			charge: 0,
-			deposit: 0,
-			total: 0
-		};
-		
-		for (var rec of records) {
-			switch (rec.concept) {
-			case 'shift_begin':
-				summary.shift_begin_amount = rec.amount;
-			case 'shift_end':
-				summary[rec.concept] = rec.start.toLocaleString ();
-				break;
-			case 'entry':
-				summary.entry ++;
-				if (rec.amount)
-					summary.charge += rec.amount;
-				if (rec.end)
-					summary.exit ++;
-				break;
-			case 'deposit':
-				summary.deposit += rec.amount;
-				break;
-			case 'lost':
-				summary.lost ++;
-				summary.charge += amount;
-				break;
-			}
-			if (rec.change)
-				summary.change += rec.change;
-		}
-		summary.total = summary.charge + summary.deposit + summary.shift_begin_amount;
-		summary.received = summary.change + summary.charge;
-
-		var i = 0;
-		$.each (summary,
-				function (k, v) {
-					var str = ui.report[k].hasClass ('money')? APP.Util.asMoney (v): v.toString ();
-					ui.report[k].text (str);
-					$(ui.tickets.report_summary_items.get (i)).text (str);
-					i++;
-				});
+		APP.mod.report.shiftSummaryReport (ui.report, 'shift_report', records);
 
 		ui.tickets.report_summary_term.text (APP.terminal.name);
 		APP.mod.devices.escposTicketLayout (ui.tickets.report_summary);
@@ -467,6 +417,7 @@
 	var mod = {
 		init: function () {
 			mod.initialized = true;
+			APP.loadModule ('report');
 			APP.appendPageAndLoadLayout (MOD_NAME, MOD_NAME + '.html', layout_init);
 		},
 

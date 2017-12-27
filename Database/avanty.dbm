@@ -19,6 +19,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 
 GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
 GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
+GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 ]]></appended-sql>
 </database>
 
@@ -2612,7 +2613,7 @@ BEGIN
 
 	-- Provide the shift number by countingh the number of shifts for the user.
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, NULL, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
@@ -2857,7 +2858,7 @@ END;]]></definition>
 	END IF;
 
 	RETURN QUERY
-		SELECT 'shift_begin'::varchar, NULL, movement.amount, 0, _start 
+		SELECT 'shift_begin'::varchar, NULL::varchar, movement.amount, 0, _start::timestamp with time zone
 			FROM user_activity AS ua 
 				JOIN ticket USING(user_id, timestamp)
 				JOIN movement USING (ticket_id)
@@ -2920,7 +2921,7 @@ BEGIN
 		SELECT * FROM av.cashier_shift_report (_uid, _start, NULL);
 
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, NULL, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>

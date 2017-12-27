@@ -7,6 +7,7 @@
 @import url('login.css');
 @import url('cash.css');
 @import url('ticket.css');
+@import url('report.css');
 
 body.avanty {
 	font-family: ibm-plex-sans;

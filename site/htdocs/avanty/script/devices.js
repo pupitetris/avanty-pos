@@ -465,7 +465,7 @@
 		return new_state;
 	}
 
-	function escpos_print_cmd (key, state, options) {
+	function escpos_print_cmd (key, state) {
 		switch (key) {
 		case 'char_spacing'	: return A.ESC + ' ' + chr(state[key]);
 		case 'underline'	: return A.ESC + '-' + chr(state[key]);
@@ -485,7 +485,7 @@
 		case 'partial_cut'	: return A.GS  + 'VB' +
 				chr(escpos_vertical_pixels_to_units (state, state.printer.cutter_distance));
 		case 'pulse'		:
-			var device = options.device;
+			var device = state.device;
 			var on = (device.on > 510)? 510: device.on;
 			if (!on) on = 200;
 			var off = (device.off > 510)? 510: device.off;

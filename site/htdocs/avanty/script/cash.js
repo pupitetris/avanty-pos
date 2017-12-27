@@ -208,7 +208,7 @@
 		ui.section_shift_report = $('#cash-shift-report');
 		ui.section_shift_report.find ('button').button ();
 		ui.shift_report_table = ui.section_shift_report.find ('tbody');
-		ui.shift_report_total = ui.section_shift_report.find ('.total');
+		ui.shift_report_charged = ui.section_shift_report.find ('.charged');
 		ui.shift_report_received = ui.section_shift_report.find ('.received');
 		ui.shift_report_change = ui.section_shift_report.find ('.change');
 		ui.shift_report_tickets = ui.section_shift_report.find ('.tickets');
@@ -238,7 +238,7 @@
 		ui.section_shift_end = $('#cash-shift-end');
 		ui.section_shift_end.find ('button').button ();
 		ui.shift_end_table = ui.section_shift_end.find ('tbody');
-		ui.shift_end_total = ui.section_shift_end.find ('.total');
+		ui.shift_end_charged = ui.section_shift_end.find ('.charged');
 		ui.shift_end_received = ui.section_shift_end.find ('.received');
 		ui.shift_end_change = ui.section_shift_end.find ('.change');
 		ui.shift_end_tickets = ui.section_shift_end.find ('.tickets');
@@ -888,8 +888,9 @@
 				deposit: 'Depósito:'
 			};
 
-			var total = 0;
+			var charged = 0;
 			var change = 0;
+			var deposit = 0;
 			var tickets = 0;
 			var pre = '';
 			ui[prefix + '_table'].empty ();
@@ -906,10 +907,10 @@
 				case 'exit':
 				case 'lost':
 					tickets ++;
-					total += rec.amount;
+					charged += rec.amount;
 					break;
 				case 'shift_begin':
-					total += rec.amount;
+					deposit += rec.amount;
 					ui.tickets[prefix + '_begin_time'].text (rec.timestamp.toLocaleString ());
 					break;
 				case 'shift_end':
@@ -928,18 +929,18 @@
 				}
 			}
 
+			ui[prefix + '_table'].append ($('<tr><th>Tarifas:</th><td colspan="3"></td></tr>'));
 			for (var rate of rate_data) {
 				pre += '<div class="desc">Tarifa: ' + rate.label_client + '</div>\n' +
 					'<div class="sum">' + rate.count + ': $' + APP.Util.asMoney (rate.amount) + '</div>\n';
-				ui[prefix + '_table'].append ($('<tr><th>Tarifas</th><td colspan="3"></td></tr>' + 
-												'<tr>' +
-												'<td>' + rate.count + '</td>' +
-												'<th>' + rate.label + '</th>' +
+				ui[prefix + '_table'].append ($('<tr>' +
+												'<td style="text-align: right">' + rate.count + '</td>' +
+												'<th>' + rate.label + ':</th>' +
 												'<td><s/></td><td class="money">' + APP.Util.asMoney (rate.amount) + '</td>' +
 												'</tr>'));
 			}
 
-			var received = total + change;
+			var received = charged + depost + change;
 
 			received = APP.Util.asMoney (received);
 			pre += '<div class="sum">Recibido: $' + received + '</div><br />\n';
@@ -949,9 +950,9 @@
 			pre += '<div class="sum">Devuelto: $' + change + '</div><br />\n';
 			ui[prefix + '_change'].text (change);
 
-			total = APP.Util.asMoney (total);
-			pre += '<br /><div class="sum">Cobrado: $' + total + '</div>\n';
-			ui[prefix + '_total'].text (total);
+			charged = APP.Util.asMoney (charged);
+			pre += '<br /><div class="sum">Cobrado: $' + charged + '</div>\n';
+			ui[prefix + '_charged'].text (charged);
 
 			pre += '<div class="sum">Boletos cobrados: ' + tickets + '</div>';
 			ui[prefix + '_tickets'].text (tickets);

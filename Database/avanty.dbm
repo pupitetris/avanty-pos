@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,0" last-zoom="0.95"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="411,585" last-zoom="0.95"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -11,6 +11,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
       password="123">
 	<comment><![CDATA[Low-security user for operation of the avanty system.]]></comment>
 	<appended-sql><![CDATA[ALTER USER avanty SET search_path TO av,public;]]></appended-sql>
+	<prepended-sql><![CDATA[DROP ROLE IF EXISTS avanty;]]></prepended-sql>
 </role>
 
 <database name="avanty" encoding="UTF8" template="template0" append-at-eod="true">
@@ -792,34 +793,35 @@ GRANT USAGE ON SEQUENCE av.ticket_ticket_id_seq TO avanty;
 	<role name="postgres"/>
 	<comment><![CDATA[who is logged in in what terminal]]></comment>
 	<position x="1080" y="1120"/>
+	<column name="shift_id" not-null="true">
+		<type name="serial" length="0"/>
+	</column>
 	<column name="last_event" not-null="true">
 		<type name="av.ts" length="0"/>
 		<comment><![CDATA[TS of last interactive event, to avoid insertion of events (tickets, movements) with arbitrary dates]]></comment>
 	</column>
+	<column name="shift_start" not-null="true">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[Timestamp when the shift begun.]]></comment>
+	</column>
+	<column name="shift_end">
+		<type name="av.ts" length="0"/>
+		<comment><![CDATA[Optional timestamp of when the shift ended, NULL if not closed yet.]]></comment>
+	</column>
+	<constraint name="cashier_shift_pk" type="pk-constr" table="av.cashier_shift">
+		<columns names="shift_id" ref-type="src-columns"/>
+	</constraint>
 
 	<customidxs object-type="column">
-		<object name="terminal_id" index="0"/>
-		<object name="user_id" index="1"/>
+		<object name="terminal_id" index="1"/>
+		<object name="user_id" index="2"/>
 	</customidxs>
 
 	<customidxs object-type="constraint">
-		<object name="cashier_shift_pk" index="0"/>
-		<object name="cashier_shift_uq" index="3"/>
-		<object name="terminal_fk" index="1"/>
-		<object name="user_cashier_fk" index="2"/>
+		<object name="terminal_fk" index="2"/>
+		<object name="user_cashier_fk" index="1"/>
 	</customidxs>
 </table>
-
-<relationship name="terminal_account_has_one_terminal" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#aa0000"
-	 src-table="av.terminal"
-	 dst-table="av.cashier_shift"
-	 src-required="true" dst-required="false"
-	 identifier="true"
-/>
 
 <table name="request">
 	<schema name="av"/>
@@ -2086,7 +2088,7 @@ END;]]></definition>
 	FROM terminal 
 		NATURAL LEFT JOIN cashier_shift
 		NATURAL LEFT JOIN account
-	WHERE ip_addr = _remote_addr;]]></definition>
+	WHERE ip_addr = _remote_addr AND shift_end IS NULL;]]></definition>
 </function>
 
 <index name="ticket_uq" table="av.ticket"
@@ -2103,15 +2105,6 @@ END;]]></definition>
 			<column name="type"/>
 		</idxelement>
 </index>
-
-<relationship name="cashier_shift_has_one_user_cashier" type="rel11"
-	 src-col-pattern="{sc}"
-	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
-	 src-fk-pattern="{st}_fk"
-	 custom-color="#83af1f"
-	 src-table="av.user_cashier"
-	 dst-table="av.cashier_shift"
-	 src-required="true" dst-required="false"/>
 
 <function name="log_out"
 		window-func="false"
@@ -2310,10 +2303,11 @@ BEGIN
 	PERFORM user_cashier_assert(_uid);
 	_terminal_id := terminal_validate(_remote_addr);
 
-	PERFORM 1 FROM cashier_shift WHERE terminal_id = _terminal_id OR user_id = _uid;
+	PERFORM 1 FROM cashier_shift 
+		WHERE shift_end IS NULL AND (terminal_id = _terminal_id OR user_id = _uid);
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
-	INSERT INTO cashier_shift VALUES (_terminal_id, _uid, CURRENT_TIMESTAMP);
+	INSERT INTO cashier_shift VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL);
 	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_begin', NULL);
 
 	INSERT INTO ticket VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, 'deposit', NULL)
@@ -2346,15 +2340,6 @@ END;]]></definition>
 	IF NOT FOUND THEN PERFORM charp_raise('USERPERM'); END IF;
 END;]]></definition>
 </function>
-
-<index name="cashier_shift_user_uq" table="av.cashier_shift"
-	 concurrent="false" unique="true" fast-update="false" buffering="false"
-	 index-type="btree" factor="0">
-	<comment><![CDATA[A cashier can only have one shift begun at a given time.]]></comment>
-		<idxelement use-sorting="false">
-			<column name="user_id"/>
-		</idxelement>
-</index>
 
 <function name="cashier_park_charge"
 		window-func="false"
@@ -2469,7 +2454,7 @@ END;]]></definition>
 BEGIN
 	SELECT terminal_id INTO _terminal_id 
 		FROM cashier_shift NATURAL JOIN terminal
-		WHERE ip_addr = _remote_addr AND user_id = _user_id;
+		WHERE ip_addr = _remote_addr AND user_id = _user_id AND shift_end IS NULL;
 
 	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
 
@@ -2502,10 +2487,10 @@ END;]]></definition>
 	_last_event av.ts;
 BEGIN
 	SELECT last_event INTO _last_event FROM cashier_shift
-		WHERE terminal_id = _terminal_id AND user_id = _user_id;
+		WHERE terminal_id = _terminal_id AND user_id = _user_id AND shift_end IS NULL;
 
 	UPDATE cashier_shift SET last_event = CURRENT_TIMESTAMP 
-		WHERE terminal_id = _terminal_id AND user_id = _user_id;
+		WHERE terminal_id = _terminal_id AND user_id = _user_id AND shift_end IS NULL;
 
 	RETURN _last_event;
 END;]]></definition>
@@ -2582,6 +2567,9 @@ END;]]></definition>
 	<parameter name="concept">
 		<type name="varchar" length="0"/>
 	</parameter>
+	<parameter name="rate">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="amount">
 		<type name="integer" length="0"/>
 	</parameter>
@@ -2614,14 +2602,17 @@ BEGIN
 
 	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_end', NULL);
 
-	DELETE FROM cashier_shift WHERE terminal_id = _terminal_id AND user_id = _uid;
+	UPDATE cashier_shift SET shift_end = CURRENT_TIMESTAMP 
+		WHERE terminal_id = _terminal_id AND user_id = _uid AND shift_end IS NULL;
+
+	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT * FROM av.cashier_shift_report(_uid, _start);
+		SELECT * FROM av.cashier_shift_report(_uid, _start, NULL);
 
 	-- Provide the shift number by countingh the number of shifts for the user.
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT 'shift_end'::varchar, NULL, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
@@ -2834,6 +2825,9 @@ END;]]></definition>
 	<parameter name="concept">
 		<type name="varchar" length="0"/>
 	</parameter>
+	<parameter name="rate">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="amount">
 		<type name="integer" length="0"/>
 	</parameter>
@@ -2848,19 +2842,22 @@ END;]]></definition>
 		<type name="smallint" length="0"/>
 	</parameter>
 	<parameter name="_start">
-		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+		<type name="av.ts" length="0" with-timezone="true"/>
 	</parameter>
-	<definition><![CDATA[DECLARE
-	_end timestamp with time zone;
-BEGIN
-	SELECT ua.timestamp INTO _end FROM user_activity AS ua
-		WHERE user_id = _user_id AND type = 'shift_end' AND ua.timestamp > _start
-		ORDER BY timestamp LIMIT 1;
+	<parameter name="_end">
+		<type name="av.ts" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	IF _end IS NULL THEN
+		SELECT ua.timestamp INTO _end FROM user_activity AS ua
+			WHERE user_id = _user_id AND type = 'shift_end' AND ua.timestamp > _start
+			ORDER BY timestamp LIMIT 1;
 
-	IF NOT FOUND THEN _end = CURRENT_TIMESTAMP; END IF;
+		IF NOT FOUND THEN _end = CURRENT_TIMESTAMP; END IF;
+	END IF;
 
 	RETURN QUERY
-		SELECT 'shift_begin'::varchar, movement.amount, 0, _start 
+		SELECT 'shift_begin'::varchar, NULL, movement.amount, 0, _start 
 			FROM user_activity AS ua 
 				JOIN ticket USING(user_id, timestamp)
 				JOIN movement USING (ticket_id)
@@ -2868,9 +2865,12 @@ BEGIN
 				AND ua.type = 'shift_begin' AND ua.timestamp = _start;
 
 	RETURN QUERY
-		SELECT t.type::varchar, m.amount, m.change, m.timestamp::timestamp with time zone
-			FROM ticket AS t JOIN movement AS m USING (ticket_id)
-			WHERE t.user_id = _user_id AND _start < m.timestamp AND m.timestamp <= _end
+		SELECT t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamp with time zone
+			FROM ticket AS t 
+				JOIN movement AS m USING (ticket_id)
+				LEFT JOIN rate AS r USING (rate_id)
+			WHERE t.user_id = _user_id 
+				AND _start < m.timestamp AND m.timestamp <= _end
 			ORDER BY m.timestamp;
 END;]]></definition>
 </function>
@@ -2889,6 +2889,9 @@ END;]]></definition>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="rate">
 		<type name="varchar" length="0"/>
 	</parameter>
 	<parameter name="amount">
@@ -2914,12 +2917,90 @@ BEGIN
 	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT * FROM av.cashier_shift_report (_uid, _start);
+		SELECT * FROM av.cashier_shift_report (_uid, _start, NULL);
 
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT 'shift_end'::varchar, NULL, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
+</function>
+
+<index name="cashier_shift_start_end_idx" table="av.cashier_shift"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="true" nulls-first="false" asc-order="false">
+			<column name="shift_start"/>
+		</idxelement>
+		<idxelement use-sorting="true" nulls-first="true" asc-order="false">
+			<column name="shift_end"/>
+		</idxelement>
+</index>
+
+<index name="cashier_shift_end_idx" table="av.cashier_shift"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="true" nulls-first="true" asc-order="false">
+			<column name="shift_end"/>
+		</idxelement>
+</index>
+
+<relationship name="user_cashier_has_many_cashier_shift" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#83af1f"
+	 src-table="av.user_cashier"
+	 dst-table="av.cashier_shift"
+	 src-required="true" dst-required="false"/>
+
+<relationship name="terminal_has_many_cashier_shift" type="rel1n"
+	 src-col-pattern="{sc}"
+	 pk-pattern="{dt}_pk" uq-pattern="{dt}_uq"
+	 src-fk-pattern="{st}_fk"
+	 custom-color="#aa0000"
+	 src-table="av.terminal"
+	 dst-table="av.cashier_shift"
+	 src-required="true" dst-required="false"/>
+
+<index name="cashier_shift_end_unique_null" table="av.cashier_shift"
+	 concurrent="false" unique="true" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+	<comment><![CDATA[An user can only have one acitve (NULL end) shift.]]></comment>
+		<idxelement use-sorting="false">
+			<column name="user_id"/>
+		</idxelement>
+	<predicate><![CDATA[shift_end IS NULL]]></predicate>
+</index>
+
+<function name="anon_rates_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get user-visible (not fragments nor system), active rates ]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="type">
+		<type name="av.rate_type" length="0"/>
+	</parameter>
+	<parameter name="label">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="label_client">
+		<type name="varchar" length="0"/>
+	</parameter>
+	</return-type>
+	<definition><![CDATA[SELECT r.name, r.type, r.label, r.label_client FROM av.rate AS r 
+	WHERE r.type <> 'system' AND r.type <> 'fragment' AND r.is_active
+	ORDER BY r.position;]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

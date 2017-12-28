@@ -145,6 +145,7 @@
 		ui.tickets.exit.find ('.closing').text (APP.config.ticket_closing);
 
 		ui.tickets.shift_end = $('#cash-ticket-shift-end');
+		ui.tickets.shift_end_shift_id = ui.tickets.shift_end.find ('.shift_id');
 		ui.tickets.shift_end_begin_time = ui.tickets.shift_end.find ('time:eq(0)');
 		ui.tickets.shift_end_time = ui.tickets.shift_end.find ('time:eq(1)');
 		ui.tickets.shift_end_num = ui.tickets.shift_end.find ('.num');
@@ -154,6 +155,7 @@
 		ui.tickets.shift_end.find ('h1').text (APP.config.establishment);
 
 		ui.tickets.shift_report = $('#cash-ticket-shift-report');
+		ui.tickets.shift_report_shift_id = ui.tickets.shift_report.find ('.shift_id');
 		ui.tickets.shift_report_begin_time = ui.tickets.shift_report.find ('time:eq(0)');
 		ui.tickets.shift_report_time = ui.tickets.shift_report.find ('time:eq(1)');
 		ui.tickets.shift_report_num = ui.tickets.shift_report.find ('.num');
@@ -208,6 +210,7 @@
 		ui.section_shift_report = $('#cash-shift-report');
 		ui.section_shift_report.find ('button').button ();
 		ui.shift_report_table = ui.section_shift_report.find ('tbody');
+		ui.shift_report_shift_id = ui.section_shift_report.find ('.shift_id');
 		ui.shift_report_charged = ui.section_shift_report.find ('.charged');
 		ui.shift_report_received = ui.section_shift_report.find ('.received');
 		ui.shift_report_change = ui.section_shift_report.find ('.change');
@@ -239,6 +242,7 @@
 		ui.section_shift_end = $('#cash-shift-end');
 		ui.section_shift_end.find ('button').button ();
 		ui.shift_end_table = ui.section_shift_end.find ('tbody');
+		ui.shift_end_shift_id = ui.section_shift_end.find ('.shift_id');
 		ui.shift_end_charged = ui.section_shift_end.find ('.charged');
 		ui.shift_end_received = ui.section_shift_end.find ('.received');
 		ui.shift_end_change = ui.section_shift_end.find ('.change');

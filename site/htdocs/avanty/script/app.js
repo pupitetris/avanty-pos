@@ -1051,7 +1051,7 @@
 					client: {
 //						type		: 'DUMMY',
 						type		: 'EPSON',
-						port		: '/dev/ttyS0',
+						port		: '/dev/ttyS2',
 						width		: 20,
 						height		: 2,
 						encoding	: 'cp437',

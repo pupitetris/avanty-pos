@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="300,1019" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="738,758" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2076,9 +2076,10 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[SELECT terminal_id, term_type, name, qz_private_key, qz_certificate, login
 	FROM terminal 
-		NATURAL LEFT JOIN cashier_shift
+		NATURAL LEFT JOIN 
+			(SELECT * FROM cashier_shift WHERE shift_end IS NULL) AS q
 		NATURAL LEFT JOIN account
-	WHERE ip_addr = _remote_addr AND shift_end IS NULL;]]></definition>
+	WHERE ip_addr = _remote_addr;]]></definition>
 </function>
 
 <function name="log_out"
@@ -2566,9 +2567,6 @@ END;]]></definition>
 	<parameter name="timestamp">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
-	<parameter name="user">
-		<type name="varchar" length="0"/>
-	</parameter>
 	</return-type>
 	<parameter name="_uid">
 		<type name="av.uid" length="0"/>
@@ -2599,9 +2597,10 @@ BEGIN
 	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT * FROM av.cashier_shift_report(_uid, _start, NULL);
+		SELECT r.concept, r.rate, r.amount, r.change, r.timestamp
+			FROM av.cashier_shift_report (_uid, _start, NULL) AS r;
 
-	-- Provide the shift number by countingh the number of shifts for the user.
+	-- Provide the shift number by counting the number of shifts for the user.
 	RETURN QUERY
 		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
@@ -2855,29 +2854,29 @@ END;]]></definition>
 	IF _end IS NULL THEN
 		SELECT ua.timestamp INTO _end FROM user_activity AS ua
 			WHERE type = 'shift_end' AND ua.timestamp > _start
-				AND (_user_id IS NULL OR user_id = _user_id)
+				AND (_user_id IS NULL OR ua.user_id = _user_id)
 			ORDER BY timestamp LIMIT 1;
 
 		IF NOT FOUND THEN _end = CURRENT_TIMESTAMP; END IF;
 	END IF;
 
 	RETURN QUERY
-		SELECT 'shift_begin'::varchar, NULL::varchar, movement.amount, 0, _start::timestamptz, user_id, shift_id
+		SELECT ua.type::varchar, NULL::varchar, movement.amount, s.shift_id, _start::timestamptz, s.user_id, s.shift_id
 			FROM user_activity AS ua 
-				NATURAL JOIN cashier_shift
-				JOIN ticket USING (shift_id)
+				NATURAL JOIN cashier_shift AS s
+				JOIN ticket USING (shift_id, timestamp)
 				JOIN movement USING (ticket_id)
 			WHERE ua.type = 'shift_begin' AND ua.timestamp >= _start
-				AND (_user_id IS NULL OR user_id = _user_id);
+				AND (_user_id IS NULL OR s.user_id = _user_id);
 
 	RETURN QUERY
-		SELECT t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz, user_id, shift_id
+		SELECT t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz, s.user_id, s.shift_id
 			FROM ticket AS t 
-				NATURAL JOIN cashier_shift
-				JOIN movement AS m USING (ticket_id)
+				NATURAL JOIN cashier_shift AS s
+				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)
-			WHERE _start < m.timestamp AND m.timestamp <= _end
-				AND (_user_id IS NULL OR user_id = _user_id);
+			WHERE (m.timestamp IS NULL OR (_start < m.timestamp AND m.timestamp <= _end))
+				AND (_user_id IS NULL OR s.user_id = _user_id);
 END;]]></definition>
 </function>
 
@@ -2923,8 +2922,8 @@ BEGIN
 	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT concept, rate, amount, change, timestamp
-			FROM av.cashier_shift_report (_uid, _start, NULL);
+		SELECT r.concept, r.rate, r.amount, r.change, r.timestamp
+			FROM av.cashier_shift_report (_uid, _start, NULL) AS r;
 
 	RETURN QUERY
 		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP

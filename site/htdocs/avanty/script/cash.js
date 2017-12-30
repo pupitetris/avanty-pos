@@ -572,30 +572,32 @@
 		}
 	}
 
-	var cash_charge_date;
-	var cash_entry_terminal;
-	var cash_entry_date;
-	var cash_rate_name;
-	var cash_rate_label;
-	var cash_charge_function;
+	var cash_charge_state = [];
+	function cash_charge_state_get (key) {
+		return cash_charge_state[cash_charge_state.length - 1][key];
+	}
 
 	function cash_park_exit_charge (rate_name, rate_label) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
-		cash_entry_date = barcode_fields.entryDate;
-		cash_entry_terminal = barcode_fields.terminalId;
-		cash_charge_date = new Date ();
-		cash_rate_name = rate_name;
-		cash_rate_label = rate_label;
-		cash_charge_function = cash_park_exit_charge;
+		var entry_date = barcode_fields.entryDate;
+		var charge_date = new Date ();
+		cash_charge_state.push ({
+			entry_date: entry_date,
+			entry_terminal: barcode_fields.terminalId,
+			charge_date: charge_date,
+			rate_name: rate_name,
+			rate_label: rate_label,
+			charge_function: cash_park_exit_charge
+		});
 
-		var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
+		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (entry_date);
 
 		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
-		ui.park_exit_charge_date.text (cash_charge_date.toLocaleString ());
+		ui.park_exit_charge_date.text (charge_date.toLocaleString ());
 
 		ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
-		ui.tickets.exit_charge_time.text (cash_charge_date.toLocaleString ());
+		ui.tickets.exit_charge_time.text (charge_date.toLocaleString ());
 
 		var duration = delta_secs;
 		var segs = duration % 60;
@@ -670,7 +672,7 @@
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 7) + '</div>';
 		ui[prefix + '_charge_total'].text (total);
 		APP.mod.devices.display ('client',
-								 'Tarifa: ' + cash_rate_label + '\n' +
+								 'Tarifa: ' + cash_charge_state_get ('rate_label') + '\n' +
 								 ' Total: $' + total);
 
 		ui.tickets.exit_items.html (pre);
@@ -751,8 +753,11 @@
 		}
 
 		APP.charp.request ('cashier_park_charge',
-						   [ cash_entry_terminal, cash_entry_date, cash_charge_date,
-							 ticket_type, cash_rate_name, 'tender', amount, change, null ],
+						   [ cash_charge_state_get ('entry_terminal'),
+							 cash_charge_state_get ('entry_date'),
+							 cash_charge_state_get ('charge_date'),
+							 ticket_type, cash_charge_state_get ('rate_name'),
+							 'tender', amount, change, null ],
 						   {
 							   success: success,
 							   error: function (err) { cash_park_charge_error (err, ui_submit, ui_received); }
@@ -771,8 +776,8 @@
 				opts: { width: '60%' }
 			});
 
-			// This is a global variable, set alongside with cash_charge_date et al globals.
-			cash_charge_function ();
+			var state = cash_charge_state.pop ();
+			state.charge_function (state.rate_name, state.rate_label);
 			return false;
 		}
 
@@ -780,6 +785,7 @@
 	}
 
 	function cash_park_charge_success (process, prefix) {
+		cash_charge_state.pop ();
 		ui[prefix + '_charge_print'].button ('enable');
 		ui[prefix + '_charge_close'].button ('enable');
 		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, process); });
@@ -825,29 +831,33 @@
 				return;
 			}
 
-			cash_entry_date = ui.park_lost_date.datepicker ('getDate');
-			cash_charge_date = new Date ();
-			cash_entry_terminal = APP.terminal.id;
-			cash_rate_name = rate.name;
-			cash_rate_label = rate.label_client;
-			cash_charge_function = cash_park_lost_charge;
+			var entry_date = ui.park_lost_date.datepicker ('getDate');
+			var charge_date = new Date ();
+			cash_charge_state.push ({
+				entry_date: entry_date,
+				entry_terminal: APP.terminal.id,
+				charge_date: charge_date,
+				rate_name: rate.name,
+				rate_label: rate.label_client,
+				charge_function: cash_park_lost_charge
+			});
 
 			var cons = {
-				fecha_ingreso: APP.Util.getTimeSecs (cash_entry_date),
+				fecha_ingreso: APP.Util.getTimeSecs (entry_date),
 				ahora: APP.Util.getTimeSecs ()
 			};
 
 			forth.setConstants (cons, cash_forth_error);
-			forth.load (cash_rate_name,
+			forth.load (rate.name,
 						function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
 						cash_forth_error);
 
 			// The entry date comes from the date picker without HMS, so we set those of the
 			// charge date so that it is unique when it goes into the database. Otherwise, you
 			// would only be able to charge one lost ticket per day.
-			cash_entry_date.setHours (cash_charge_date.getHours ());
-			cash_entry_date.setMinutes (cash_charge_date.getMinutes ());
-			cash_entry_date.setSeconds (cash_charge_date.getSeconds ());
+			entry_date.setHours (charge_date.getHours ());
+			entry_date.setMinutes (charge_date.getMinutes ());
+			entry_date.setSeconds (charge_date.getSeconds ());
 		}
 
 		APP.charp.request ('cashier_park_get_rates', ['lost'],

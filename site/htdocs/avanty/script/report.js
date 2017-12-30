@@ -68,7 +68,7 @@
 			APP.fetch ('rates_get', 'REPORT', [], true, function (rate_data) {
 				var rates = {};
 				for (var rate of rate_data) {
-					rates[rate[name]] = rate;
+					rates[rate.name] = rate;
 					rate.count = 0;
 					rate.amount = 0;
 				}
@@ -90,7 +90,7 @@
 				ui[prefix + '_table'].empty ();
 				for (var rec of records) {
 					if (rec.rate) {
-						var rate = rates[rec.rate.name];
+						var rate = rates[rec.rate];
 						rate.count ++;
 						rate.amount += rec.amount;
 					}
@@ -98,7 +98,7 @@
 					switch (rec.concept) {
 					case 'entry':
 						printed_tickets ++;
-						if (!rec.amount)
+						if (!rec.rate)
 							break;
 					case 'exit':
 					case 'lost':
@@ -163,6 +163,7 @@
 				}
 
 				var received = charged + deposit + change;
+				var balance = received - change;
 
 				received = APP.Util.asMoney (received);
 				pre += '<br /><div class="sum">Recibido: $' + received + '</div><br />\n';
@@ -173,8 +174,12 @@
 				ui[prefix + '_change'].text (change);
 
 				charged = APP.Util.asMoney (charged);
-				pre += '<div class="sum">Cobrado: $' + charged + '</div>\n';
+				pre += '<div class="sum">Cobrado: $' + charged + '</div><br />\n';
 				ui[prefix + '_charged'].text (charged);
+
+				balance = APP.Util.asMoney (balance);
+				pre += '<div class="sum">Balance: $' + balance + '</div>\n';
+				ui[prefix + '_balance'].text (balance);
 
 				pre += '<div class="sum">Boletos cobrados: ' + charged_tickets + '</div>';
 				ui[prefix + '_charged_tickets'].text (charged_tickets);

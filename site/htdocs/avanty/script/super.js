@@ -64,7 +64,7 @@
 		shell.ui.user_create.on ('click', super_create_user);
 
 		shell.ui.report_summary = $('#super-tab-report-summary');
-		shell.ui.report_summary.on ('click', super_report_summary);
+		shell.ui.report_summary.on ('click', super_report_summary_filter);
 
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });
 		newuser_layout_init ('newuser', {
@@ -104,6 +104,94 @@
 		ui.section_report = $('#super-report');
 		ui.section_report.find ('button').button ();
 		ui.report = {};
+
+		ui.report.summary_filter_section = $('#super-report-summary-filter');
+		ui.report.summary_filter_section.find ('form');
+		ui.report.summary_filter_section.find ('button').button ();
+		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
+		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
+		ui.report.summary_filter_start_h = ui.report.summary_filter_section.find ('select[name="start_h"]');
+		ui.report.summary_filter_start_m = ui.report.summary_filter_section.find ('select[name="start_m"]');
+		ui.report.summary_filter_start_ampm = ui.report.summary_filter_section.find ('select[name="start_ampm"]');
+		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
+		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
+		ui.report.summary_filter_end_h = ui.report.summary_filter_section.find ('select[name="end_h"]');
+		ui.report.summary_filter_end_m = ui.report.summary_filter_section.find ('select[name="end_m"]');
+		ui.report.summary_filter_end_ampm = ui.report.summary_filter_section.find ('select[name="end_ampm"]');
+		ui.report.summary_filter_users = $('#super-report-summary-users');
+		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
+
+		function cal_toggle (cal1, cal2) {
+			if (cal1.is (':hidden')) {
+				cal1.show ('drop', { direction: 'up' }, 200);
+				cal2.hide ();
+			} else {
+				cal1.hide ('drop', { direction: 'up' }, 200);
+			}
+		}
+
+		ui.report.summary_filter_start_d.on ('click', function () {
+			cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
+		})
+		ui.report.summary_filter_end_d.on ('click', function () {
+			cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
+		})
+
+		var calopts = {
+			maxDate: 0,
+			firstDay: APP.config.weekFirstDay,
+			changeMonth: true,
+			changeYear: true,
+			dateFormat: 'yy/mm/dd'
+		};
+
+		function cal_selected (date, inst, button) {
+			button.find ('span').text (date);
+			inst.dpDiv.fadeOut ();
+		}
+
+		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({
+			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_start_d); }
+		}, calopts));
+		ui.report.summary_filter_end_d_cal.datepicker ($.extend ({
+			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_end_d); }
+		}, calopts));
+
+		for (var i = 1; i <= 12; i++) {
+			var num = APP.Util.padZeroes (i, 2);
+			ui.report.summary_filter_start_h.append ($('<option value="' + i + '">' + num + '</option>'));
+			ui.report.summary_filter_end_h.append ($('<option value="' + i + '">' + num + '</option>'));
+		}
+
+		for (var i = 0; i < 60; i += 5) {
+			var num = APP.Util.padZeroes (i, 2);
+			ui.report.summary_filter_start_m.append ($('<option value="' + i + '">' + num + '</option>'));
+			ui.report.summary_filter_end_m.append ($('<option value="' + i + '">' + num + '</option>'));
+		}
+
+		function multi_select_mousedown (e) {
+			e.preventDefault ();
+			var originalScrollTop = $(this).parent ().scrollTop ();
+			$(this).prop ('selected', $(this).prop ('selected') ? false : true);
+			var self = this;
+			$(this).parent ().focus ();
+			window.setTimeout (function () {
+				$(self).parent ().scrollTop (originalScrollTop);
+			}, 0);
+			
+			return false;
+		}
+
+		ui.report.summary_filter_users.find ('option').on ('mousedown', multi_select_mousedown);
+		ui.report.summary_filter_shifts.find ('option').on ('mousedown', multi_select_mousedown);
+
+		ui.report.summary_filter_start_h.selectmenu ();
+		ui.report.summary_filter_start_m.selectmenu ();
+		ui.report.summary_filter_start_ampm.selectmenu ();
+		ui.report.summary_filter_end_h.selectmenu ();
+		ui.report.summary_filter_end_m.selectmenu ();
+		ui.report.summary_filter_end_ampm.selectmenu ();
+
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary_table = ui.report.summary.find ('tbody');
 		ui.report.summary_charged = ui.report.summary.find ('.charged');
@@ -166,7 +254,7 @@
 		} else {
 			APP.history.go (MOD_NAME, ui.section_super_chpass, 'super-chpass-user');
 			shell.navShow ();
-			shell.show (true);
+			shell.show ();
 		}
 
 		ui.super_chpass_form.validate ().resetForm ();
@@ -236,8 +324,10 @@
 		if (mod.chpass) {
 			mod.chpass = false;
 			APP.loadModule ('login');
-		} else
-			shell.backGo ();
+		} else {
+			APP.history.back ('super-chpass-user', false);
+			shell.navShow ();
+		}
 
 		ui.super_chpass_submit.button ('enable');
 		ui.super_chpass_cancel.button ('enable');
@@ -249,7 +339,7 @@
 		if (super_is_first)
 			shell.show (false);
 		else
-			shell.show (true);
+			shell.show ();
 
 		ui.newsuper_form.validate ().resetForm ();
 		ui.newsuper_login.val ('');
@@ -361,7 +451,7 @@
 	}
 
 	function super_main () {
-		shell.show (true);
+		shell.show ();
 		shell.navShow ();
 		shell.setStatus (APP.config.establishment +
 						 ' Versión: ' + APP.config.version +
@@ -372,10 +462,15 @@
 		APP.switchSection (ui.section_main);
 	}
 
+	function super_report_summary_filter () {
+		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-summary');
+		shell.navShow ();
+		shell.menuCollapse ();
+	}
+
 	function super_report_summary () {
 		APP.history.go (MOD_NAME, ui.section_report, 'super-report-summary');
 		shell.navShow ();
-		shell.menuCollapse ();
 
 		if (super_report_records) {
 			super_report_summary_do (super_report_records);

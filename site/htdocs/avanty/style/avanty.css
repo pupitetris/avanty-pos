@@ -389,3 +389,16 @@ form s:before {
 	padding-right: 0.5em;
 }
 
+.button-bar-h {
+	margin-top: 1em;
+	display: flex;
+	flex-direction: row;
+	justify-content: space-between;
+}
+
+.button-bar-h button {
+}
+
+.button-bar-h button:first-child {
+	margin-left: 0;
+}

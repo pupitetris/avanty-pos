@@ -182,6 +182,7 @@ sub error_send {
 
 	my %err = %{$CHARP::ERRORS{$err_key}};
 	if (defined $parms) {
+		$err{'parms'} = $parms;
 		$err{'desc'} = sprintf ($err{'desc'}, @$parms);
 	}
 	if (defined $msg) {

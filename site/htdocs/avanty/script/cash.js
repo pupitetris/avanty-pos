@@ -525,7 +525,12 @@
 					desc: 'El ticket que presentó ya fue cobrado con anterioridad.',
 					sev: CHARP.ERROR_SEV['USER'],
 					title: 'Ticket ya procesado',
-					opts: { width: '75%' }
+					opts: {
+						width: '75%',
+						buttons: {
+							'Cerrar': cash_park_exit_cancel
+						}
+					}
 				});
 				return;
 			}
@@ -868,6 +873,9 @@
 				rate_label: rate.label_client,
 				charge_function: cash_park_lost_charge
 			});
+
+			ui.tickets.exit_entry_time.text (entry_date.toLocaleDateString ());
+			ui.tickets.exit_charge_time.text (charge_date.toLocaleString ());
 
 			var cons = {
 				fecha_ingreso: APP.Util.getTimeSecs (entry_date),

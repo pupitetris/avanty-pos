@@ -163,9 +163,9 @@
 			},
 
 			show: function (show) {
-				if (show) {
+				if (show === undefined || show) {
 					this.ui.sections_parent.addClass ('with-shell');
-					this.ui.shell.show ();
+					this.ui.shell.show ('drop', { direction: 'up' }, 200);
 				} else {
 					this.ui.sections_parent.removeClass ('with-shell');
 					this.ui.shell.hide ();

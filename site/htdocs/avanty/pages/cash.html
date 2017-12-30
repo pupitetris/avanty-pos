@@ -120,7 +120,7 @@
 		  <td colspan="2" class="charged-tickets"></td>
 		</tr>
 		<tr>
-		  <th colspan="2">Boletos emitidos:</th>
+		  <th colspan="2">Boletos emitidos por TPV:</th>
 		  <td colspan="2" class="printed-tickets"></td>
 		</tr>
 	  </tfoot>
@@ -173,7 +173,7 @@
 		  <td colspan="2" class="charged-tickets"></td>
 		</tr>
 		<tr>
-		  <th colspan="2">Boletos emitidos:</th>
+		  <th colspan="2">Boletos emitidos por TPV:</th>
 		  <td colspan="2" class="printed-tickets"></td>
 		</tr>
 	  </tfoot>
@@ -233,8 +233,8 @@
 		  <tr>
 			<td colspan="6">
 			  <button class="button-icon" type="submit"><img src="img/symbolic/yes.svg" />Abrir caja</button>
-			  <button id="cash-park-exit-charge-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
-			  <button id="cash-park-exit-charge-close" class="button-icon"><img src="img/symbolic/close.svg" />Cerrar</button>
+			  <button id="cash-park-exit-charge-print" class="button-icon" type="button"><img src="img/symbolic/print.svg" />Imprimir</button>
+			  <button id="cash-park-exit-charge-close" class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>
 			</td>
 		  </tr>
 		</tfoot>
@@ -258,8 +258,10 @@
 	<form>
 	  <h2>Boleto perdido: selecciona la fecha de ingreso.</h2>
 	  <div id="cash-park-lost-date"></div>
-	  <button class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>
-	  <button type="submit" class="button-icon"><img src="img/symbolic/yes.svg" />Continuar</button>
+	  <div class="button-bar-h" style="width: 50%">
+		<button class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>
+		<button class="button-icon-r" type="submit">Continuar<img src="img/symbolic/next.svg" /></button>
+	  </div>
 	</form>
   </div>
   <div class="section section-small cash-park-charge" id="cash-park-lost-charge">
@@ -288,8 +290,8 @@
 		  <tr>
 			<td colspan="6">
 			  <button class="button-icon" type="submit"><img src="img/symbolic/yes.svg" />Abrir caja</button>
-			  <button id="cash-park-lost-charge-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
-			  <button id="cash-park-lost-charge-close" class="button-icon"><img src="img/symbolic/close.svg" />Cerrar</button>
+			  <button id="cash-park-lost-charge-print" class="button-icon" type="button"><img src="img/symbolic/print.svg" />Imprimir</button>
+			  <button id="cash-park-lost-charge-close" class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>
 			</td>
 		  </tr>
 		</tfoot>

@@ -122,6 +122,7 @@
 
 		ui[prefix + '_charge_close'] = $('#cash-' + id + '-charge-close');
 		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close (process); });
+		ui[prefix + '_charge_close_html'] = ui[prefix + '_charge_close'].html ();
 
 		ui[prefix + '_charge_detail'] = section.find ('.detail');
 
@@ -303,6 +304,8 @@
 				firstDay: APP.config.weekFirstDay
 			});
 
+		ui.park_lost_cancel = ui.section_park_lost.find ('button[type="button"]');
+		ui.park_lost_cancel.on ('click', cash_park_lost_cancel);
 		ui.park_lost_submit = ui.section_park_lost.find ('button[type="submit"]');
 
 		park_charge_layout_init ('park_lost');
@@ -670,13 +673,12 @@
 
 		total = APP.Util.asMoney (total);
 		pre += '<div class="sum">Total = ' + APP.Util.padString (total, 7) + '</div>';
+		ui.tickets.exit_items.html (pre);
+
 		ui[prefix + '_charge_total'].text (total);
 		APP.mod.devices.display ('client',
 								 'Tarifa: ' + cash_charge_state_get ('rate_label') + '\n' +
 								 ' Total: $' + total);
-
-		ui.tickets.exit_items.html (pre);
-		APP.mod.devices.escposTicketLayout (ui.tickets.exit);
 
 		ui[prefix + '_charge_received'].val ('');
 		ui[prefix + '_charge_change'].text ('');
@@ -703,7 +705,7 @@
 		ui[prefix + '_charge_received'].input ('enable');
 		ui[prefix + '_charge_submit'].button ('enable');
 		ui[prefix + '_charge_print'].button ('disable');
-		ui[prefix + '_charge_close'].button ('disable');
+		ui[prefix + '_charge_close'].html (ui[prefix + '_charge_close_html']).addClass ('button-icon');
 
 		APP.later (function () {
 			if (ui['section_' + prefix + '_charge'].is (':hidden')) return true;
@@ -741,6 +743,14 @@
 
 		function success () {
 			var received_val = ui_received.val ();
+
+			var pre = ui.tickets.exit_items.html ();
+			pre += '<div class="sum">Recibido = ' + APP.Util.padString (received_val, 7) + '</div>';
+			pre += '<div class="sum">Cambio = ' + APP.Util.padString (change_val, 7) + '</div>';
+			ui.tickets.exit_items.html (pre);
+
+			APP.mod.devices.escposTicketLayout (ui.tickets.exit);
+
 			var width = (received_val.length > change_val.length)? received_val.length: change_val.length;
 			APP.mod.devices.openDrawer ('main', function () {
 				APP.mod.devices.display ('client',
@@ -787,7 +797,7 @@
 	function cash_park_charge_success (process, prefix) {
 		cash_charge_state.pop ();
 		ui[prefix + '_charge_print'].button ('enable');
-		ui[prefix + '_charge_close'].button ('enable');
+		ui[prefix + '_charge_close'].text ('Concluir').removeClass ('button-icon');
 		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, process); });
 	}
 
@@ -809,6 +819,11 @@
 	}
 
 	function cash_park_lost_reset () {
+	}
+
+	function cash_park_lost_cancel () {
+		APP.history.back ('cash-park-lost');
+		shell.navShow ();
 	}
 
 	function cash_park_lost_submit (evt) {

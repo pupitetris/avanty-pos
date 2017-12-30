@@ -63,13 +63,6 @@ input[name="shift-begin-amount"] {
 	height: 50vh;
 }
 
-#cash-park-lost {
-}
-
-#cash-park-lost button[type="submit"] {
-	margin-top: 1em;
-}
-
 .shift-report td:first-child {
 	padding-right: 1em;
 }

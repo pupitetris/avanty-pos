@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="737,757" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="737,1018" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2518,9 +2518,15 @@ BEGIN
 	SELECT terminal_id INTO _terminal_id
 		FROM cashier_shift_assert (_uid, _remote_addr);
 
-	PERFORM 1 FROM ticket AS t NATURAL JOIN cashier_shift JOIN movement USING (ticket_id)
-		WHERE terminal_id = _ticket_terminal_id
-			AND date_trunc ('second', t.timestamp) = _ticket_entry_ts;
+	PERFORM 1 FROM (
+		WITH t AS 
+			( SELECT ticket_id, detail FROM ticket
+				WHERE date_trunc ('second', timestamp) = _ticket_entry_ts )
+		SELECT 1 
+			FROM t NATURAL JOIN cashier_shift	JOIN movement USING (ticket_id)
+			WHERE _ticket_terminal_id = terminal_id
+				OR _ticket_terminal_id = (t.detail->>'terminal_id')::integer
+	) AS x;
 
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
@@ -3017,6 +3023,14 @@ END;]]></definition>
 	 src-table="av.cashier_shift"
 	 dst-table="av.ticket"
 	 src-required="true" dst-required="false"/>
+
+<index name="ticket_timestamp_idx" table="av.ticket"
+	 concurrent="false" unique="false" fast-update="false" buffering="false"
+	 index-type="btree" factor="0">
+		<idxelement use-sorting="false">
+			<column name="&quot;timestamp&quot;"/>
+		</idxelement>
+</index>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">

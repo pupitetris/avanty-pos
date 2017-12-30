@@ -55,8 +55,8 @@ CHARP.ERRORS = {
 	var timestamptz_re = new RegExp ('^([^+-]+)([+-]\\d+)');
 	function cast_timestamptz_surf (datum) {
 		var parts = datum.split (/ /);
-		var match = parts[3].match (timestamptz_re);
-		var msecs = new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + match[1]).getTime ();
+		var match = parts[1].match (timestamptz_re);
+		var msecs = new Date (parts[0] + 'T' + match[1]).getTime ();
 		// Surf parses these ISO dates as UTC, so we manually add the offset:
 		msecs -= parseInt (match[2]) * 1000 * 60 * 60;
 		return new Date (msecs);
@@ -136,7 +136,7 @@ CHARP.ERRORS = {
 									msg: '<><pre>' + err.ctx.reqData.res + ': ' + err.statestr + 
 									((err.state)? ' (' + err.state + ')' : '') + 
 									((err.msg)? '<br />' + err.msg : '') +
-									'</pre>',
+									'<br /><br /></pre>',
 									sev: err.sev,
 									title: 'Error ' + err.key + '(' + err.code + ')',
 									opts: {

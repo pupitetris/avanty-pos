@@ -477,12 +477,15 @@
 	}
 
 	function cash_park_exit () {
+		shell.ui.park_exit.button ('disable');
+		shell.ui.park_lost.button ('disable');
+
 		ui.park_exit_barcode.val ('');
 
 		APP.history.go (MOD_NAME, ui.section_park_exit, 'cash-park-exit');
 		shell.navShow ();
 		shell.menuCollapse ();
-		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); });
+		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); }, 'cash');
 	}
 
 	function cash_park_exit_reset () {
@@ -597,6 +600,26 @@
 		return cash_charge_state[cash_charge_state.length - 1][key];
 	}
 
+	function cash_calculate_duration (delta_secs) {
+		var duration = delta_secs;
+		var segs = duration % 60;
+		duration = (duration - segs) / 60;
+		var mins = duration % 60;
+		duration = (duration - mins) / 60;
+		var hrs = duration % 24;
+		duration = (duration - hrs) / 24;
+		var days = duration % 7;
+		var weeks = (duration - days) / 7;
+
+		var res =
+			((weeks > 0)? weeks + ' semana' + ((weeks == 1)? '': 's') + ' ': '') +
+			((days > 0)? days + ' día' + ((days == 1)? '': 's') + ' ': '') +
+			((hrs > 0)? hrs + ' hr. ': '') +
+			((mins > 0)? mins + ' min. ': '') +
+			((segs > 0)? segs + ' seg. ': '');
+		return res;
+	}
+
 	function cash_park_exit_charge (rate_name, rate_label) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
 
@@ -611,30 +634,14 @@
 			charge_function: cash_park_exit_charge
 		});
 
-		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (entry_date);
-
 		ui.park_exit_entry_date.text (barcode_fields.entryDate.toLocaleString ());
 		ui.park_exit_charge_date.text (charge_date.toLocaleString ());
 
 		ui.tickets.exit_entry_time.text (barcode_fields.entryDate.toLocaleString ());
 		ui.tickets.exit_charge_time.text (charge_date.toLocaleString ());
 
-		var duration = delta_secs;
-		var segs = duration % 60;
-		duration = (duration - segs) / 60;
-		var mins = duration % 60;
-		duration = (duration - mins) / 60;
-		var hrs = duration % 24;
-		duration = (duration - hrs) / 24;
-		var days = duration % 7;
-		var weeks = (duration - days) / 7;
-
-		duration =
-			((weeks > 0)? weeks + ' semana' + ((weeks == 1)? '': 's') + ' ': '') +
-			((days > 0)? days + ' día' + ((days == 1)? '': 's') + ' ': '') +
-			((hrs > 0)? hrs + ' hr. ': '') +
-			mins + ' mins. ' + segs + ' seg.';
-
+		var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (entry_date);
+		var duration = cash_calculate_duration (delta_secs);
 		ui.park_exit_duration.text (duration);
 		ui.tickets.exit_duration.text (duration);
 
@@ -815,7 +822,7 @@
 		cash_charge_state.pop ();
 		ui[prefix + '_charge_print'].button ('enable');
 		ui[prefix + '_charge_close'].text ('Concluir').removeClass ('button-icon');
-		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, process); });
+		APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, process); }, 'cash');
 	}
 
 	function cash_park_charge_print () {
@@ -830,12 +837,16 @@
 	}
 
 	function cash_park_lost () {
+		shell.ui.park_exit.button ('disable');
+		shell.ui.park_lost.button ('disable');
+
 		APP.history.go (MOD_NAME, ui.section_park_lost, 'cash-park-lost');
 		shell.navShow ();
 		shell.menuCollapse ();
 	}
 
 	function cash_park_lost_reset () {
+		ui.park_lost_date.datepicker ('setDate', new Date ());
 	}
 
 	function cash_park_lost_cancel () {
@@ -882,17 +893,22 @@
 				ahora: APP.Util.getTimeSecs ()
 			};
 
-			forth.setConstants (cons, cash_forth_error);
-			forth.load (rate.name,
-						function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
-						cash_forth_error);
-
 			// The entry date comes from the date picker without HMS, so we set those of the
 			// charge date so that it is unique when it goes into the database. Otherwise, you
 			// would only be able to charge one lost ticket per day.
 			entry_date.setHours (charge_date.getHours ());
 			entry_date.setMinutes (charge_date.getMinutes ());
 			entry_date.setSeconds (charge_date.getSeconds ());
+
+			var delta_secs = APP.Util.getTimeSecs (charge_date) - APP.Util.getTimeSecs (entry_date) + 24 * 60 * 60;
+			var duration = cash_calculate_duration (delta_secs);
+			ui.tickets.exit_duration.text (duration);
+
+			forth.setConstants (cons, cash_forth_error);
+			forth.load (rate.name,
+						function (script) { cash_park_charge_rate ('park_lost', script, 'cash-park-lost'); },
+						cash_forth_error);
+
 		}
 
 		APP.charp.request ('cashier_park_get_rates', ['lost'],
@@ -947,8 +963,11 @@
 			// Open the menu to save the user from this chore.
 			shell.menuCollapse (false);
 
-			APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); });
+			APP.mod.devices.hidHandler.on (function (evt, str) { cash_park_exit_hid (evt, str, 'cash-park-exit'); }, 'cash');
 			APP.mod.devices.display ('client', 'Bienvenido', null, { align: 'center' });
+
+			shell.ui.park_exit.button ('enable');
+			shell.ui.park_lost.button ('enable');
 		}
 	}
 
@@ -1002,11 +1021,11 @@
 		APP.mod.devices.openDrawer ('main');
 		APP.toast ('Se inició el turno ' + suffix);
 
-		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
-		cash_main_reset ();
-
 		APP.history.back ('cash-shift-begin', false);
 		shell.navShow ();
+
+		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
+		cash_main_reset ();
 
 		ui.shift_begin_submit.button ('enable');
 		ui.shift_begin_amount.val ('');

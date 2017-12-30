@@ -56,7 +56,8 @@
 
 			// Register an event listener.
 			on: function (func, id) {
-				if (!id) id = this.listeners.length;
+				if (!id)
+					id = Object.keys (this.listeners).length;
 				this.listeners[id] = true;
 				$(document).on ('avanty:HID.' + id, func);
 				return id;

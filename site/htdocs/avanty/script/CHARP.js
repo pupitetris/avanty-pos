@@ -52,9 +52,17 @@ CHARP.ERRORS = {
 		err.key = key;
 	}
 
-	var timestamptz_re = new RegExp ('[+-]\\d{2}$');
+	var timestamptz_re = new RegExp ('^([^+-]+)([+-]\\d+)');
+	function cast_timestamptz_surf (datum) {
+		var parts = datum.split (/ /);
+		var match = parts[3].match (timestamptz_re);
+		var msecs = new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + match[1]).getTime ();
+		// Surf parses these ISO dates as UTC, so we manually add the offset:
+		msecs -= parseInt (match[2]) * 1000 * 60 * 60;
+		return new Date (msecs);
+	}
+
 	var bad_date_parser;
-	
 	function cast_datum (datum, type) {
 		switch (type) {
 		case 'bool': return (datum)? true: false;
@@ -69,8 +77,7 @@ CHARP.ERRORS = {
 				return new Date (datum + '00');
 			case 2:
 				// Surf
-				var parts = datum.split (/[ +-]/);
-				return new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + parts[3]);
+				return cast_timestamptz_surf (datum);
 			default:
 				bad_date_parser = 0;
 				var d = new Date (datum);
@@ -79,8 +86,7 @@ CHARP.ERRORS = {
 				d = new Date (datum + '00');
 				if (!isNaN (d)) return d;
 				bad_date_parser = 2;
-				var parts = datum.split (/[ +-]/);
-				return new Date (parts[0] + '-' + parts[1] + '-' + parts[2] + 'T' + parts[3]);
+				return cast_timestamptz_surf (datum);
 			}
 		}
 		// text or a number or some other thing.
@@ -138,8 +144,8 @@ CHARP.ERRORS = {
 										height: 'auto',
 										minHeight: 400,
 										maxHeight: 700,
-										width: 500,
-										minWidth: 500,
+										width: 750,
+										minWidth: 750,
 										maxWidth: 1000
 									} });
 		},

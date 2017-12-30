@@ -64,6 +64,7 @@ CHARP.ERRORS = {
 
 	var bad_date_parser;
 	function cast_datum (datum, type) {
+		if (datum === null) return null;
 		switch (type) {
 		case 'bool': return (datum)? true: false;
 		case 'timestamp':

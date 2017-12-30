@@ -2,21 +2,32 @@
 	font-family: unset;
 }
 
-.avanty button.ui-widget.button-icon {
-	padding-left: 56px;
-}
-
 .avanty .button-left {
 	position: absolute;
 	left: 3ex;
 }
 
+.avanty button.ui-widget.button-icon {
+	padding-left: 56px;
+}
+
+.avanty button.ui-widget.button-icon-r {
+	padding-right: 56px;
+}
+
 .avanty button.ui-widget img {
 	position: absolute;
-	left: 16px;
-	top: 8px;
+	top: 5px;
 	width: 32px;
 	height: 32px;
+}
+
+.avanty button.ui-widget.button-icon img {
+	left: 16px;
+}
+
+.avanty button.ui-widget.button-icon-r img {
+	padding-left: 12px;
 }
 
 .avanty input.ui-widget {

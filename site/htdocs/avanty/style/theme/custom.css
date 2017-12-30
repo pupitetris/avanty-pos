@@ -201,3 +201,45 @@
 .avanty .ui-icon {
 	transform: scale(1.5);
 }
+
+::-webkit-scrollbar {
+  width: 32px;
+  height: 32px;
+}
+
+::-webkit-scrollbar-button {
+  width: 0px;
+  height: 0px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c0c0c0;
+  border: 1px outset #808080;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #d1d1d1;
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: #c0c0c0;
+}
+
+::-webkit-scrollbar-track {
+  background: #ffffff;
+  border: 1px solid #c0c0c0;
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-track:hover {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-track:active {
+  background: #ffffff;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}

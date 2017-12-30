@@ -577,6 +577,7 @@
 	var cash_entry_date;
 	var cash_rate_name;
 	var cash_rate_label;
+	var cash_charge_function;
 
 	function cash_park_exit_charge (rate_name, rate_label) {
 		var barcode_fields = APP.mod.barcode.parse (ui.park_exit_barcode.val ());
@@ -586,6 +587,7 @@
 		cash_charge_date = new Date ();
 		cash_rate_name = rate_name;
 		cash_rate_label = rate_label;
+		cash_charge_function = cash_park_exit_charge;
 
 		var delta_secs = APP.Util.getTimeSecs (cash_charge_date) - APP.Util.getTimeSecs (cash_entry_date);
 
@@ -768,7 +770,9 @@
 				title: 'Cálculo de tarifa',
 				opts: { width: '60%' }
 			});
-			cash_park_lost_charge ();
+
+			// This is a global variable, set alongside with cash_charge_date et al globals.
+			cash_charge_function ();
 			return false;
 		}
 
@@ -826,6 +830,7 @@
 			cash_entry_terminal = APP.terminal.id;
 			cash_rate_name = rate.name;
 			cash_rate_label = rate.label_client;
+			cash_charge_function = cash_park_lost_charge;
 
 			var cons = {
 				fecha_ingreso: APP.Util.getTimeSecs (cash_entry_date),

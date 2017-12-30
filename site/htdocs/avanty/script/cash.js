@@ -47,8 +47,14 @@
 		var pass2 = ui[name + '_pass2'] = section.find ('input[name="' + name + '-pass2"]');
 		pass2.input ();
 
-		var submit = ui[name + '_submit'] = section.find ('button');
+		var submit = ui[name + '_submit'] = section.find ('button[type="submit"]');
 		submit.button ();
+
+		var cancel = section.find ('button[type="button"]');
+		if (cancel.length > 0) {
+			ui[name + '_cancel'] = section.find ('button[type="button"]');
+			cancel.button ();
+		}
 
 		ui[name + '_title'] = section.find ('h2');
 
@@ -189,8 +195,8 @@
 		shell.ui.user_chpass = $('#cash-tab-user-chpass');
 		shell.ui.user_chpass.on ('click', cash_chpass);
 
-		shell.ui.user_shift_begin = $('#cash-tab-user-shift-report');
-		shell.ui.user_shift_begin.on ('click', cash_shift_report);
+		shell.ui.user_shift_report = $('#cash-tab-user-shift-report');
+		shell.ui.user_shift_report.on ('click', cash_shift_report);
 
 		shell.ui.user_shift_begin = $('#cash-tab-user-shift-begin');
 		shell.ui.user_shift_begin.on ('click', cash_shift_begin);
@@ -211,9 +217,10 @@
 		ui.section_shift_report.find ('button').button ();
 		ui.shift_report_table = ui.section_shift_report.find ('tbody');
 		ui.shift_report_shift_id = ui.section_shift_report.find ('.shift_id');
-		ui.shift_report_charged = ui.section_shift_report.find ('.charged');
 		ui.shift_report_received = ui.section_shift_report.find ('.received');
 		ui.shift_report_change = ui.section_shift_report.find ('.change');
+		ui.shift_report_charged = ui.section_shift_report.find ('.charged');
+		ui.shift_report_balance = ui.section_shift_report.find ('.balance');
 		ui.shift_report_charged_tickets = ui.section_shift_report.find ('.charged-tickets');
 		ui.shift_report_printed_tickets = ui.section_shift_report.find ('.printed-tickets');
 		ui.shift_report_print = $('#cash-shift-report-print');
@@ -243,9 +250,10 @@
 		ui.section_shift_end.find ('button').button ();
 		ui.shift_end_table = ui.section_shift_end.find ('tbody');
 		ui.shift_end_shift_id = ui.section_shift_end.find ('.shift_id');
-		ui.shift_end_charged = ui.section_shift_end.find ('.charged');
 		ui.shift_end_received = ui.section_shift_end.find ('.received');
 		ui.shift_end_change = ui.section_shift_end.find ('.change');
+		ui.shift_end_charged = ui.section_shift_end.find ('.charged');
+		ui.shift_end_balance = ui.section_shift_end.find ('.balance');
 		ui.shift_end_charged_tickets = ui.section_shift_end.find ('.charged-tickets');
 		ui.shift_end_printed_tickets = ui.section_shift_end.find ('.printed-tickets');
 		ui.shift_end_print = $('#cash-shift-end-print');
@@ -302,6 +310,7 @@
 		// ui.section_chpass is defined inside here:
 		pass_layout_init ('chpass', { submitHandler: cash_chpass_submit });
 		ui.section_chpass.on ('avanty:switchSectionEnter', cash_chpass_reset);
+		ui.chpass_cancel.on ('click', cash_chpass_cancel);
 
 		APP.loadLayout (ui.sections_parent.find ('.ticket-cont'), 'cash-tickets.html', layout_tickets);
 		
@@ -384,6 +393,11 @@
 		});
 	}
 
+	function cash_chpass_cancel () {
+		APP.history.back ('cash-change-password', false);
+		shell.navShow ();
+	}
+
 	function cash_chpass_submit (form, evt) {
 		evt.originalEvent.preventDefault ();
 
@@ -427,8 +441,10 @@
 			APP.mod.login.isFirst = false;
 			ui.chpass_title.text (chpass_title);
 			cash_main ();
-		} else
-			shell.backGo ();
+		} else {
+			APP.history.back ('cash-change-password', false);
+			shell.navShow ();
+		}
 	}
 
 	function cash_park_entry () {
@@ -703,16 +719,7 @@
 		ui_received.input ('disable');
 		ui_submit.button ('disable');
 
-		var received_val = ui_received.val ();
 		var change_val = ui[prefix + '_charge_change'].text ();
-
-		var width = (received_val.length > change_val.length)? received_val.length: change_val.length;
-		APP.mod.devices.openDrawer ('main', function () {
-			APP.mod.devices.display ('client',
-									 'Recibido: $' + APP.Util.padString (received_val, width) + '\n' +
-									 '  Cambio: $' + APP.Util.padString (change_val, width));
-			APP.mod.devices.openBoom ('exit');
-		});
 
 		var amount = APP.Util.parseMoney (ui[prefix + '_charge_total'].text ());
 		var change = APP.Util.parseMoney (change_val);
@@ -728,17 +735,44 @@
 			break;
 		}
 
+		function success () {
+			var received_val = ui_received.val ();
+			var width = (received_val.length > change_val.length)? received_val.length: change_val.length;
+			APP.mod.devices.openDrawer ('main', function () {
+				APP.mod.devices.display ('client',
+										 'Recibido: $' + APP.Util.padString (received_val, width) + '\n' +
+										 '  Cambio: $' + APP.Util.padString (change_val, width));
+				APP.mod.devices.openBoom ('exit');
+			});
+
+			cash_park_charge_success (process, prefix);
+		}
+
 		APP.charp.request ('cashier_park_charge',
 						   [ cash_entry_terminal, cash_entry_date, cash_charge_date,
 							 ticket_type, cash_rate_name, 'tender', amount, change, null ],
 						   {
-							   success: function () { cash_park_charge_success (process, prefix); },
-							   error: function () {
-								   ui_submit.button ('enable');
-								   ui_received.input ('enable');
-								   return true;
-							   }
+							   success: success,
+							   error: function (err) { cash_park_charge_error (err, ui_submit, ui_received); }
 						   });
+	}
+
+	function cash_park_charge_error (err, ui_submit, ui_received) {
+		ui_submit.button ('enable');
+		ui_received.input ('enable');
+
+		if (err.type == 'USERPERM' && err.parms[0] == 'last_event') {
+			APP.msgDialog ({
+				icon: 'warning',
+				desc: '<>Se ha realizado otra operación en el transcurso de este cobro.<br/><br/>La tarifa se va a recalcular.',
+				title: 'Cálculo de tarifa',
+				opts: { width: '60%' }
+			});
+			cash_park_lost_charge ();
+			return false;
+		}
+
+		return true;
 	}
 
 	function cash_park_charge_success (process, prefix) {
@@ -921,7 +955,8 @@
 		APP.terminal.shiftUser = APP.charp.credentialsGet ().login;
 		cash_main_reset ();
 
-		shell.backGo ();
+		APP.history.back ('cash-shift-begin', false);
+		shell.navShow ();
 
 		ui.shift_begin_submit.button ('enable');
 		ui.shift_begin_amount.val ('');

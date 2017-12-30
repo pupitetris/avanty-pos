@@ -194,8 +194,10 @@
 
 			navShow: function () {
 				// FIXME: NOP for now until further testing is possible.
-				this.ui.back.hide ();
-				this.ui.forward.hide ();
+				if (this.ui.back)
+					this.ui.back.hide ();
+				if (this.ui.forward)
+					this.ui.forward.hide ();
 				return;
 
 				if (this.ui.back) {

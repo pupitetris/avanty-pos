@@ -43,10 +43,6 @@ input[name="shift-begin-amount"] {
 	width: 8ex;
 }
 
-#cash-park-rate {
-	
-}
-
 #cash-park-rate form {
 	flex-direction: row;
 }

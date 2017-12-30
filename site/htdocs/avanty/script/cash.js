@@ -281,7 +281,9 @@
 		});
 
 		ui.park_exit_barcode = ui.section_park_exit.find ('input[name="cash-park-exit-barcode"]');
-		ui.park_exit_submit = ui.section_park_exit.find ('button');
+		ui.park_exit_submit = ui.section_park_exit.find ('button[type="submit"]');
+		ui.park_exit_cancel = ui.section_park_exit.find ('button[type="button"]');
+		ui.park_exit_cancel.on ('click', cash_park_exit_cancel);
 
 		park_charge_layout_init ('park_exit');
 
@@ -508,19 +510,9 @@
 		});
 	}
 
-	function cash_forth_error (error) {
-		console.error (error);
-
-		forth.reset ();
-
-		APP.msgDialog ({
-			icon: 'error',
-			desc: 'Falla interna al evaluar tarifa.',
-			msg: error,
-			sev: CHARP.ERROR_SEV['INTERNAL'],
-			title: 'Falla en tarifa',
-			opts: { width: '75%' }
-		});
+	function cash_park_exit_cancel () {
+		APP.history.back ('cash-park-exit');
+		shell.navShow ();
 	}
 
 	function cash_park_exit_submit (form, evt) {
@@ -557,6 +549,21 @@
 						   });
 	}
 
+	function cash_forth_error (error) {
+		console.error (error);
+
+		forth.reset ();
+
+		APP.msgDialog ({
+			icon: 'error',
+			desc: 'Falla interna al evaluar tarifa.',
+			msg: error,
+			sev: CHARP.ERROR_SEV['INTERNAL'],
+			title: 'Falla en tarifa',
+			opts: { width: '75%' }
+		});
+	}
+
 	function cash_park_exit_rate_reset () {
 		forth.reset (null, cash_forth_error);
 	}
@@ -573,6 +580,11 @@
 				cash_park_exit_charge ($(this).val (), $(this).data ('label'));
 			});
 		}
+
+		var button = $('<button class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>');
+		ui.park_exit_rate_buttons.append (button);
+		button.button ();
+		button.on ('click' , cash_park_exit_cancel);
 	}
 
 	var cash_charge_state = [];
@@ -889,7 +901,7 @@
 			return;
 		}
 
-		shell.show (true);
+		shell.show ();
 		shell.navShow ();
 
 		APP.history.setHome (MOD_NAME, ui.section_main);
@@ -1011,11 +1023,14 @@
 	function cash_shift_end () {
 		APP.msgDialog ({
 			icon: 'shift',
-			desc: 'Al finalizar turno se requerirá el corte de caja. ¿Deseas continuar?',
+			desc: 'Al finalizar turno se efectuará el corte de caja. ¿Deseas continuar?',
 			title: 'Finalizar turno',
 			opts: {
 				buttons: {
-					'Sí, finalizar': function () { APP.charp.request ('cashier_shift_end', [], cash_shift_end_success); },
+					'Sí, finalizar turno ahora.':
+					function () {
+						APP.charp.request ('cashier_shift_end', [], cash_shift_end_success);
+					},
 					'Cancelar': null
 				}
 			}
@@ -1025,6 +1040,8 @@
 	function cash_shift_end_success (records) {
 		APP.terminal.shiftUser = null;
 		shell.setStatus ('');
+		shell.menuCollapse ();
+		shell.show (false); // Hide shell.
 
 		APP.mod.report.shiftSummaryReport (ui, 'shift_end', records);
 
@@ -1051,6 +1068,7 @@
 	function cash_shift_end_continue () {
 		APP.history.back ('cash-shift-end');
 		shell.navShow ();
+		shell.show ();
 	}
 
 	function cash_shift_end_quit () {

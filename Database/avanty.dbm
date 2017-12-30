@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="738,758" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="737,757" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -2373,7 +2373,7 @@ BEGIN
 
 	_last_event := cashier_shift_update_last_event (_uid, _terminal_id);
 	IF _charge_ts < _last_event THEN 
-		PERFORM charp_raise ('USERPERM'); -- exception will roll back previous update
+		PERFORM charp_raise ('USERPERM', 'last_event'); -- exception will roll back previous update
 	END IF;
 
 	_type = _ticket_type::av.ticket_type;
@@ -2399,7 +2399,7 @@ BEGIN
 
 	INSERT INTO movement
 		SELECT _ticket_id, _charge_ts, rate_id, _method::av.payment_type, _amount, _change, _reference
-			FROM rate WHERE rate.name = _rate_name AND rate.type = 'regular'
+			FROM rate WHERE rate.name = _rate_name AND (rate.type = 'regular' OR rate.type = 'lost')
         RETURNING rate_id INTO _rate_id;
 
 	IF _rate_id IS NULL THEN PERFORM charp_raise ('ASSERT', 'Rate "' || _rate_name || '" not found'); END IF;
@@ -2440,7 +2440,7 @@ BEGIN
 		FROM cashier_shift AS s NATURAL JOIN terminal
 		WHERE ip_addr = _remote_addr AND user_id = _user_id AND shift_end IS NULL;
 
-	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM'); END IF;
+	IF NOT FOUND THEN PERFORM charp_raise ('USERPERM', 'shift'); END IF;
 
 	shift_id := _shift_id;
 	terminal_id := _terminal_id;
@@ -2875,7 +2875,7 @@ END;]]></definition>
 				NATURAL JOIN cashier_shift AS s
 				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)
-			WHERE (m.timestamp IS NULL OR (_start < m.timestamp AND m.timestamp <= _end))
+			WHERE ((m.timestamp IS NULL AND _start < t.timestamp) OR (_start < m.timestamp AND m.timestamp <= _end))
 				AND (_user_id IS NULL OR s.user_id = _user_id);
 END;]]></definition>
 </function>

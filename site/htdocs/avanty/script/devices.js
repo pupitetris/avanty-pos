@@ -561,6 +561,8 @@
 		data.push (A.GS + 'h' + chr(config.height));
 
 		var data_chars = element.attr ('data-chars');
+		if (APP.config.DEVEL)
+			console.log ('barcode: ' + data_chars);
 		var chars = (config.system == 'CODE128C')?
 			escpos_decode_code128C (data_chars) :
 			decodeURIComponent (data_chars);

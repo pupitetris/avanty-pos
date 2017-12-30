@@ -86,6 +86,9 @@ qyggkrzF8BoHCRCvSRMUDmipczEsLDh93H+p8R/K8Ob7qtct0sZthwWBU2ZJXvhX
 zozCzYdSCBfnRztD8A==
 -----END CERTIFICATE-----
 ');
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY1', '0.0.0.0', 0, NULL, NULL );
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY2', '0.0.0.0', 0, NULL, NULL );
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY3', '0.0.0.0', 0, NULL, NULL );
 
     DELETE FROM tender;
     ALTER SEQUENCE tender_tender_id_seq RESTART;

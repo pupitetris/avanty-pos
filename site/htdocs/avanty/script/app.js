@@ -963,8 +963,8 @@
 			APP.devconf = {};
 			APP.config = {
 				DEVEL: true,
-				version: '0.85',
-				establishment: 'Piloto VIPS',
+				version: '1.0.1',
+				establishment: 'Piloto',
 				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
 				barcodeSecret: 'secret',
 				maxTender: 100000, // Biggest tender (in cents) that can be received by the POS.

@@ -17,6 +17,8 @@
 	function layout_init () {
 		ui.sections_parent = $('#activate-sections');
 
+		$('#activate-app-version').text ('Versión: ' + APP.config.version);
+
 		// "Blank" screen, where we go when things fail.
 
 		var blank_button = $('#activate-blank button');

@@ -249,6 +249,9 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 		<type name="varchar" length="0"/>
 		<comment><![CDATA[A random-generated string that the supervisor must give to support.]]></comment>
 	</column>
+	<column name="created" not-null="true">
+		<type name="av.ts" length="0"/>
+	</column>
 	<column name="expiration">
 		<type name="av.ts" length="0"/>
 	</column>
@@ -1676,8 +1679,8 @@ BEGIN
 
 	IF NOT FOUND THEN
 		INSERT INTO
-			supervisor_challenge (string, user_id, expiration, solution)
-			VALUES (activation_challenge_gen (), 1::uid, CURRENT_TIMESTAMP + '15 minutes', NULL)
+			supervisor_challenge (string, user_id, created, expiration, solution)
+			VALUES (activation_challenge_gen (), 1::uid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP + '15 minutes', NULL)
 			RETURNING string INTO _string;
 	END IF;
 

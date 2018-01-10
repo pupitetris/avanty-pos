@@ -74,14 +74,14 @@
 						   });
 	}
 
-	function activate_load_is_activated (data) {
-		if (!data) { // System is not activated. Proceed with activation.
+	function activate_load_is_activated (created) {
+		if (!created) { // System is not activated. Proceed with activation.
 			APP.hourglass.enable ();
 			APP.switchSection ($('#activate-greeting'));
 			return;
 		}
 
-		activate_finish ();
+		activate_finish (created);
 	}
 
 	function quadrant_success () {
@@ -126,7 +126,7 @@
 		APP.charp.request ('activation_challenge_check', [chal, solution],
 						   {
 							   asAnon: true,
-							   success: function () { activate_challenge_check_success (chal, solution) },
+							   success: function (created) { activate_challenge_check_success (created, chal, solution) },
 							   error: function (err) {
 								   switch (err.key) {
 								   case 'SQL:EXIT':
@@ -169,11 +169,12 @@
 			activate_blank_error ();
 	}
 
-	function activate_challenge_check_success (chal, solution) {
-		activate_challenge_finalize_cb (chal, solution);
+	function activate_challenge_check_success (created, chal, solution) {
+		activate_challenge_finalize_cb (created, chal, solution);
 	}
 
-	function activate_finish () {
+	function activate_finish (created) {
+		APP.config.startDate = created;
 		APP.loadModule ('super');
 	}
 

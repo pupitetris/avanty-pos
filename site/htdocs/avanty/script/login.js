@@ -59,7 +59,7 @@
 		APP.mod.activate.requestChallenge (request_challenge_success);
 	}
 
-	function request_challenge_success (chal, solution) {
+	function request_challenge_success (created, chal, solution) {
 		function super_set_chpass (mod) {
 			mod.chpass = true;
 			mod.chpass_chal = chal;

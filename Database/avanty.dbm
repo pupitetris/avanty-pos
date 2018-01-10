@@ -2177,7 +2177,7 @@ END;]]></definition>
 	<definition><![CDATA[DECLARE
 	_new_user_id av.account.user_id%TYPE;
 BEGIN
-	IF NOT rp.anon_system_is_activated() OR rp.anon_supervisor_created() THEN
+	IF rp.anon_system_is_activated() IS NULL OR rp.anon_supervisor_created() THEN
 		PERFORM charp_raise ('USERPERM');
 	END IF;
 

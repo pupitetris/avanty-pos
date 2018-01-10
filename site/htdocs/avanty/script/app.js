@@ -23,7 +23,7 @@
 		};
 	} (jQuery));
 
-	function configure (cb) {
+	function loadConfig (key, url, cb) {
 		function send_error (error_msg) {
 			console.error (error_msg);
 
@@ -42,14 +42,14 @@
 		}
 
 		function success (data) {
-			$.extend (APP.config, data);
+			$.extend (APP[key], data);
 			if (cb)
-				cb (APP.config);
+				cb (APP[key]);
 		}
 
 		$.ajax ({
 			type: 'GET',
-			url: 'config.json',
+			url: url,
 			cache: false,
 			dataType: 'json',
 			global: false,
@@ -960,6 +960,7 @@
 		},
 
 		main: function () {
+			APP.devconf = {};
 			APP.config = {
 				DEVEL: true,
 				version: '0.85',
@@ -1029,76 +1030,18 @@
 			$(document).ajaxStart (function () { show_hourglass (true); });
 			$(document).ajaxStop (function () { show_hourglass (false); });
 
-			var dev_conf = {
-				qz_connect: {
-//					host: 'localhost.qz.io',
-					host: 'www.avanty.local',
-					port: { secure: [8181] },
-					usingSecure: true,
-					keepAlive: 60,
-					retries: 0,
-					delay: 0
-				},
-				printer: {
-					name: 'thermal',
-					type: 'ESCPOS',
-					basedir: 'file:///avanty/site/htdocs/avanty',
-					qz_type: 'escp',
-					qz_options: {
-						encoding: 'cp437'
-					},
-					cutter_distance: 48, // 1/96ths of an inch
-					defaults: {
-						  motion: { x: 180, y: 180 },
-						standard: { line_spacing: 30 }, // 1/6 in
-						    page: { line_spacing: 30 }  // 1/6 in
-					}
-				},
-				displays: {
-					client: {
-//						type		: 'DUMMY',
-						type		: 'EPSON',
-						port		: '/dev/ttyS2',
-						width		: 20,
-						height		: 2,
-						encoding	: 'cp437',
-						qz_options: {
-							baudRate	: 9600,
-							dataBits	: 8,
-							parity		: 'NONE',
-							stopBits	: 1,
-							flowControl	: 'NONE'
-						}
-					}
-				},
-				drawers: {
-					main: {
-						type: 'printer', // only supported type for the moment.
-						line: 0,
-						on: 200, // msecs, max 510.
-						off: 200 // msecs, max 510
-					}
-				},
-				booms: {
-					exit: {
-						type: 'printer', // only supported type for the moment.
-						line: 1,
-						on: 510, // msecs, max 510.
-						off: 510 // msecs, max 510
-					}
-				}
-			};
-
 			APP.loadModule ('fetch'); // Catalog loading with a cache.
 
-			APP.loadModule ('devices', // Printer and HIDs.
-							function (mod) {
-								mod.hidHandler.start ();
-								mod.configure (dev_conf);
-							});
+			loadConfig ('devconf', 'devices.json', function (dev_config) {
+				APP.loadModule ('devices', // Printer and HIDs.
+								function (mod) {
+									mod.hidHandler.start ();
+									mod.configure (dev_config);
+								});
 
-			configure (function () {
-				APP.loadModule ('activate');
+				loadConfig ('config', 'config.json', function () {
+					APP.loadModule ('activate');
+				});
 			});
 		}
 	};

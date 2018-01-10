@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="737,1018" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,663" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1054,12 +1054,18 @@ BEGIN
 
 	IF _request_id IS NULL THEN
 		_request_id := nextval('request_request_id_seq');
-		INSERT INTO request_log
-			VALUES(_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
+		INSERT INTO
+			request_log (request_log_id, user_id, timestamp, error_code,
+				login, ip_addr, proname, params, err_params,
+				finished, status)
+			VALUES (_request_id, _user_id, CURRENT_TIMESTAMP, _code::charp_error_code,
 				_login, _ip_addr, _proname, NULL, _err_params,
 				CURRENT_TIMESTAMP, _status::charp_request_status);
 	ELSE
-		INSERT INTO request_log
+		INSERT INTO
+			request_log (request_log_id, user_id, timestamp, error_code,
+				login, ip_addr, proname, params, err_params,
+				finished, status)
 			SELECT r.request_id, r.user_id, r.timestamp, _code::charp_error_code, 
 				_login, r.ip_addr, r.proname, r.params, _err_params, 
 				CURRENT_TIMESTAMP, _status::charp_request_status
@@ -1214,15 +1220,14 @@ END;]]></definition>
 	_random_bytes character varying;
 BEGIN
 	_random_bytes := encode(pgcrypto.gen_random_bytes(32), 'hex');
-	INSERT INTO request VALUES(
-		DEFAULT,
-		charp_account_get_id_by_login_status(_login, 'active'),
-		_random_bytes, 
-		CURRENT_TIMESTAMP,
-		_ip_addr,
-		charp_rp_get_function_by_name(_function_name),
-		_params
-	);
+	INSERT INTO
+		request (request_id, user_id,
+			random_bytes, timestamp, ip_addr, proname, 
+			params)
+		VALUES (DEFAULT,	charp_account_get_id_by_login_status(_login, 'active'),
+			_random_bytes, CURRENT_TIMESTAMP, _ip_addr, charp_rp_get_function_by_name(_function_name),
+			_params);
+
 	RETURN _random_bytes;
 END;]]></definition>
 </function>
@@ -1502,8 +1507,11 @@ END;]]></definition>
 	_user_id account.user_id%TYPE;
 BEGIN
 	_salt := pgcrypto.gen_salt('bf', 8);
-	INSERT INTO account
-		VALUES(DEFAULT, _uid, _login, _salt, 
+	INSERT INTO
+		account (user_id, creator_user_id, login, salt,
+			password, 
+			password_expiration, status, is_first, created)
+		VALUES (DEFAULT, _uid, _login, _salt, 
 			pgcrypto.crypt(_plain_password, _salt), 
 			_password_expiration, 'active', TRUE, CURRENT_TIMESTAMP) 
 		RETURNING user_id INTO _user_id;
@@ -1667,7 +1675,8 @@ BEGIN
 			AND solution IS NULL;
 
 	IF NOT FOUND THEN
-		INSERT INTO supervisor_challenge 
+		INSERT INTO
+			supervisor_challenge (string, user_id, expiration, solution)
 			VALUES (activation_challenge_gen (), 1::uid, CURRENT_TIMESTAMP + '15 minutes', NULL)
 			RETURNING string INTO _string;
 	END IF;
@@ -1834,13 +1843,13 @@ END;]]></definition>
 	<definition><![CDATA[BEGIN
 	CASE _role
 		WHEN 'supervisor' THEN
-			INSERT INTO user_supervisor VALUES (_user_id)
+			INSERT INTO user_supervisor (user_id) VALUES (_user_id)
 				ON CONFLICT DO NOTHING;
 		WHEN 'cashier' THEN
-			INSERT INTO user_cashier VALUES (_user_id)
+			INSERT INTO user_cashier (user_id) VALUES (_user_id)
 				ON CONFLICT DO NOTHING;
 		WHEN 'maintenance' THEN
-			INSERT INTO user_maintenance VALUES (_user_id)
+			INSERT INTO user_maintenance (user_id) VALUES (_user_id)
 				ON CONFLICT DO NOTHING;
 		ELSE
 			PERFORM charp_raise ('ASSERT', '_role NOT FOUND');
@@ -2027,7 +2036,8 @@ END;]]></definition>
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
 	<definition><![CDATA[BEGIN
-	INSERT INTO user_activity
+	INSERT INTO
+		user_activity (user_id, timestamp, terminal_id, type, detail)
 		SELECT _uid, current_timestamp, terminal_validate (_remote_addr), 'login', NULL;
 
 	UPDATE account SET is_first = FALSE 
@@ -2103,7 +2113,8 @@ END;]]></definition>
 	<parameter name="_remote_addr">
 		<type name="av.remote_addr" length="0"/>
 	</parameter>
-	<definition><![CDATA[INSERT INTO user_activity
+	<definition><![CDATA[INSERT INTO
+	user_activity (user_id, timestamp, terminal_id, type, detail)
 	SELECT _uid, current_timestamp, terminal_validate (_remote_addr), 'logout', NULL;]]></definition>
 </function>
 
@@ -2275,15 +2286,24 @@ BEGIN
 		WHERE shift_end IS NULL AND (terminal_id = _terminal_id OR user_id = _uid);
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
-	INSERT INTO cashier_shift VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+	INSERT INTO
+		cashier_shift (shift_id, terminal_id, user_id, last_event, shift_start, shift_end)
+		VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
 		RETURNING shift_id INTO _shift_id;
-	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_begin',
-		json_build_object ('shift_id', _shift_id));
+	INSERT INTO
+		user_activity (user_id, timestamp, terminal_id, type, 
+			detail)
+		VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_begin',
+			json_build_object ('shift_id', _shift_id));
 
-	INSERT INTO ticket VALUES (DEFAULT, _shift_id, CURRENT_TIMESTAMP, 'deposit', NULL)
+	INSERT INTO
+		ticket (ticket_id, shift_id, timestamp, type, detail)
+		VALUES (DEFAULT, _shift_id, CURRENT_TIMESTAMP, 'deposit', NULL)
 		RETURNING ticket_id INTO _ticket_id;
 
-	INSERT INTO movement VALUES (_ticket_id, CURRENT_TIMESTAMP, NULL, 'tender', _deposit_amount, NULL, NULL);
+	INSERT INTO
+		movement (ticket_id, timestamp, rate_id, method, amount, change, reference)
+		VALUES (_ticket_id, CURRENT_TIMESTAMP, NULL, 'tender', _deposit_amount, NULL, NULL);
 END;]]></definition>
 </function>
 
@@ -2387,7 +2407,9 @@ BEGIN
 	END IF;
 
 	IF _ticket_type <> 'entry' OR _ticket_terminal_id <> _terminal_id THEN
-		INSERT INTO ticket VALUES (DEFAULT, _shift_id, _entry_ts, _type, _ticket_detail)
+		INSERT INTO
+			ticket (ticket_id, shift_id, timestamp, type, detail)
+			VALUES (DEFAULT, _shift_id, _entry_ts, _type, _ticket_detail)
 			RETURNING ticket_id INTO _ticket_id;
 	ELSE
 		SELECT ticket_id INTO _ticket_id FROM ticket NATURAL JOIN cashier_shift
@@ -2397,7 +2419,8 @@ BEGIN
 		IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 	END IF;
 
-	INSERT INTO movement
+	INSERT INTO
+		movement (ticket_id, timestamp, rate_id, method, amount, change, reference)
 		SELECT _ticket_id, _charge_ts, rate_id, _method::av.payment_type, _amount, _change, _reference
 			FROM rate WHERE rate.name = _rate_name AND (rate.type = 'regular' OR rate.type = 'lost')
         RETURNING rate_id INTO _rate_id;
@@ -2530,7 +2553,9 @@ BEGIN
 
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
-	INSERT INTO user_activity
+	INSERT INTO 
+		user_activity (user_id, timestamp, terminal_id, type, 
+			detail)
 		VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'charge_check', 
 			jsonb_build_object ('terminal_id', _ticket_terminal_id, 'timestamp', _ticket_entry_ts));
 END;]]></definition>
@@ -2595,7 +2620,9 @@ BEGIN
 	-- No shifts ever begun (so no last shift), or last shift has already been ended.
 	IF NOT FOUND OR _type = 'shift_end' THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
-	INSERT INTO user_activity VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_end', NULL);
+	INSERT INTO 
+		user_activity (user_id, timestamp, terminal_id, type, detail)
+		VALUES (_uid, CURRENT_TIMESTAMP, _terminal_id, 'shift_end', NULL);
 
 	UPDATE cashier_shift SET shift_end = CURRENT_TIMESTAMP 
 		WHERE terminal_id = _terminal_id AND user_id = _uid AND shift_end IS NULL;
@@ -2655,8 +2682,11 @@ BEGIN
 		WHERE terminal_id = _terminal_id
 		RETURNING entry_consecutive INTO _consecutive;
 
-	INSERT INTO ticket VALUES (DEFAULT, _shift_id, _entry_ts, 'entry', 
-		json_build_object ('consecutive', _consecutive));
+	INSERT INTO 
+		ticket (ticket_id, shift_id, timestamp, type, 
+			detail)
+		VALUES (DEFAULT, _shift_id, _entry_ts, 'entry', 
+			json_build_object ('consecutive', _consecutive));
 
 	RETURN _consecutive;
 END;]]></definition>

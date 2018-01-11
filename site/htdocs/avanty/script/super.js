@@ -125,8 +125,18 @@
 		ui.report.summary_filter_start_d_txt.text (todayStr);
 		ui.report.summary_filter_end_d_txt.text (todayStr);
 
+		function window_click_hide (evt, cal1, cal2) {
+			if ($(evt.target).closest (cal1).length < 1)
+				cal_toggle (cal1, cal2);
+		}
+
 		function cal_toggle (cal1, cal2) {
+			$(window).off ('click.super_report_summary_toggle');
 			if (cal1.is (':hidden')) {
+				APP.later (function () {
+					$(window).on ('click.super_report_summary_toggle',
+								  function (evt) { window_click_hide (evt, cal1, cal2); });
+ 				}, 200);
 				cal1.show ('drop', { direction: 'up' }, 200);
 				cal2.hide ();
 			} else {
@@ -151,6 +161,8 @@
 		};
 
 		function cal_selected (date, inst, txt) {
+			$(window).off ('click.super_report_summary_toggle');
+
 			txt.text (date);
 			inst.dpDiv.parent ().fadeOut ();
 		}

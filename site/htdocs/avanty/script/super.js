@@ -133,6 +133,7 @@
 		})
 
 		var calopts = {
+			minDate: APP.config.startDate, // activation date, recovered from DB during activation check.
 			maxDate: 0,
 			firstDay: APP.config.weekFirstDay,
 			changeMonth: true,

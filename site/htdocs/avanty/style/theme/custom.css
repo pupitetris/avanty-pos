@@ -7,6 +7,10 @@
 	left: 3ex;
 }
 
+.avanty button.ui-widget {
+	border-width: 2px;
+}
+
 .avanty button.ui-widget.button-icon {
 	padding-left: 56px;
 }
@@ -34,6 +38,10 @@
 	font-size: 1.5em;
 	padding: 0 0.25em 0.2em 0.25em;
 	margin: 1px;
+}
+
+.avanty button.ui-widget.error {
+	border-color: red;
 }
 
 .avanty input.ui-widget.error {
@@ -154,6 +162,12 @@
 	opacity: 0.35;
 }
 
+.avanty .ui-datepicker {
+    user-select: none;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+}
+
 .avanty .ui-datepicker-trigger {
     padding-left: 4px;
     vertical-align: top;
@@ -224,17 +238,18 @@
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border: 1px outset #808080;
+  background: #dedede;
+  border: 2px outset #c5c5c5;
   border-radius: 8px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #d1d1d1;
+  background: #e5e5e5;
 }
 
 ::-webkit-scrollbar-thumb:active {
-  background: #c0c0c0;
+  background: #dedede;
+  border: 2px inset #c5c5c5;
 }
 
 ::-webkit-scrollbar-track {

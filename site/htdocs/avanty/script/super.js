@@ -113,6 +113,8 @@
 		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
 		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
 		ui.report.summary_filter_end_d_txt = ui.report.summary_filter_end_d.find ('span');
+		ui.report.summary_filter_end_d_error = $('#super-report-summary-end-d-error');
+		ui.report.summary_filter_end_d_error.hide ();
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
@@ -165,6 +167,15 @@
 
 			txt.text (date);
 			inst.dpDiv.parent ().fadeOut ();
+
+			if (ui.report.summary_filter_start_d_txt.text () > 
+				ui.report.summary_filter_end_d_txt.text ()) {
+				ui.report.summary_filter_end_d.addClass ('error');
+				ui.report.summary_filter_end_d_error.show ();
+			} else {
+				ui.report.summary_filter_end_d.removeClass ('error');
+				ui.report.summary_filter_end_d_error.hide ();
+			}
 		}
 
 		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({

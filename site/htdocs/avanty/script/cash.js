@@ -472,7 +472,7 @@
 		ui.tickets.entry_consecutive.text (entry_consecutive);
 		ui.tickets.entry_barcode.attr ('data-chars', barcode);
 
-		APP.mod.devices.escposTicketLayout (ui.tickets.entry);
+		APP.mod.devices.layoutTicket (ui.tickets.entry);
 		APP.mod.devices.print (ui.tickets.entry);
 	}
 
@@ -773,7 +773,7 @@
 			pre += '<div class="sum">Cambio = ' + APP.Util.padString (change_val, 7) + '</div>';
 			ui.tickets.exit_items.html (pre);
 
-			APP.mod.devices.escposTicketLayout (ui.tickets.exit);
+			APP.mod.devices.layoutTicket (ui.tickets.exit);
 
 			var width = (received_val.length > change_val.length)? received_val.length: change_val.length;
 			APP.mod.devices.openDrawer ('main', function () {

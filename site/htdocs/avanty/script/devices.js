@@ -170,7 +170,7 @@
 			.split (', ').map (function (n) { return parseInt (n); });
 	}
 
-	function escpos_get_css (element) {
+	function css_get (element) {
 		return {
 			background_color		: css_color (element.css ('background-color')),
 			color					: css_color (element.css ('color')),
@@ -188,40 +188,7 @@
 		}
 	}
 
-	// root is the container for the printing structure
-	function escpos_reset_state (printer, root) {
-		return {
-			printer: printer,
-			element: root,
-			css: escpos_get_css (root),
-			mode: 'standard',
-			motion: {
-				x: printer.defaults.motion.x, // 1/x'ths of an inch
-				y: printer.defaults.motion.y  // 1/y'ths of an inch
-			},
-			standard: {
-				upside_down: 0,
-				line_spacing: printer.defaults.standard.line_spacing,
-				unidirectional: 0,
-				justification: 0
-			},
-			page: {
-				print_direction: 0, // 0 left-right, 1 bottom-top, 2 right-left, 3 top-bottom
-				line_spacing: printer.defaults.page.line_spacing,
-				unidirectional: 1
-			},
-			char_spacing: 0,
-			underline: 0,
-			emphasis: 0,
-			font: 0,
-			char_size: { width: 1, height: 1 },
-			double_strike: 0,
-			reverse: 0,
-			color: 0
-		};
-	}
-
-	function escpos_text_apply_white_space (white_space, text) {
+	function layout_text_apply_white_space (white_space, text) {
 		switch (white_space) {
 		case 'normal':
 		case 'nowrap':
@@ -237,7 +204,7 @@
 		return text;
 	}
 
-	function escpos_text_capitalize (text) {
+	function layout_text_capitalize (text) {
 		var ret = '';
 		var in_word = false;
 		var c;
@@ -256,10 +223,10 @@
 		return ret;
 	}
 
-	function escpos_text_apply_transform (transform, text) {
+	function layout_text_apply_transform (transform, text) {
 		switch (transform) {
 		case 'capitalize':
-			return escpos_text_capitalize (text);
+			return layout_text_capitalize (text);
 		case 'uppercase':
 			return text.toUpperCase ();
 		case 'lowercase':
@@ -268,14 +235,14 @@
 		return text;
 	}
 
-	function escpos_print_text (state, text) {
-		text = escpos_text_apply_white_space (state.css.white_space, text);
-		text = escpos_text_apply_transform (state.css.text_transform, text);
+	function layout_print_text (state, text) {
+		text = layout_text_apply_white_space (state.css.white_space, text);
+		text = layout_text_apply_transform (state.css.text_transform, text);
 		return text;
 	}
 
-	function escpos_print_text_node (state, node) {
-		var text = escpos_print_text (state, node.get (0).textContent);
+	function layout_print_text_node (state, node) {
+		var text = layout_print_text (state, node.get (0).textContent);
 
 		switch (state.css.white_space) {
 		case 'normal':
@@ -393,13 +360,62 @@
 		}
 	}
 
-	function escpos_print_contents (printer, node, reset, state) {
+	function layout_print_contents (printer, node, reset, state) {
 		var data = [];
 		node.contents ().each (function (i, node) {
-			var node_data = escpos_print (printer, $(node), reset, state);
+			var node_data = layout_print (printer, $(node), reset, state);
 			if (node_data) data_append (data, node_data);
 		});
 		return data;
+	}
+
+	function code128C_decode (data) {
+		var chars = '{C';
+
+		// Pad with a zero on the left if length is odd.
+		if (data.length % 2 > 0) {
+			console.warn ('CODE128C length is not even!');
+			data = '0' + data;
+		}
+
+		for (var i = 0; i < data.length; i += 2)
+			chars += chr (parseInt (data.substr (i, 2)));
+
+		return chars;
+	}
+
+	// State of the features propietary to escpos printers.
+	// root is the container for the printing structure
+	function escpos_reset_state (printer, root) {
+		return {
+			printer: printer,
+			element: root,
+			css: css_get (root),
+			mode: 'standard',
+			motion: {
+				x: printer.defaults.motion.x, // 1/x'ths of an inch
+				y: printer.defaults.motion.y  // 1/y'ths of an inch
+			},
+			standard: {
+				upside_down: 0,
+				line_spacing: printer.defaults.standard.line_spacing,
+				unidirectional: 0,
+				justification: 0
+			},
+			page: {
+				print_direction: 0, // 0 left-right, 1 bottom-top, 2 right-left, 3 top-bottom
+				line_spacing: printer.defaults.page.line_spacing,
+				unidirectional: 1
+			},
+			char_spacing: 0,
+			underline: 0,
+			emphasis: 0,
+			font: 0,
+			char_size: { width: 1, height: 1 },
+			double_strike: 0,
+			reverse: 0,
+			color: 0
+		};
 	}
 
 	function escpos_state_get_horizontal_unit (state) {
@@ -430,44 +446,9 @@
 		return Math.round (pixels * unit / PX_PER_IN);
 	}
 
-	// Merge given state with what can be inferred from element.
-	// Return new copy of state.
-	function escpos_merge_state (state, element, reset) {
-		var new_state = $.extend (true, {}, state);
-		var css = escpos_get_css (element);
-		new_state.css = css;
-		new_state.element = element;
-
-		new_state.char_spacing = escpos_horizontal_pixels_to_units (state, css.letter_spacing);
-
-		new_state.underline = (css.text_decoration_line == 'none')? 0:
-			APP.Util.objGet (css.text_decoration_style, 'double', { solid: 1, double: 2 });
-		
-		new_state.emphasis = (css.font_style == 'italic')? 1: 0;
-
-		new_state.font = (css.font_size == 11)? 0: 1;
-
-		new_state.char_size.width = Math.round (Math.abs (css.transform_matrix[0]));
-		new_state.char_size.height = Math.round (Math.abs (css.transform_matrix[3]));
-
-		new_state.double_strike = (css.font_weight >= 700)? 1: 0;
-
-		new_state.standard.upside_down = (css.transform_matrix[0] < 0 && css.transform_matrix[3] < 0)? 1: 0;
-
-		new_state.reverse = (css.color == reset.css.background_color &&
-							 (css.background_color == reset.css.color ||
-							  css.background_color == reset.printer.second_color))? 1: 0;
-
-		new_state.color = (css[(new_state.reverse)? 'background_color' : 'color'] == reset.css.color)?
-			0: 1;
-
-		new_state.standard.justification = APP.Util.objGet (css.text_align, 'left', { left: 0, center: 1, right: 2 });
-
-		return new_state;
-	}
-
 	function escpos_print_cmd (key, state) {
 		switch (key) {
+		case 'line_feed'    : return (state.css.position == 'absolute')? A.CR: A.LF;
 		case 'char_spacing'	: return A.ESC + ' ' + chr(state[key]);
 		case 'underline'	: return A.ESC + '-' + chr(state[key]);
 		case 'emphasis'		: return A.ESC + 'E' + chr(state[key]);
@@ -497,61 +478,19 @@
 		return '';
 	}
 
-	function escpos_decode_code128C (data) {
-		var chars = '{C';
-
-		// Pad with a zero on the left if length is odd.
-		if (data.length % 2 > 0) {
-			console.warn ('CODE128C length is not even!');
-			data = '0' + data;
+	function escpos_print_img (img, state) {
+		return {
+			type: 'raw',
+			format: 'image',
+			data: state.printer.basedir + '/' + img.attr ('src'),
+			options: { language: state.printer.qz_type, dotDensity: 'double' }
 		}
-
-		for (var i = 0; i < data.length; i += 2)
-			chars += chr (parseInt (data.substr (i, 2)));
-
-		return chars;
-	}
-
-	function escpos_barcode_get_config (element, state) {
-		var config = {};
-
-		// HRI: Human Readable Interpretation
-		var hri_above = false;
-		var hri_below = false;
-		var figs = element.find ('figcaption');
-		figs.each (function (i, e) {
-			if (node_name ($(e).next ()) == 'DIV')
-				hri_above = true;
-			if (node_name ($(e).prev ()) == 'DIV')
-				hri_below = true;
-		});
-
-		var hri_pos = 0;
-		if (hri_above) hri_pos += 1;
-		if (hri_below) hri_pos += 2;
-
-		config.hri_pos = hri_pos;
-
-		if (state) {
-			config.font = (state.css.font_size == 11)? 0: 1;
-			config.height = escpos_vertical_pixels_to_units (state, element.find ('div').height ());
-		}
-
-		var width = parseInt (element.attr ('data-width'));
-		if (!width) width = 2;
-		config.width = width;
-
-		var system = element.attr ('data-system');
-		if (!system) system = 'CODE128C';
-		config.system = system;
-
-		return config;
 	}
 
 	function escpos_print_barcode (element, state) {
 		var data = [];
 
-		var config = escpos_barcode_get_config (element, state);
+		var config = layout_barcode_get_config (element, state);
 
 		data.push (A.GS + 'H' + chr(config.hri_pos));
 
@@ -565,7 +504,7 @@
 		if (APP.config.DEVEL)
 			console.log ('barcode: ' + data_chars);
 		var chars = (config.system == 'CODE128C')?
-			escpos_decode_code128C (data_chars) :
+			code128C_decode (data_chars) :
 			decodeURIComponent (data_chars);
 
 		// Barcode system
@@ -629,7 +568,83 @@
 		return str;
 	}
 
-	function escpos_print_element (printer, element, reset, state) {
+	function escpos_send_pulse (printer, device) {
+		return [ escpos_print_cmd ('pulse', { printer: printer, device: device }) ];
+	}
+
+	// Merge given state with what can be inferred from element.
+	// Return new copy of state.
+	function layout_merge_state (state, element, reset) {
+		var new_state = $.extend (true, {}, state);
+		var css = css_get (element);
+		new_state.css = css;
+		new_state.element = element;
+
+		new_state.char_spacing = state.printer.methods.horizontalPixelsToUnits (state, css.letter_spacing);
+
+		new_state.underline = (css.text_decoration_line == 'none')? 0:
+			APP.Util.objGet (css.text_decoration_style, 'double', { solid: 1, double: 2 });
+		
+		new_state.emphasis = (css.font_style == 'italic')? 1: 0;
+
+		new_state.font = (css.font_size == 11)? 0: 1;
+
+		new_state.char_size.width = Math.round (Math.abs (css.transform_matrix[0]));
+		new_state.char_size.height = Math.round (Math.abs (css.transform_matrix[3]));
+
+		new_state.double_strike = (css.font_weight >= 700)? 1: 0;
+
+		new_state.standard.upside_down = (css.transform_matrix[0] < 0 && css.transform_matrix[3] < 0)? 1: 0;
+
+		new_state.reverse = (css.color == reset.css.background_color &&
+							 (css.background_color == reset.css.color ||
+							  css.background_color == reset.printer.second_color))? 1: 0;
+
+		new_state.color = (css[(new_state.reverse)? 'background_color' : 'color'] == reset.css.color)?
+			0: 1;
+
+		new_state.standard.justification = APP.Util.objGet (css.text_align, 'left', { left: 0, center: 1, right: 2 });
+
+		return new_state;
+	}
+
+	function layout_barcode_get_config (element, state) {
+		var config = {};
+
+		// HRI: Human Readable Interpretation
+		var hri_above = false;
+		var hri_below = false;
+		var figs = element.find ('figcaption');
+		figs.each (function (i, e) {
+			if (node_name ($(e).next ()) == 'DIV')
+				hri_above = true;
+			if (node_name ($(e).prev ()) == 'DIV')
+				hri_below = true;
+		});
+
+		var hri_pos = 0;
+		if (hri_above) hri_pos += 1;
+		if (hri_below) hri_pos += 2;
+
+		config.hri_pos = hri_pos;
+
+		if (state) {
+			config.font = (state.css.font_size == 11)? 0: 1;
+			config.height = state.printer.methods.verticalPixelsToUnits (state, element.find ('div').height ());
+		}
+
+		var width = parseInt (element.attr ('data-width'));
+		if (!width) width = 2;
+		config.width = width;
+
+		var system = element.attr ('data-system');
+		if (!system) system = 'CODE128C';
+		config.system = system;
+
+		return config;
+	}
+
+	function layout_print_element (printer, element, reset, state) {
 		var data = [];
 
 		if (!node_is_visible (element))
@@ -641,89 +656,87 @@
 		if (element != reset.element &&	!is_inline &&
 			node_find (element, node_prev, node_is_visible, true))
 			// If we are not inline and not the first visible node:
-			data.push (A.LF);
+			data.push (printer.methods.printCmd ('line_feed', state));
 
-		var new_state = escpos_merge_state (state, element, reset);
-		var changes = escpos_print_state_changes (state, new_state);
+		var new_state = layout_merge_state (state, element, reset);
+		var changes = printer.methods.printStateChanges (state, new_state);
 		if (changes) data.push (changes);
 
 		var before = element_get_pseudo_content (element, ':before')
-		if (before)	data.push (escpos_print_text (state, before));
+		if (before)	data.push (layout_print_text (state, before));
 
 		var process_contents_flag = true;
 		switch (node_name (element)) {
 			// Special-case elements that render besides their css and contents.
 			case 'ARTICLE':
-				data.push (escpos_print_cmd ('initialize', new_state));
+				data.push (printer.methods.printCmd ('initialize', new_state));
 				break;
 			case 'HR':
 				var cmd = (element.css ('border-style') == 'dotted')? 'partial_cut': 'cut';
-				data.push (escpos_print_cmd (cmd, new_state));
+				data.push (printer.methods.printCmd (cmd, new_state));
 				break;
 			case 'IMG':
-				data.push ({
-					type: 'raw',
-					format: 'image',
-					data: printer.basedir + '/' + element.attr ('src'),
-					options: { language: state.printer.qz_type, dotDensity: 'double' }
-				});
+				data.push (printer.methods.printImg (element, state));
 				break;
 			case 'FIGURE':
 				process_contents_flag = false;
-				data_append (data, escpos_print_barcode (element, new_state));
+				data_append (data, printer.methods.printBarcode (element, new_state));
 				break;
 			case 'BR': 
-				data.push (A.LF);
+				data.push (printer.methods.printCmd ('line_feed', new_state));
 				break;
 		}
 
 		if (process_contents_flag && element.contents ().length > 0)
-			data_append (data, escpos_print_contents (printer, element, reset, new_state));
+			data_append (data, layout_print_contents (printer, element, reset, new_state));
 
 		var after = element_get_pseudo_content (element, ':after')
-		if (after) data.push (escpos_print_text (state, after));
+		if (after) data.push (layout_print_text (state, after));
 
 		if (element != reset.element && !is_inline &&
 			node_find (element, node_next, node_is_visible))
 			// If we are not inline and not the last visible node:
-			data.push ((new_state.css.position == 'absolute')? A.CR: A.LF);
+			data.push (printer.methods.printCmd ('line_feed', new_state));
 
 		if (changes) // use states in inverted order to generate reverting commands.
-			data.push (escpos_print_state_changes (new_state, state));
+			data.push (printer.methods.printStateChanges (new_state, state));
 
 		return data;
 	}
 
-	function escpos_print (printer, node, reset, state) {
-		if (!reset) reset = escpos_reset_state (printer, node);
-		if (!state)	state = escpos_reset_state (printer, node);
+	function layout_print (printer, node, reset, state) {
+		if (!reset) reset = printer.methods.resetState (printer, node);
+		if (!state)	state = printer.methods.resetState (printer, node);
 		
 		switch (node_type (node)) {
 			case (Node.COMMENT_NODE): return null;
-			case (Node.TEXT_NODE): return escpos_print_text_node (state, node);
-			case (Node.ELEMENT_NODE): return escpos_print_element (printer, node, reset, state);
+			case (Node.TEXT_NODE): return layout_print_text_node (state, node);
+			case (Node.ELEMENT_NODE): return layout_print_element (printer, node, reset, state);
 		}
 
 		console.warn ('Unrecognized node type ' + node.nodeType);
 		return null;
 	}
 
-	function escpos_send_pulse (printer, device) {
-		return [ escpos_print_cmd ('pulse', { printer: printer, device: device }) ];
-	}
-
 	var print_methods = {
 		ESCPOS: {
-			print: escpos_print,
-			sendPulse: escpos_send_pulse
+			print: layout_print,
+			sendPulse: escpos_send_pulse,
+			resetState: escpos_reset_state,
+			horizontalPixelsToUnits: escpos_horizontal_pixels_to_units,
+			verticalPixelsToUnits: escpos_vertical_pixels_to_units,
+			printCmd: escpos_print_cmd,
+			printImg: escpos_print_img,
+			printBarcode: escpos_print_barcode,
+			printStateChanges: escpos_print_state_changes
 		}
 	};
 
-	function escpos_ticket_layout (ticket) {
+	function layout_ticket (ticket) {
 		ticket.find ('figure').each (
 			function (i, e) {
 				var ele = $(e);
-				var config = escpos_barcode_get_config (ele);
+				var config = layout_barcode_get_config (ele);
 
 				var barcode, length;
 				if (config.system == 'CODE128C') {
@@ -769,7 +782,7 @@
 	}
 
 	// Dump data in a nice format so the stream can be analized easily.
-	function escpos_debug_data (data) {
+	function debug_data (data) {
 		var str = '';
 		data.map (function (d) { str += d.toString (); });
 
@@ -977,7 +990,7 @@
 			throw 'devices: no printer configured';
 
 		function do_open (conf) {
-			var data = print_methods[printer.type].sendPulse (printer, device);
+			var data = printer.methods.sendPulse (printer, device);
 
 			for (var i = 0; i < data.length; i++)
 				if (typeof data[i] == 'string')
@@ -1011,7 +1024,7 @@
 		hidHandler: new HidHandler ().init (),
 
 		// Dynamic layout and css adjustments to make tickets look good on screen.
-		escposTicketLayout: escpos_ticket_layout,
+		layoutTicket: layout_ticket,
 
 		print: function (element, cb) {
 			var printer = devices_config.printer;
@@ -1019,7 +1032,7 @@
 				throw 'devices: no printer configured';
 
 			function do_print (conf) {
-				var data = print_methods[printer.type].print (printer, element);
+				var data = printer.methods.print (printer, element);
 
 				for (var i = 0; i < data.length; i++)
 					if (typeof data[i] == 'string')
@@ -1080,25 +1093,26 @@
 		configure: function (new_config) {
 			devices_config = new_config;
 
-			function add_devices_to_printer (key) {
+			function add_devices_to_printer (printer, key) {
 				var devices = devices_config[key];
 				if (devices) {
-					var printer = devices_config.printer;
-					if (printer) {
-						for (var name of Object.keys (devices)) {
-							var device = devices[name];
-							if (device.type == 'printer') {
-								if (!printer[key])
-									printer[key] = {};
-								printer[key][name] = device;
-							}
+					for (var name of Object.keys (devices)) {
+						var device = devices[name];
+						if (device.type == 'printer') {
+							if (!printer[key])
+								printer[key] = {};
+							printer[key][name] = device;
 						}
 					}
 				}
 			}
 
-			add_devices_to_printer ('drawers');
-			add_devices_to_printer ('booms');
+			var printer = devices_config.printer;
+			if (printer) {
+				printer.methods = print_methods[printer.type];
+				add_devices_to_printer (printer, 'drawers');
+				add_devices_to_printer (printer, 'booms');
+			}
 		},
 
 		setQzCredentials: function (key, cert) {

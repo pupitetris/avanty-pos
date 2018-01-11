@@ -488,7 +488,7 @@
 		APP.mod.report.shiftSummaryReport (ui.report, 'shift_report', records);
 
 		ui.tickets.report_summary_term.text (APP.terminal.name);
-		APP.mod.devices.escposTicketLayout (ui.tickets.report_summary);
+		APP.mod.devices.layoutTicket (ui.tickets.report_summary);
 	}
 
 	function super_report_summary_reload () {

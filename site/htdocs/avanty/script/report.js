@@ -190,7 +190,7 @@
 				ui.tickets[prefix + '_terminal'].text (APP.terminal.name);
 				ui.tickets[prefix + '_user'].text (APP.charp.credentialsGet ().login);
 				ui.tickets[prefix + '_items'].html (pre);
-				APP.mod.devices.escposTicketLayout (ui.tickets[prefix]);
+				APP.mod.devices.layoutTicket (ui.tickets[prefix]);
 			});
 		}
 

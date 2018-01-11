@@ -110,14 +110,9 @@
 		ui.report.summary_filter_section.find ('button').button ();
 		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
 		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
-		ui.report.summary_filter_start_h = ui.report.summary_filter_section.find ('select[name="start_h"]');
-		ui.report.summary_filter_start_m = ui.report.summary_filter_section.find ('select[name="start_m"]');
-		ui.report.summary_filter_start_ampm = ui.report.summary_filter_section.find ('select[name="start_ampm"]');
 		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
-		ui.report.summary_filter_end_h = ui.report.summary_filter_section.find ('select[name="end_h"]');
-		ui.report.summary_filter_end_m = ui.report.summary_filter_section.find ('select[name="end_m"]');
-		ui.report.summary_filter_end_ampm = ui.report.summary_filter_section.find ('select[name="end_ampm"]');
+
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
 
@@ -157,6 +152,14 @@
 			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_end_d); }
 		}, calopts));
 
+/*
+		ui.report.summary_filter_start_h = ui.report.summary_filter_section.find ('select[name="start_h"]');
+		ui.report.summary_filter_start_m = ui.report.summary_filter_section.find ('select[name="start_m"]');
+		ui.report.summary_filter_start_ampm = ui.report.summary_filter_section.find ('select[name="start_ampm"]');
+		ui.report.summary_filter_end_h = ui.report.summary_filter_section.find ('select[name="end_h"]');
+		ui.report.summary_filter_end_m = ui.report.summary_filter_section.find ('select[name="end_m"]');
+		ui.report.summary_filter_end_ampm = ui.report.summary_filter_section.find ('select[name="end_ampm"]');
+
 		for (var i = 1; i <= 12; i++) {
 			var num = APP.Util.padZeroes (i, 2);
 			ui.report.summary_filter_start_h.append ($('<option value="' + i + '">' + num + '</option>'));
@@ -168,6 +171,14 @@
 			ui.report.summary_filter_start_m.append ($('<option value="' + i + '">' + num + '</option>'));
 			ui.report.summary_filter_end_m.append ($('<option value="' + i + '">' + num + '</option>'));
 		}
+
+		ui.report.summary_filter_start_h.selectmenu ();
+		ui.report.summary_filter_start_m.selectmenu ();
+		ui.report.summary_filter_start_ampm.selectmenu ();
+		ui.report.summary_filter_end_h.selectmenu ();
+		ui.report.summary_filter_end_m.selectmenu ();
+		ui.report.summary_filter_end_ampm.selectmenu ();
+*/
 
 		function multi_select_mousedown (e) {
 			e.preventDefault ();
@@ -184,13 +195,6 @@
 
 		ui.report.summary_filter_users.find ('option').on ('mousedown', multi_select_mousedown);
 		ui.report.summary_filter_shifts.find ('option').on ('mousedown', multi_select_mousedown);
-
-		ui.report.summary_filter_start_h.selectmenu ();
-		ui.report.summary_filter_start_m.selectmenu ();
-		ui.report.summary_filter_start_ampm.selectmenu ();
-		ui.report.summary_filter_end_h.selectmenu ();
-		ui.report.summary_filter_end_m.selectmenu ();
-		ui.report.summary_filter_end_ampm.selectmenu ();
 
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary_table = ui.report.summary.find ('tbody');

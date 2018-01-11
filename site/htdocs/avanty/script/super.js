@@ -109,12 +109,21 @@
 		ui.report.summary_filter_section.find ('form');
 		ui.report.summary_filter_section.find ('button').button ();
 		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
+		ui.report.summary_filter_start_d_txt = ui.report.summary_filter_start_d.find ('span');
 		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
 		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
+		ui.report.summary_filter_end_d_txt = ui.report.summary_filter_end_d.find ('span');
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
+
+		var now = new Date ();
+		var todayStr = now.getFullYear () + '/' +
+			APP.Util.padZeroes (now.getMonth () + 1, 2) + '/' +
+			APP.Util.padZeroes (now.getDate (), 2);
+		ui.report.summary_filter_start_d_txt.text (todayStr);
+		ui.report.summary_filter_end_d_txt.text (todayStr);
 
 		function cal_toggle (cal1, cal2) {
 			if (cal1.is (':hidden')) {
@@ -141,16 +150,16 @@
 			dateFormat: 'yy/mm/dd'
 		};
 
-		function cal_selected (date, inst, button) {
-			button.find ('span').text (date);
-			inst.dpDiv.fadeOut ();
+		function cal_selected (date, inst, txt) {
+			txt.text (date);
+			inst.dpDiv.parent ().fadeOut ();
 		}
 
 		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_start_d); }
+			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_start_d_txt); }
 		}, calopts));
 		ui.report.summary_filter_end_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_end_d); }
+			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
 
 /*

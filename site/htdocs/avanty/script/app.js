@@ -1032,17 +1032,18 @@
 
 			APP.loadModule ('fetch'); // Catalog loading with a cache.
 
-			loadConfig ('devconf', 'devices.json', function (dev_config) {
-				APP.loadModule ('devices', // Printer and HIDs.
-								function (mod) {
-									mod.hidHandler.start ();
-									mod.configure (dev_config);
-								});
-
-				loadConfig ('config', 'config.json', function () {
-					APP.loadModule ('activate');
-				});
-			});
+			loadConfig ('devconf', 'devices.json',
+						function (dev_config) {
+							APP.loadModule ('devices', // Printer and HIDs.
+											function (mod) {
+												mod.hidHandler.start ();
+												mod.configure (dev_config);
+												loadConfig ('config', 'config.json',
+															function () {
+																APP.loadModule ('activate');
+															});
+											});
+						});
 		}
 	};
 

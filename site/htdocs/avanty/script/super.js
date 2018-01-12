@@ -119,8 +119,14 @@
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
+		ui.report.summary_filter_users_all.on ('click', function () {
+			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_users_all, ui.report.summary_filter_users);
+		});
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
 		ui.report.summary_filter_shifts_all = $('#super-report-summary-shifts-all');
+		ui.report.summary_filter_shifts_all.on ('click', function () {
+			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
+		});
 
 		var now = new Date ();
 		var todayStr = now.getFullYear () + '/' +
@@ -460,12 +466,32 @@
 		shell.navShow ();
 		shell.menuCollapse ();
 
-		super_report_summary_filter_refresh ();
+		super_report_summary_filter_refresh (function () {
+			ui.report.summary_filter_users_all.data ('state', 'all');
+			ui.report.summary_filter_shifts_all.data ('state', 'all');
+			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_users_all, ui.report.summary_filter_users);
+			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
+		});
 	}
 
 	function super_report_summary_filter_window_click (evt, cal1, cal2) {
 		if ($(evt.target).closest (cal1).length < 1)
 			cal_toggle (cal1, cal2);
+	}
+
+	function super_report_summary_filter_select_all_or_none (button, select) {
+		var state = button.data ('state');
+		if (!state || state == 'all') {
+			button.data ('state', 'none');
+			button.find ('span').text ('Seleccionar ninguno');
+			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'none.svg'));
+			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', true); });
+		} else {
+			button.data ('state', 'all');
+			button.find ('span').text ('Seleccionar todos');
+			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'all.svg'));
+			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', false); });
+		}
 	}
 
 	function super_report_summary_filter_cal_toggle (cal1, cal2) {
@@ -504,7 +530,7 @@
 		super_report_summary_filter_refresh ();
 	}
 
-	function super_report_summary_filter_refresh () {
+	function super_report_summary_filter_refresh (cb) {
 		var start = ui.report.summary_filter_start_d_txt.text ();
 		var end = ui.report.summary_filter_end_d_txt.text ();
 
@@ -517,7 +543,8 @@
 		ui.report.summary_filter_end_d.removeClass ('error');
 		ui.report.summary_filter_end_d_error.hide ();
 
-		APP.charp.request ('supervisor_get_shifts', [start, end], super_report_summary_filter_refresh_success);
+		APP.charp.request ('supervisor_get_shifts', [start, end],
+						   function (shifts) { super_report_summary_filter_refresh_success (shifts, cb); });
 	}
 
 	function super_report_summary_select_populate (select, shifts, key) {
@@ -545,7 +572,7 @@
 			}
 	}
 
-	function super_report_summary_filter_refresh_success (shifts) {
+	function super_report_summary_filter_refresh_success (shifts, cb) {
 		super_report_summary_select_populate (ui.report.summary_filter_users, shifts, 'cashier');
 		super_report_summary_select_populate (ui.report.summary_filter_shifts, shifts, 'shift_id');
 
@@ -556,6 +583,8 @@
 			ui.report.summary_filter_users_all.button ('disable');
 			ui.report.summary_filter_shifts_all.button ('disable');
 		}
+
+		if (cb)	cb ();
 	}
 
 	function super_report_summary () {

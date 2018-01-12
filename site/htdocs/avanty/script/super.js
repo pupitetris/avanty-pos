@@ -127,30 +127,11 @@
 		ui.report.summary_filter_start_d_txt.text (todayStr);
 		ui.report.summary_filter_end_d_txt.text (todayStr);
 
-		function window_click_hide (evt, cal1, cal2) {
-			if ($(evt.target).closest (cal1).length < 1)
-				cal_toggle (cal1, cal2);
-		}
-
-		function cal_toggle (cal1, cal2) {
-			$(window).off ('click.super_report_summary_toggle');
-			if (cal1.is (':hidden')) {
-				APP.later (function () {
-					$(window).on ('click.super_report_summary_toggle',
-								  function (evt) { window_click_hide (evt, cal1, cal2); });
- 				}, 200);
-				cal1.show ('drop', { direction: 'up' }, 200);
-				cal2.hide ();
-			} else {
-				cal1.hide ('drop', { direction: 'up' }, 200);
-			}
-		}
-
 		ui.report.summary_filter_start_d.on ('click', function () {
-			cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
+			super_report_summary_filter_cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
 		})
 		ui.report.summary_filter_end_d.on ('click', function () {
-			cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
+			super_report_summary_filter_cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
 		})
 
 		var calopts = {
@@ -162,27 +143,14 @@
 			dateFormat: 'yy/mm/dd'
 		};
 
-		function cal_selected (date, inst, txt) {
-			$(window).off ('click.super_report_summary_toggle');
-
-			txt.text (date);
-			inst.dpDiv.parent ().fadeOut ();
-
-			if (ui.report.summary_filter_start_d_txt.text () > 
-				ui.report.summary_filter_end_d_txt.text ()) {
-				ui.report.summary_filter_end_d.addClass ('error');
-				ui.report.summary_filter_end_d_error.show ();
-			} else {
-				ui.report.summary_filter_end_d.removeClass ('error');
-				ui.report.summary_filter_end_d_error.hide ();
-			}
-		}
-
 		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_start_d_txt); }
+			onSelect: function (date, inst) {
+				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_start_d_txt); }
 		}, calopts));
+
 		ui.report.summary_filter_end_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) { cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
+			onSelect: function (date, inst) {
+				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
 
 /*
@@ -213,21 +181,8 @@
 		ui.report.summary_filter_end_ampm.selectmenu ();
 */
 
-		function multi_select_mousedown (e) {
-			e.preventDefault ();
-			var originalScrollTop = $(this).parent ().scrollTop ();
-			$(this).prop ('selected', $(this).prop ('selected') ? false : true);
-			var self = this;
-			$(this).parent ().focus ();
-			window.setTimeout (function () {
-				$(self).parent ().scrollTop (originalScrollTop);
-			}, 0);
-			
-			return false;
-		}
-
-		ui.report.summary_filter_users.find ('option').on ('mousedown', multi_select_mousedown);
-		ui.report.summary_filter_shifts.find ('option').on ('mousedown', multi_select_mousedown);
+		ui.report.summary_filter_users.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
+		ui.report.summary_filter_shifts.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary_table = ui.report.summary.find ('tbody');
@@ -503,6 +458,54 @@
 		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-summary');
 		shell.navShow ();
 		shell.menuCollapse ();
+	}
+
+	function super_report_summary_filter_window_click (evt, cal1, cal2) {
+		if ($(evt.target).closest (cal1).length < 1)
+			cal_toggle (cal1, cal2);
+	}
+
+	function super_report_summary_filter_cal_toggle (cal1, cal2) {
+		$(window).off ('click.super_report_summary_toggle');
+		if (cal1.is (':hidden')) {
+			APP.later (function () {
+				$(window).on ('click.super_report_summary_toggle',
+							  function (evt) { super_report_summary_filter_window_click (evt, cal1, cal2); });
+ 			}, 200);
+			cal1.show ('drop', { direction: 'up' }, 200);
+			cal2.hide ();
+		} else {
+			cal1.hide ('drop', { direction: 'up' }, 200);
+		}
+	}
+
+	function super_report_summary_filter_multi_select_mousedown (evt) {
+		evt.preventDefault ();
+		var originalScrollTop = $(this).parent ().scrollTop ();
+		$(this).prop ('selected', $(this).prop ('selected') ? false : true);
+		var self = this;
+		$(this).parent ().focus ();
+		window.setTimeout (function () {
+			$(self).parent ().scrollTop (originalScrollTop);
+		}, 0);
+		
+		return false;
+	}
+	
+	function super_report_summary_filter_cal_selected (date, inst, txt) {
+		$(window).off ('click.super_report_summary_toggle');
+
+		txt.text (date);
+		inst.dpDiv.parent ().fadeOut ();
+
+		if (ui.report.summary_filter_start_d_txt.text () > 
+			ui.report.summary_filter_end_d_txt.text ()) {
+			ui.report.summary_filter_end_d.addClass ('error');
+			ui.report.summary_filter_end_d_error.show ();
+		} else {
+			ui.report.summary_filter_end_d.removeClass ('error');
+			ui.report.summary_filter_end_d_error.hide ();
+		}
 	}
 
 	function super_report_summary () {

@@ -3068,6 +3068,66 @@ END;]]></definition>
 		</idxelement>
 </index>
 
+<function name="supervisor_get_shifts"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get a report of activities for the given parameters.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="shift_id">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="cashier">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="end">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="_end">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM user_supervisor_assert(_uid);
+
+	IF _start IS NULL THEN
+		_start := '2017-01-01 00:00:00'::timestamptz;
+	END IF;
+
+	IF _end IS NULL THEN
+		_end := CURRENT_TIMESTAMP;
+	END IF;
+
+	RETURN QUERY
+		SELECT cs.shift_id, t.name, a.login, 
+			cs.shift_start::timestamptz, cs.shift_end::timestamptz
+			FROM cashier_shift AS cs
+				NATURAL JOIN account AS a NATURAL JOIN terminal AS t
+			WHERE (_end IS NULL OR shift_start < _end)
+				AND (_start IS NULL 
+					OR shift_end IS NULL OR shift_end >= _start);
+END;]]></definition>
+</function>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>

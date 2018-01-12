@@ -125,7 +125,7 @@
 			  <th><label for="super-report-summary-start-d">Inicio:</label></th>
 			  <td>
 				<div id="super-report-summary-start-d-cal" class="cal"></div>
-				<button id="super-report-summary-start-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>2017/12/10</span></button>
+				<button id="super-report-summary-start-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
 <!--
 				<div class="hm"><select name="start_h"></select></div>:&nbsp;<div class="hm"><select name="start_m" class="hm"></select></div>
 				<div class="hm"><select name="start_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
@@ -138,7 +138,8 @@
 			  <th><label for="super-report-summary-end-d">Fin:</label></th>
 			  <td>
 				<div id="super-report-summary-end-d-cal" class="cal"></div>
-				<button id="super-report-summary-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>2017/12/10</span></button>
+				<button id="super-report-summary-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
+				<label id="super-report-summary-end-d-error" class="error">Fecha final menor que fecha inicial.</label>
 <!--
 				<div class="hm"><select name="end_h"></select></div>:&nbsp;<div class="hm"><select name="end_m" class="hm"></select></div>
 				<div class="hm"><select name="end_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
@@ -151,23 +152,18 @@
 	  <div>
 		<div>
 		  <h4>Usuarios</h4>
+		  <div>
+			<button id="super-report-summary-users-all" type="button" class="button-icon"><img src="img/symbolic/all.svg" />Seleccionar todos</button>
+		  </div>
 		  <select id="super-report-summary-users" multiple="multiple">
-			<option>cash</option>
-			<option>fulano</option>
-			<option>mengano</option>
-			<option>perengano</option>
 		  </select>
 		</div>
 		<div>
 		  <h4>Turnos</h4>
+		  <div>
+			<button id="super-report-summary-shifts-all" type="button" class="button-icon"><img src="img/symbolic/all.svg" />Seleccionar todos</button>
+		  </div>
 		  <select id="super-report-summary-shifts" multiple="multiple">
-			<option>1234</option>
-			<option>1233</option>
-			<option>1232</option>
-			<option>1231</option>
-			<option>1230</option>
-			<option>1229</option>
-			<option>1228</option>
 		  </select>
 		</div>
 	  </div>

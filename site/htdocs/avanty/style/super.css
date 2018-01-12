@@ -45,7 +45,7 @@
 	display: flex;
 	flex-direction: column;
 	flex-grow: 1;
-	margin: 0.5em;
+	margin: 0.5em 1em;
 }
 
 #super-report-summary-filter form > div:last-child > div {
@@ -53,7 +53,12 @@
 }
 
 #super-report-summary-filter h4 {
+	margin-bottom: 0.5em;
 	border-bottom: 1px solid black;
+}
+
+#super-report-summary-filter form > div > div > div {
+	text-align: center;
 }
 
 #super-report-summary-filter .hm {
@@ -74,7 +79,12 @@
 }
 
 #super-report-summary-filter select[multiple="multiple"] {
+	margin-top: 0.5em;
 	font-size: inherit;
 	height: 8em;
 	border-radius: 10px;
+}
+
+#super-report-summary-filter button[type="submit"] {
+	margin-top: 1em;
 }

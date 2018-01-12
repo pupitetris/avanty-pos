@@ -118,7 +118,9 @@
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
+		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
+		ui.report.summary_filter_shifts_all = $('#super-report-summary-shifts-all');
 
 		var now = new Date ();
 		var todayStr = now.getFullYear () + '/' +
@@ -181,7 +183,6 @@
 		ui.report.summary_filter_end_ampm.selectmenu ();
 */
 
-		ui.report.summary_filter_users.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 		ui.report.summary_filter_shifts.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 
 		ui.report.summary = $('#super-report-summary');
@@ -458,6 +459,8 @@
 		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-summary');
 		shell.navShow ();
 		shell.menuCollapse ();
+
+		super_report_summary_filter_refresh ();
 	}
 
 	function super_report_summary_filter_window_click (evt, cal1, cal2) {
@@ -498,13 +501,60 @@
 		txt.text (date);
 		inst.dpDiv.parent ().fadeOut ();
 
-		if (ui.report.summary_filter_start_d_txt.text () > 
-			ui.report.summary_filter_end_d_txt.text ()) {
+		super_report_summary_filter_refresh ();
+	}
+
+	function super_report_summary_filter_refresh () {
+		var start = ui.report.summary_filter_start_d_txt.text ();
+		var end = ui.report.summary_filter_end_d_txt.text ();
+
+		if (start > end) {
 			ui.report.summary_filter_end_d.addClass ('error');
 			ui.report.summary_filter_end_d_error.show ();
+			return;
+		}
+
+		ui.report.summary_filter_end_d.removeClass ('error');
+		ui.report.summary_filter_end_d_error.hide ();
+
+		APP.charp.request ('supervisor_get_shifts', [start, end], super_report_summary_filter_refresh_success);
+	}
+
+	function super_report_summary_select_populate (select, shifts, key) {
+		var opts = {};
+
+		select.find ('option').each (
+			function (i, opt) {
+				opts[opt.value] = { selected: opt.selected };
+			});
+		for (var shift of shifts) {
+			if (opts[shift[key]])
+				opts[shift[key]].found = true;
+			else
+				opts[shift[key]] = { found: true };
+		}
+
+		select.empty ();
+		for (var val of Object.keys (opts).sort ())
+			if (opts[val].found) {
+				var option = $('<option value="' + val + '"' +
+								 ((opts[val].selected)? ' selected="selected"': '') +
+							   '>' + val + '</option>');
+				option.on ('mousedown', super_report_summary_filter_multi_select_mousedown);
+				select.append (option);
+			}
+	}
+
+	function super_report_summary_filter_refresh_success (shifts) {
+		super_report_summary_select_populate (ui.report.summary_filter_users, shifts, 'cashier');
+		super_report_summary_select_populate (ui.report.summary_filter_shifts, shifts, 'shift_id');
+
+		if (shifts.length > 0) {
+			ui.report.summary_filter_users_all.button ('enable');
+			ui.report.summary_filter_shifts_all.button ('enable');
 		} else {
-			ui.report.summary_filter_end_d.removeClass ('error');
-			ui.report.summary_filter_end_d_error.hide ();
+			ui.report.summary_filter_users_all.button ('disable');
+			ui.report.summary_filter_shifts_all.button ('disable');
 		}
 	}
 

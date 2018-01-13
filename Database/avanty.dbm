@@ -3128,6 +3128,165 @@ END;]]></definition>
 END;]]></definition>
 </function>
 
+<function name="supervisor_summary_report"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get a report of activities for the given parameters.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="shift_id">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="cashier">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="rate">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<parameter name="_start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="_end">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="_users">
+		<type name="smallint" length="0" dimension="1"/>
+	</parameter>
+	<parameter name="_shifts">
+		<type name="integer" length="0" dimension="1"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM user_supervisor_assert(_uid);
+
+	IF _start IS NULL THEN
+		_start := '2017-01-01 00:00:00'::timestamptz;
+	END IF;
+
+	IF _end IS NULL THEN
+		_end := CURRENT_TIMESTAMP;
+	END IF;
+
+	RETURN QUERY
+		SELECT * FROM operations_get (_start, _end, _users, _shifts) ORDER BY timestamp;
+END;]]></definition>
+</function>
+
+<function name="operations_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get a report of activities for the given parameters.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="shift_id">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="cashier">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="concept">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="rate">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="amount">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="change">
+		<type name="integer" length="0"/>
+	</parameter>
+	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	</return-type>
+	<parameter name="_start">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="_end">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="_users">
+		<type name="smallint" length="0" dimension="1"/>
+	</parameter>
+	<parameter name="_shifts">
+		<type name="integer" length="0" dimension="1"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	-- shift_begin and shift_end events.
+	RETURN QUERY
+		WITH sop AS
+			( SELECT cs.shift_id, cs.terminal_id, cs.user_id,
+				ua.type::varchar AS concept, 
+				movement.amount AS amount, 
+				ua.timestamp AS timestamp
+				FROM cashier_shift AS cs
+					JOIN user_activity AS ua 
+						ON (shift_start = ua.timestamp OR
+							shift_end = ua.timestamp)
+					LEFT JOIN ticket USING (timestamp)
+					LEFT JOIN movement USING (ticket_id)
+				WHERE _start <= ua.timestamp AND ua.timestamp < _end
+					AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts))
+					AND (_users IS NULL OR cs.user_id = ANY (_users))
+			)
+			SELECT sop.shift_id, terminal.name, account.login,
+				sop.concept, NULL, sop.amount, 0, sop.timestamp
+				FROM sop 
+					NATURAL JOIN terminal
+					NATURAL JOIN account;
+
+	-- All other operations.
+	RETURN QUERY
+		SELECT cs.shift_id, terminal.name, account.login, 
+			t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz
+			FROM ticket AS t 
+				NATURAL JOIN cashier_shift AS cs
+				NATURAL JOIN terminal
+				NATURAL JOIN account
+				LEFT JOIN movement AS m USING (ticket_id)
+				LEFT JOIN rate AS r USING (rate_id)
+			WHERE ((m.timestamp IS NULL AND _start <= t.timestamp) OR (_start <= m.timestamp AND m.timestamp < _end))
+				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts))
+				AND (_users IS NULL OR cs.user_id = ANY (_users));
+END;]]></definition>
+</function>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>

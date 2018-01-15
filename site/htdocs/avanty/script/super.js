@@ -448,7 +448,7 @@
 
 	function super_report_summary_filter_window_click (evt, cal1, cal2) {
 		if ($(evt.target).closest (cal1).length < 1)
-			cal_toggle (cal1, cal2);
+			super_report_summary_filter_cal_toggle (cal1, cal2);
 	}
 
 	function super_report_summary_filter_select_all_or_none (button, select) {

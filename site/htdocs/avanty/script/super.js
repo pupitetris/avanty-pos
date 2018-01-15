@@ -161,34 +161,6 @@
 				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
 
-/*
-		ui.report.summary_filter_start_h = ui.report.summary_filter_section.find ('select[name="start_h"]');
-		ui.report.summary_filter_start_m = ui.report.summary_filter_section.find ('select[name="start_m"]');
-		ui.report.summary_filter_start_ampm = ui.report.summary_filter_section.find ('select[name="start_ampm"]');
-		ui.report.summary_filter_end_h = ui.report.summary_filter_section.find ('select[name="end_h"]');
-		ui.report.summary_filter_end_m = ui.report.summary_filter_section.find ('select[name="end_m"]');
-		ui.report.summary_filter_end_ampm = ui.report.summary_filter_section.find ('select[name="end_ampm"]');
-
-		for (var i = 1; i <= 12; i++) {
-			var num = APP.Util.padZeroes (i, 2);
-			ui.report.summary_filter_start_h.append ($('<option value="' + i + '">' + num + '</option>'));
-			ui.report.summary_filter_end_h.append ($('<option value="' + i + '">' + num + '</option>'));
-		}
-
-		for (var i = 0; i < 60; i += 5) {
-			var num = APP.Util.padZeroes (i, 2);
-			ui.report.summary_filter_start_m.append ($('<option value="' + i + '">' + num + '</option>'));
-			ui.report.summary_filter_end_m.append ($('<option value="' + i + '">' + num + '</option>'));
-		}
-
-		ui.report.summary_filter_start_h.selectmenu ();
-		ui.report.summary_filter_start_m.selectmenu ();
-		ui.report.summary_filter_start_ampm.selectmenu ();
-		ui.report.summary_filter_end_h.selectmenu ();
-		ui.report.summary_filter_end_m.selectmenu ();
-		ui.report.summary_filter_end_ampm.selectmenu ();
-*/
-
 		ui.report.summary_filter_shifts.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 
 		ui.report.summary = $('#super-report-summary');

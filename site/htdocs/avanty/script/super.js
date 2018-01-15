@@ -106,8 +106,8 @@
 		ui.report = {};
 
 		ui.report.summary_filter_section = $('#super-report-summary-filter');
-		ui.report.summary_filter_section.find ('form');
 		ui.report.summary_filter_section.find ('button').button ();
+		ui.report.summary_filter_form = ui.report.summary_filter_section.find ('form');
 		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
 		ui.report.summary_filter_start_d_txt = ui.report.summary_filter_start_d.find ('span');
 		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
@@ -116,6 +116,7 @@
 		ui.report.summary_filter_end_d_error = $('#super-report-summary-end-d-error');
 		ui.report.summary_filter_end_d_error.hide ();
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
+		ui.report.summary_filter_submit = ui.report.summary_filter_form.find ('button[type="submit"]');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
@@ -160,8 +161,6 @@
 			onSelect: function (date, inst) {
 				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
-
-		ui.report.summary_filter_shifts.find ('option').on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary_table = ui.report.summary.find ('tbody');
@@ -480,14 +479,30 @@
 		}
 	}
 
-	function super_report_summary_filter_multi_select_mousedown (evt) {
+	function super_report_summary_filter_update_shifts (shifts) {
+		var cashiers = {};
+		ui.report.summary_filter_users.find ('option').each (
+			function (i, opt) {
+				cashiers[opt.value] = { selected: opt.selected? true: false }
+			});
+
+		ui.report.summary_filter_shifts.find ('option').each (
+			function (i, opt) {
+				$(opt).prop ('selected', cashiers[shifts.byId[opt.value].cashier].selected);
+			});
+	}
+
+	function super_report_summary_filter_multi_select_mousedown (evt, shifts) {
 		evt.preventDefault ();
-		var originalScrollTop = $(this).parent ().scrollTop ();
-		$(this).prop ('selected', $(this).prop ('selected') ? false : true);
-		var self = this;
-		$(this).parent ().focus ();
+		var option = $(evt.target);
+		var select = option.parent ();
+		var originalScrollTop = select.scrollTop ();
+		option.prop ('selected', option.prop ('selected') ? false : true);
+		select.focus ();
 		window.setTimeout (function () {
-			$(self).parent ().scrollTop (originalScrollTop);
+			select.scrollTop (originalScrollTop);
+			if (select.prop ('id') == ui.report.summary_filter_users.prop ('id'))
+				super_report_summary_filter_update_shifts (shifts);
 		}, 0);
 		
 		return false;
@@ -534,17 +549,23 @@
 		}
 
 		select.empty ();
+		select.data ('opts', opts);
 		for (var val of Object.keys (opts).sort ())
 			if (opts[val].found) {
 				var option = $('<option value="' + val + '"' +
 								 ((opts[val].selected)? ' selected="selected"': '') +
 							   '>' + val + '</option>');
-				option.on ('mousedown', super_report_summary_filter_multi_select_mousedown);
+				option.on ('mousedown', function (evt) { super_report_summary_filter_multi_select_mousedown (evt, shifts); });
 				select.append (option);
 			}
 	}
 
 	function super_report_summary_filter_refresh_success (shifts, cb) {
+		var dict = {};
+		for (var shift of shifts)
+			dict[shift.shift_id] = shift;
+		shifts.byId = dict;
+		
 		super_report_summary_select_populate (ui.report.summary_filter_users, shifts, 'cashier');
 		super_report_summary_select_populate (ui.report.summary_filter_shifts, shifts, 'shift_id');
 

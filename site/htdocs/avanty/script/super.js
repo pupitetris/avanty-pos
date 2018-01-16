@@ -572,7 +572,7 @@
 			if (opts[shift[key]])
 				opts[shift[key]].found = true;
 			else
-				opts[shift[key]] = { found: true };
+				opts[shift[key]] = { found: true, selected: true };
 		}
 
 		select.empty ();
@@ -610,7 +610,8 @@
 	function super_report_summary_filter_submit (evt) {
 		evt.preventDefault ();
 
-		if (!super_report_summary_filter_validate_start_end ())
+		var dates = super_report_summary_filter_validate_start_end ();
+		if (!dates)
 			return;
 
 		if (!super_report_summary_filter_validate_shifts ())

@@ -237,13 +237,17 @@ form tfoot td[colspan="2"] {
 form label.error {
 	display: block;
 	position: absolute;
-	top: 3em;
+	top: calc(3em - 2px);
 	left: -8px;
 	width: 100%;
 	text-align: right;
 	font-size: 50%;
 	color: red;
 	letter-spacing: -1px;
+}
+
+form button label.error {
+	top: calc(3em - 4px);
 }
 
 .form-hor {

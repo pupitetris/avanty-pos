@@ -3194,7 +3194,8 @@ END;]]></definition>
 	END IF;
 
 	RETURN QUERY
-		SELECT * FROM operations_get (_start, _end, _shifts) ORDER BY timestamp;
+		SELECT * FROM operations_get (_start, _end, _shifts) 
+			ORDER BY timestamp, concept;
 END;]]></definition>
 </function>
 

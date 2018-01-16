@@ -3175,9 +3175,6 @@ END;]]></definition>
 	<parameter name="_end">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
-	<parameter name="_users">
-		<type name="smallint" length="0" dimension="1"/>
-	</parameter>
 	<parameter name="_shifts">
 		<type name="integer" length="0" dimension="1"/>
 	</parameter>
@@ -3192,8 +3189,12 @@ END;]]></definition>
 		_end := CURRENT_TIMESTAMP;
 	END IF;
 
+	IF array_length (_shifts, 1) = 0 THEN
+		_shifts = NULL;
+	END IF;
+
 	RETURN QUERY
-		SELECT * FROM operations_get (_start, _end, _users, _shifts) ORDER BY timestamp;
+		SELECT * FROM operations_get (_start, _end, _shifts) ORDER BY timestamp;
 END;]]></definition>
 </function>
 
@@ -3241,9 +3242,6 @@ END;]]></definition>
 	<parameter name="_end">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
-	<parameter name="_users">
-		<type name="smallint" length="0" dimension="1"/>
-	</parameter>
 	<parameter name="_shifts">
 		<type name="integer" length="0" dimension="1"/>
 	</parameter>
@@ -3263,10 +3261,9 @@ END;]]></definition>
 					LEFT JOIN movement USING (ticket_id)
 				WHERE _start <= ua.timestamp AND ua.timestamp < _end
 					AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts))
-					AND (_users IS NULL OR cs.user_id = ANY (_users))
 			)
 			SELECT sop.shift_id, terminal.name, account.login,
-				sop.concept, NULL, sop.amount, 0, sop.timestamp
+				sop.concept, NULL::varchar, sop.amount, 0, sop.timestamp::timestamptz
 				FROM sop 
 					NATURAL JOIN terminal
 					NATURAL JOIN account;
@@ -3282,8 +3279,7 @@ END;]]></definition>
 				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)
 			WHERE ((m.timestamp IS NULL AND _start <= t.timestamp) OR (_start <= m.timestamp AND m.timestamp < _end))
-				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts))
-				AND (_users IS NULL OR cs.user_id = ANY (_users));
+				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts));
 END;]]></definition>
 </function>
 

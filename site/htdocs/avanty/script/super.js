@@ -108,15 +108,18 @@
 		ui.report.summary_filter_section = $('#super-report-summary-filter');
 		ui.report.summary_filter_section.find ('button').button ();
 		ui.report.summary_filter_form = ui.report.summary_filter_section.find ('form');
+		ui.report.summary_filter_form.on ('submit', super_report_summary_filter_submit);
+		ui.report.summary_filter_submit = ui.report.summary_filter_form.find ('button[type="submit"]');
+		ui.report.summary_filter_error = ui.report.summary_filter_submit.find ('.error');
+		ui.report.summary_filter_error.hide ();
 		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
 		ui.report.summary_filter_start_d_txt = ui.report.summary_filter_start_d.find ('span');
 		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
 		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
 		ui.report.summary_filter_end_d_txt = ui.report.summary_filter_end_d.find ('span');
-		ui.report.summary_filter_end_d_error = $('#super-report-summary-end-d-error');
+		ui.report.summary_filter_end_d_error = ui.report.summary_filter_end_d.find ('.error');
 		ui.report.summary_filter_end_d_error.hide ();
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
-		ui.report.summary_filter_submit = ui.report.summary_filter_form.find ('button[type="submit"]');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
@@ -463,6 +466,7 @@
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'all.svg'));
 			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', false); });
 		}
+		super_report_summary_filter_validate_shifts ();
 	}
 
 	function super_report_summary_filter_cal_toggle (cal1, cal2) {
@@ -492,6 +496,18 @@
 			});
 	}
 
+	function super_report_summary_filter_validate_shifts () {
+		if (ui.report.summary_filter_shifts.find ('option:selected').length == 0) {
+			ui.report.summary_filter_submit.addClass ('error');
+			ui.report.summary_filter_error.show ();
+			return false;
+		}
+		
+		ui.report.summary_filter_submit.removeClass ('error');
+		ui.report.summary_filter_error.hide ();
+		return true;
+	}		
+
 	function super_report_summary_filter_multi_select_mousedown (evt, shifts) {
 		evt.preventDefault ();
 		var option = $(evt.target);
@@ -503,6 +519,8 @@
 			select.scrollTop (originalScrollTop);
 			if (select.prop ('id') == ui.report.summary_filter_users.prop ('id'))
 				super_report_summary_filter_update_shifts (shifts);
+
+			super_report_summary_filter_validate_shifts ();
 		}, 0);
 		
 		return false;
@@ -517,20 +535,29 @@
 		super_report_summary_filter_refresh ();
 	}
 
-	function super_report_summary_filter_refresh (cb) {
+	function super_report_summary_filter_validate_start_end () {
 		var start = ui.report.summary_filter_start_d_txt.text ();
 		var end = ui.report.summary_filter_end_d_txt.text ();
 
 		if (start > end) {
 			ui.report.summary_filter_end_d.addClass ('error');
 			ui.report.summary_filter_end_d_error.show ();
-			return;
+			ui.report.summary_filter_shifts.empty ();
+			ui.report.summary_filter_users.empty ();
+			return undefined;
 		}
 
 		ui.report.summary_filter_end_d.removeClass ('error');
 		ui.report.summary_filter_end_d_error.hide ();
+		return { start: start, end: end };
+	}
 
-		APP.charp.request ('supervisor_get_shifts', [start, end],
+	function super_report_summary_filter_refresh (cb) {
+		var res = super_report_summary_filter_validate_start_end ();
+		if (!res)
+			return;
+
+		APP.charp.request ('supervisor_get_shifts', [res.start, res.end],
 						   function (shifts) { super_report_summary_filter_refresh_success (shifts, cb); });
 	}
 
@@ -580,7 +607,15 @@
 		if (cb)	cb ();
 	}
 
-	function super_report_summary () {
+	function super_report_summary_filter_submit (evt) {
+		evt.preventDefault ();
+
+		if (!super_report_summary_filter_validate_start_end ())
+			return;
+
+		if (!super_report_summary_filter_validate_shifts ())
+			return;
+		
 		APP.history.go (MOD_NAME, ui.section_report, 'super-report-summary');
 		shell.navShow ();
 

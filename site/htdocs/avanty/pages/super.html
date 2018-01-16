@@ -138,8 +138,8 @@
 			  <th><label for="super-report-summary-end-d">Fin:</label></th>
 			  <td>
 				<div id="super-report-summary-end-d-cal" class="cal"></div>
-				<button id="super-report-summary-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
-				<label id="super-report-summary-end-d-error" class="error">Fecha final menor que fecha inicial.</label>
+				<button id="super-report-summary-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span><label class="error">Fecha final menor que fecha inicial.</label></button>
+				
 <!--
 				<div class="hm"><select name="end_h"></select></div>:&nbsp;<div class="hm"><select name="end_m" class="hm"></select></div>
 				<div class="hm"><select name="end_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
@@ -168,9 +168,8 @@
 		</div>
 	  </div>
 	  <div>
-		<div>
-		  <button type="submit" class="button-icon"><img src="img/symbolic/yes.svg" />Mostrar reporte</button>
-		</div>
+		<button type="submit" class="button-icon"><img src="img/symbolic/yes.svg" />Mostrar reporte<label class="error">Selecciona por lo menos un turno.</label></button>
+		  
 	  </div>
 	</form>
   </div>

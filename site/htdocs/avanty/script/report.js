@@ -84,7 +84,7 @@
 				var charged_tickets = 0;
 				var printed_tickets = 0;
 				var pre = '';
-				var shift_begin_ts;
+				var shift_begin_ts = '';
 				var shift_ids = [];
 
 				ui[prefix + '_table'].empty ();
@@ -143,11 +143,12 @@
 				if (ui[prefix + '_shift_id'])
 					ui[prefix + '_shift_id'].text (shift_ids_str);
 
-				pre += '<div class="desc">' + shift_begin_ts + ' Dotación:</div>\n' +
+				var deposit_str = (num_deposits > 1)? 'Dotaciones:': 'Dotación:';
+				pre += '<div class="desc">' + shift_begin_ts + ' ' + deposit_str + '</div>\n' +
 					'<div class="sum">$' + APP.Util.asMoney (deposit) + '</div>\n';
 				ui[prefix + '_table'].append ($('<tr>' +
 												'<td style="text-align: right">' + shift_begin_ts + ' (' + num_deposits + ')</td>' +
-												'<th>Dotación:</th>' +
+												'<th>' + deposit_str + '</th>' +
 												'<td><s/></td><td class="money">' + APP.Util.asMoney (deposit) + '</td>' +
 												'</tr>'));
 				

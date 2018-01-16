@@ -101,8 +101,6 @@
 		ui.super_chpass_cancel.button ();
 		ui.super_chpass_cancel.on ('click', super_chpass_finish);
 
-		ui.section_report = $('#super-report');
-		ui.section_report.find ('button').button ();
 		ui.report = {};
 
 		ui.report.summary_filter_section = $('#super-report-summary-filter');
@@ -165,11 +163,16 @@
 				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
 
+		ui.report.summary_filter_cancel = $('#super-report-summary-filter-cancel');
+		ui.report.summary_filter_cancel.on ('click', super_report_summary_close);
+
 		ui.report.summary = $('#super-report-summary');
+		ui.report.summary.find ('button').button ();
 		ui.report.summary_table = ui.report.summary.find ('tbody');
-		ui.report.summary_charged = ui.report.summary.find ('.charged');
 		ui.report.summary_received = ui.report.summary.find ('.received');
 		ui.report.summary_change = ui.report.summary.find ('.change');
+		ui.report.summary_charged = ui.report.summary.find ('.charged');
+		ui.report.summary_balance = ui.report.summary.find ('.balance');
 		ui.report.summary_charged_tickets = ui.report.summary.find ('.charged-tickets');
 		ui.report.summary_printed_tickets = ui.report.summary.find ('.printed-tickets');
 		ui.report.summary_reload = $('#super-report-summary-reload');
@@ -179,10 +182,12 @@
 		ui.report.summary_close = $('#super-report-summary-close');
 		ui.report.summary_close.on ('click', super_report_summary_close);
 		
-		ui.tickets = {};
-		ui.tickets.report_summary = $('#super-ticket-report-summary');
-		ui.tickets.report_summary_term = ui.tickets.report_summary.find ('.term');
-		ui.tickets.report_summary_items = ui.tickets.report_summary.find ('.items span');
+		ui.report.tickets = {};
+		ui.report.tickets.summary = $('#super-ticket-report-summary');
+		ui.report.tickets.summary_timestamp = ui.report.tickets.summary.find ('.ts');
+		ui.report.tickets.summary_terminal = ui.report.tickets.summary.find ('.term');
+		ui.report.tickets.summary_user = ui.report.tickets.summary.find ('.user');
+		ui.report.tickets.summary_items = ui.report.tickets.summary.find ('.items span');
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -616,6 +621,9 @@
 		if (cb)	cb ();
 	}
 
+	var super_report_summary_params;
+	var super_report_summary_params_str;
+	var super_report_summary_records;
 	function super_report_summary_filter_submit (evt) {
 		evt.preventDefault ();
 
@@ -625,39 +633,55 @@
 
 		if (!super_report_summary_filter_validate_shifts ())
 			return;
-		
-		APP.history.go (MOD_NAME, ui.section_report, 'super-report-summary');
+
+		APP.history.go (MOD_NAME, ui.report.summary, 'super-report-summary');
 		shell.navShow ();
 
-		if (super_report_records) {
-			super_report_summary_do (super_report_records);
+		var shifts = [];
+		ui.report.summary_filter_shifts.find ('option').each (
+			function (i, opt) {
+				var opt = $(opt);
+				if (opt.is (':selected'))
+					shifts.push (parseInt (opt.prop ('value')));
+			});
+		if (shifts.length == 0)
+			shifts = null;
+		
+		var params = { dates: dates, shifts: shifts };
+		var params_str = JSON.stringify (params);
+		if (super_report_summary_params_str && params_str == super_report_summary_params_str) {
+			super_report_summary_do (super_report_summary_records);
 			return;
 		}
 
-		super_report_summary_request ();
+		super_report_summary_request (params, params_str);
 	}
 
-	function super_report_summary_request () {
-		APP.charp.request ('supervisor_terminal_report', [APP.terminal.id], super_report_summary_do);
+	function super_report_summary_request (params, params_str) {
+		APP.charp.request ('supervisor_summary_report', [params.dates.start, params.dates.end, params.shifts],
+						   function (records) {
+							   super_report_summary_params = params;
+							   super_report_summary_params_str = params_str;
+							   super_report_summary_records = records; 
+							   super_report_summary_do (records)
+						   });
 	}
 
 	function super_report_summary_do (records) {
-		APP.mod.report.shiftSummaryReport (ui.report, 'shift_report', records);
-
-		ui.tickets.report_summary_term.text (APP.terminal.name);
-		APP.mod.devices.layoutTicket (ui.tickets.report_summary);
+		ui.report.tickets.summary_timestamp.text (new Date ().toLocaleString ());
+		APP.mod.report.shiftSummaryReport (ui.report, 'summary', records);
 	}
 
 	function super_report_summary_reload () {
 		ui.report.summary_reload.button ('disable');
-		super_report_summary_request ();
+		super_report_summary_request (super_report_summary_params, super_report_summary_params_str);
 		APP.later (function () {
 			ui.report.summary_reload.button ('enable');
 		}, 1000);
 	}
 
 	function super_report_summary_print () {
-		APP.mod.devices.print (ui.tickets.report_summary);
+		APP.mod.devices.print (ui.report.tickets.summary);
 	}
 
 	function super_report_summary_close () {

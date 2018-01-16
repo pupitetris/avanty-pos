@@ -167,9 +167,9 @@
 		  </select>
 		</div>
 	  </div>
-	  <div>
+	  <div class="button-bar-h">
+		<button type="button" id="super-report-summary-filter-cancel" class="button-icon"><img src="img/symbolic/close.svg" />Cancelar</button>
 		<button type="submit" class="button-icon"><img src="img/symbolic/yes.svg" />Mostrar reporte<label class="error">Selecciona por lo menos un turno.</label></button>
-		  
 	  </div>
 	</form>
   </div>
@@ -192,11 +192,15 @@
 		  <td><s/></td><td class="money charged"></td>
 		</tr>
 		<tr>
+		  <th colspan="2">Balance:</th>
+		  <td><s/></td><td class="money balance"></td>
+		</tr>
+		<tr>
 		  <th colspan="2">Boletos cobrados:</th>
 		  <td colspan="2" class="charged-tickets"></td>
 		</tr>
 		<tr>
-		  <th colspan="2">Boletos emitidos:</th>
+		  <th colspan="2">Boletos emitidos por TPV:</th>
 		  <td colspan="2" class="printed-tickets"></td>
 		</tr>
 	  </tfoot>
@@ -214,26 +218,16 @@
 		<img src="img/logo_bw.png" />
 		<br />
 		<br />
-		<h1>Vips Eugenia</h1>
+		<h1>Establishment</h1>
 		<br />
 		<h2>Resumen operaciones</h2>
+		<p>Generado: <time class="ts">XXXX-XX-XX XX:XX:XX</time></p>
 		<br />
 		<summary>Terminal <span class="term">XXX</span></summary>
+		<summary>Usuario <span class="user">XXX</span></summary>
 	  </header>
 	  <br />
 	  <div class="items">
-Inicio del turno: <span></span>
-   Fin del turno: <span></span>
-        Entradas: <span></span>
-         Salidas: <span></span>
-        Perdidos: <span></span>
-
-<div class="sum">Cant. inicial: $<span class="money"></span></div>
-<div class="sum">Recibido: $<span class="money"></span></div>
-<div class="sum">Devuelto: $<span class="money"></span></div>
-<div class="sum">Cobrado: $<span class="money"></span></div>
-<div class="sum">Depósitos: $<span class="money"></span></div>
-<div class="sum">Balance: $<span class="money"></span></div>
 	  </div>
 	  <br />
 	  <hr />

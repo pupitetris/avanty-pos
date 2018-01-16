@@ -548,8 +548,8 @@
 	}
 
 	function super_report_summary_filter_validate_start_end () {
-		var start = ui.report.summary_filter_start_d_txt.text ();
-		var end = ui.report.summary_filter_end_d_txt.text ();
+		var start = new Date (ui.report.summary_filter_start_d_txt.text ());
+		var end = new Date (ui.report.summary_filter_end_d_txt.text ());
 
 		if (start > end) {
 			ui.report.summary_filter_end_d.addClass ('error');
@@ -561,6 +561,8 @@
 
 		ui.report.summary_filter_end_d.removeClass ('error');
 		ui.report.summary_filter_end_d_error.hide ();
+
+		end.setDate (end.getDate () + 1); // Range is start <= x < end
 		return { start: start, end: end };
 	}
 

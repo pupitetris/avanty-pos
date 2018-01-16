@@ -466,6 +466,10 @@
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'all.svg'));
 			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', false); });
 		}
+
+		if (button.prop ('id') == 'super-report-summary-users-all')
+			super_report_summary_filter_update_shifts ();
+
 		super_report_summary_filter_validate_shifts ();
 	}
 
@@ -483,8 +487,11 @@
 		}
 	}
 
-	function super_report_summary_filter_update_shifts (shifts) {
+	var super_report_summary_shifts;
+	function super_report_summary_filter_update_shifts () {
 		var cashiers = {};
+		var shifts = super_report_summary_shifts;
+
 		ui.report.summary_filter_users.find ('option').each (
 			function (i, opt) {
 				cashiers[opt.value] = { selected: opt.selected? true: false }
@@ -508,7 +515,7 @@
 		return true;
 	}		
 
-	function super_report_summary_filter_multi_select_mousedown (evt, shifts) {
+	function super_report_summary_filter_multi_select_mousedown (evt) {
 		evt.preventDefault ();
 		var option = $(evt.target);
 		var select = option.parent ();
@@ -518,7 +525,7 @@
 		window.setTimeout (function () {
 			select.scrollTop (originalScrollTop);
 			if (select.prop ('id') == ui.report.summary_filter_users.prop ('id'))
-				super_report_summary_filter_update_shifts (shifts);
+				super_report_summary_filter_update_shifts ();
 
 			super_report_summary_filter_validate_shifts ();
 		}, 0);
@@ -561,8 +568,9 @@
 						   function (shifts) { super_report_summary_filter_refresh_success (shifts, cb); });
 	}
 
-	function super_report_summary_select_populate (select, shifts, key) {
+	function super_report_summary_select_populate (select, key) {
 		var opts = {};
+		var shifts = super_report_summary_shifts;
 
 		select.find ('option').each (
 			function (i, opt) {
@@ -582,7 +590,7 @@
 				var option = $('<option value="' + val + '"' +
 								 ((opts[val].selected)? ' selected="selected"': '') +
 							   '>' + val + '</option>');
-				option.on ('mousedown', function (evt) { super_report_summary_filter_multi_select_mousedown (evt, shifts); });
+				option.on ('mousedown', super_report_summary_filter_multi_select_mousedown);
 				select.append (option);
 			}
 	}
@@ -592,9 +600,10 @@
 		for (var shift of shifts)
 			dict[shift.shift_id] = shift;
 		shifts.byId = dict;
+		super_report_summary_shifts = shifts;
 		
-		super_report_summary_select_populate (ui.report.summary_filter_users, shifts, 'cashier');
-		super_report_summary_select_populate (ui.report.summary_filter_shifts, shifts, 'shift_id');
+		super_report_summary_select_populate (ui.report.summary_filter_users, 'cashier');
+		super_report_summary_select_populate (ui.report.summary_filter_shifts, 'shift_id');
 
 		if (shifts.length > 0) {
 			ui.report.summary_filter_users_all.button ('enable');

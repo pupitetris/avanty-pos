@@ -86,6 +86,7 @@
 				var pre = '';
 				var shift_begin_ts = '';
 				var shift_ids = [];
+				var last_shift_id = 0;
 
 				ui[prefix + '_table'].empty ();
 				for (var rec of records) {
@@ -110,8 +111,9 @@
 					case 'shift_begin':
 						num_deposits ++;
 						deposit += rec.amount;
-						shift_ids.push (rec.change);
-						if (num_deposits == 1) {
+						last_shift_id = (rec.shift_id)? rec.shift_id: rec.change;
+						shift_ids.push (last_shift_id);
+						if (shift_ids.length == 1) {
 							shift_begin_ts = rec.timestamp.toLocaleString ();
 							if (ui.tickets[prefix + '_begin_time'])
 								ui.tickets[prefix + '_begin_time'].text (shift_begin_ts);
@@ -119,14 +121,23 @@
 							shift_begin_ts = '';
 						break;
 					case 'shift_end':
-						ui.tickets[prefix + '_num'].text (rec.amount);
-						ui.tickets[prefix + '_time'].text (rec.timestamp.toLocaleString ());
+						if (ui.tickets[prefix + '_num'])
+							ui.tickets[prefix + '_num'].text (rec.amount);
+						if (ui.tickets[prefix + '_time'])
+							ui.tickets[prefix + '_time'].text (rec.timestamp.toLocaleString ());
+						break;
+					case 'deposit':
+						if (rec.shift_id && rec.shift_id != last_shift_id) // New shift record coming, this is the initial deposit.
+							break;
+						num_deposits ++;
+						deposit += rec.amount;
 						break;
 					default:
-						console.warn ('Unknown concept ' + rec.concept);
-					}
+						if (!desc[rec.concept]) {
+							console.warn ('Unknown concept ' + rec.concept);
+							break;
+						}
 
-					if (desc[rec.concept]) {
 						pre += '<div class="desc">' + rec.timestamp.toLocaleString () + ' ' + desc[rec.concept] + '</div>\n' +
 							'<div class="sum">$' + APP.Util.asMoney (rec.amount) + '</div>\n';
 						ui[prefix + '_table'].append ($('<tr>' +
@@ -135,6 +146,7 @@
 														'<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
 														'</tr>'));
 					}
+
 				}
 
 				var shift_ids_str = render_shift_ids (shift_ids);

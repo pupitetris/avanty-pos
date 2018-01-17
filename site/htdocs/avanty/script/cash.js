@@ -992,12 +992,14 @@
 	}
 
 	function cash_shift_begin () {
-		APP.history.go (MOD_NAME, ui.section_shift_begin, 'cash-shift-begin');
-		shell.navShow ();
-
-		APP.later (function () {
-			if (ui.section_shift_begin.is (':hidden')) return true;
-			ui.shift_begin_amount.focus ();
+		APP.checkActivated (function () {
+			APP.history.go (MOD_NAME, ui.section_shift_begin, 'cash-shift-begin');
+			shell.navShow ();
+			
+			APP.later (function () {
+				if (ui.section_shift_begin.is (':hidden')) return true;
+				ui.shift_begin_amount.focus ();
+			});
 		});
 	}
 

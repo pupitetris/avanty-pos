@@ -191,12 +191,14 @@
 							   });
 			}
 
-			APP.charp.request ('salt_get', [login],
-							   {
-								   asAnon: true,
-								   success: auth_try,
-								   error: error_cb
-							   });
+			APP.checkActivated (function () {
+				APP.charp.request ('salt_get', [login],
+								   {
+									   asAnon: true,
+									   success: auth_try,
+									   error: error_cb
+								   });
+			}, error_cb);
 		},
 
 		loginErrorHandler: function (err, ctx) {

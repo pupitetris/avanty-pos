@@ -959,6 +959,23 @@
 			return args;
 		},
 
+		checkActivated: function (cb, error_cb) {
+			function check (created) {
+				if (!created) { // System is not activated. Reload app.
+					window.location.reload (true);
+					return;
+				}
+				cb ();
+			}
+
+			APP.charp.request ('system_is_activated', [],
+							   {
+								   asAnon: true,
+								   success: check,
+								   error: error_cb
+							   });
+		},
+
 		main: function () {
 			APP.devconf = {};
 			APP.config = {

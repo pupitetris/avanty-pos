@@ -177,6 +177,10 @@
     vertical-align: top;
 }
 
+.avanty .ui-datepicker-unselectable span {
+	background: #faa;
+}
+
 .avanty .ui-tabs li.ui-tabs-tab.ui-state-focus {
 	z-index: 1;
 }

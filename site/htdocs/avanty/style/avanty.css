@@ -182,6 +182,9 @@ h1 {
 	height: calc(100vh - 200px - 70px); /* 70px is the shell's height */
 }
 
+.section h1, .section h2, .section h3, .section h4, .section h5 {
+	text-align: center;
+}
 
 .quadrant {
 	position: absolute;

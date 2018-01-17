@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,662" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,661" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -1608,15 +1608,28 @@ END;]]></definition>
 	<schema name="rp"/>
 	<role name="postgres"/>
 	<comment><![CDATA[check if the system has already been activated: you need a non-first supervisor account and a correctly signed challenge.]]></comment>
-	<language name="sql" sql-disabled="true"/>
+	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
 	<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</return-type>
-	<definition><![CDATA[SELECT created FROM supervisor_challenge 
-	WHERE user_id = 1::uid 
-		AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
-		AND activation_solve_challenge (string) = solution
-	ORDER BY created DESC LIMIT 1;]]></definition>
+	<definition><![CDATA[DECLARE
+	_created timestamptz;
+BEGIN
+	PERFORM 1 FROM supervisor_challenge
+		WHERE user_id = 1::uid
+			AND created <= CURRENT_TIMESTAMP
+			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
+			AND solution IS NULL;
+	IF FOUND THEN RETURN NULL; END IF;
+
+	SELECT created INTO _created FROM supervisor_challenge 
+		WHERE user_id = 1::uid 
+			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
+			AND activation_solve_challenge (string) = solution
+		ORDER BY created DESC LIMIT 1;
+
+	RETURN _created;
+END;]]></definition>
 </function>
 
 <function name="activation_solve_challenge"
@@ -1675,6 +1688,7 @@ BEGIN
 	SELECT string INTO _string
 		FROM supervisor_challenge 
 		WHERE user_id = 1::uid
+			AND created <= CURRENT_TIMESTAMP
 			AND (expiration IS NULL OR expiration > CURRENT_TIMESTAMP)
 			AND solution IS NULL;
 

@@ -136,6 +136,17 @@ h1 {
 	white-space: nowrap;
 }
 
+#app-version {
+	position: absolute;
+	top: calc(100vh - 3.5em);
+	left: 0;
+	width: 100%;
+	text-align: right;
+	padding: 1em;
+	font-size: 0.55em;
+	box-sizing: border-box;
+}
+
 #hourglass {
 	display: none;
 	position: absolute;

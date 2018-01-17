@@ -937,7 +937,6 @@
 		ui.section_main.children ('div').hide ();
 
 		shell.setStatus (APP.config.establishment +
-						 ' Versión: ' + APP.config.version +
 						 ' Terminal: ' + APP.terminal.name, true);
 
 		if (!APP.terminal.shiftUser) {

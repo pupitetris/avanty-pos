@@ -436,7 +436,6 @@
 		shell.show ();
 		shell.navShow ();
 		shell.setStatus (APP.config.establishment +
-						 ' Versión: ' + APP.config.version +
 						 ' Terminal: ' + APP.terminal.name, true);
 		shell.menuCollapse (false);
 

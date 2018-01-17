@@ -168,6 +168,8 @@
 
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary.find ('button').button ();
+		ui.report.summary_start = ui.report.summary.find ('.start');
+		ui.report.summary_end = ui.report.summary.find ('.end');
 		ui.report.summary_table = ui.report.summary.find ('tbody');
 		ui.report.summary_received = ui.report.summary.find ('.received');
 		ui.report.summary_change = ui.report.summary.find ('.change');
@@ -185,6 +187,8 @@
 		ui.report.tickets = {};
 		ui.report.tickets.summary = $('#super-ticket-report-summary');
 		ui.report.tickets.summary_timestamp = ui.report.tickets.summary.find ('.ts');
+		ui.report.tickets.summary_start = ui.report.tickets.summary.find ('.start');
+		ui.report.tickets.summary_end = ui.report.tickets.summary.find ('.end');
 		ui.report.tickets.summary_terminal = ui.report.tickets.summary.find ('.term');
 		ui.report.tickets.summary_user = ui.report.tickets.summary.find ('.user');
 		ui.report.tickets.summary_items = ui.report.tickets.summary.find ('.items span');
@@ -671,6 +675,12 @@
 
 	function super_report_summary_do (records) {
 		ui.report.tickets.summary_timestamp.text (new Date ().toLocaleString ());
+		ui.report.tickets.summary_start.text (super_report_summary_params.dates.start.toLocaleString ());
+		ui.report.tickets.summary_end.text (super_report_summary_params.dates.end.toLocaleString ());
+
+		ui.report.summary_start.text (super_report_summary_params.dates.start.toLocaleString ());
+		ui.report.summary_end.text (super_report_summary_params.dates.end.toLocaleString ());
+
 		APP.mod.report.shiftSummaryReport (ui.report, 'summary', records);
 	}
 

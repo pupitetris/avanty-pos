@@ -12,11 +12,8 @@
 }
 
 #cash-sections .shell .username {
-	display: inline-block;
-	width: calc(100% - 31px);
-	overflow: hidden;
-	text-align: center;
-	line-height: 16px;
+	text-align: left;
+	padding-left: 4px;
 }
 
 #cash-main > div {

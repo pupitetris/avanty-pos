@@ -212,7 +212,8 @@
 		ui.section_main.find ('button').button ();
 
 		ui.main_noshift = $('#cash-main-noshift');
-		ui.main_noshift.on ('click', cash_shift_begin);
+		ui.main_noshift.find ('button').on ('click', cash_shift_begin);
+		ui.main_othershift = $('#cash-main-othershift');
 
 		ui.section_shift_report = $('#cash-shift-report');
 		ui.section_shift_report.find ('button').button ();
@@ -516,6 +517,9 @@
 	function cash_park_exit_cancel () {
 		APP.history.back ('cash-park-exit');
 		shell.navShow ();
+
+		shell.ui.park_exit.button ('enable');
+		shell.ui.park_lost.button ('enable');
 	}
 
 	function cash_park_exit_submit (form, evt) {
@@ -834,6 +838,9 @@
 		APP.history.back (process);
 		shell.navShow ();
 		shell.menuCollapse (false);
+
+		shell.ui.park_exit.button ('enable');
+		shell.ui.park_lost.button ('enable');
 	}
 
 	function cash_park_lost () {
@@ -948,6 +955,7 @@
 			// There's a shift running for another user. Can't operate nor start shift.
 			shell.ui.user_shift_begin.button ('disable');
 			shell.ui.shell.find ('button.requires-shift').button ('disable');
+			ui.main_othershift.find ('span').text (APP.terminal.shiftUser);
 			ui.main_othershift.show ();
 		} else {
 			// Our shift is running.

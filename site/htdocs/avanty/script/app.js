@@ -16,9 +16,70 @@
 				this.addClass ('ui-state-disabled');
 				this.prop ('disabled', true);
 			} else {
-				this.addClass('ui-widget ui-widget-content ui-corner-all');
+				this.addClass ('ui-widget ui-widget-content ui-corner-all');
 			}
 
+			return this;
+		};
+
+		// Our own one-click, toggle selectors.
+		$.fn.ava_select = function () {
+			if (!this.hasClass ('avanty-select'))
+				this.addClass ('avanty-select');
+			return this;
+		};
+
+		function option_select (option, selected) {
+			if (selected)
+				return option.addClass ('selected').addClass ('ui-state-active');
+			return option.removeClass ('selected').removeClass ('ui-state-active');
+		}
+
+		function option_toggle (option) {
+			if (option.hasClass ('selected')) {
+				option_select (option, false);
+				return false;
+			}
+			option_select (option, true);
+			return true;
+		}
+
+		function option_apply_param (option, param, arg) {
+			switch (param) {
+			case 'selected':
+				if (arg === undefined)
+					return option.hasClass ('selected');
+				return option_select (option, arg);
+			case 'toggle':
+				return option_toggle (option);
+			case 'value':
+				if (arg === undefined)
+					return option.data ('value');
+				return option.data ('value', arg);
+			}
+
+			console.warn ('ava_option: unrecognized param ' + param);
+			return option;
+		}
+
+		function option_clicked (evt) {
+			var option = $(evt.target);
+			var selected = option_toggle (option);
+			option.trigger ('avanty:select', [selected]);
+			option.parent ().trigger ('avanty:optionSelect', [option, selected]);
+		}
+
+		$.fn.ava_option = function (param, arg) {
+			if (!this.hasClass ('avanty-option')) {
+				this.addClass ('avanty-option');
+				this.on ('click.avanty_option', option_clicked);
+			}
+
+			if (typeof param != 'object')
+				return option_apply_param (this, param, arg);
+
+			for (var p in param)
+				option_apply_param (this, p, param[p]);
 			return this;
 		};
 	} (jQuery));

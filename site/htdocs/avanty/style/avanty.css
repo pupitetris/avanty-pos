@@ -420,3 +420,19 @@ form s:before {
 .button-bar-h button:first-child {
 	margin-left: 0;
 }
+
+.avanty-select {
+	border: 2px solid #ccc;
+	border-radius: 10px;
+	background-color: white;
+	user-select: none;
+	-webkit-user-select: none;
+	overflow: auto;
+}
+
+.avanty-option {
+	cursor: pointer;
+	text-align: left;
+	border: 1px solid transparent;
+	padding: 4px;
+}

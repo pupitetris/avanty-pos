@@ -78,9 +78,7 @@
 	display: none;
 }
 
-#super-report-summary-filter select[multiple="multiple"] {
+#super-report-summary-filter .avanty-select {
 	margin-top: 0.5em;
-	font-size: inherit;
 	height: 8em;
-	border-radius: 10px;
 }

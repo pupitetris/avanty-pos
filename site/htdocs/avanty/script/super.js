@@ -120,11 +120,15 @@
 		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
+		ui.report.summary_filter_users.ava_select ();
+		ui.report.summary_filter_users.on ('avanty:optionSelect', super_report_summary_filter_select_toggled);
 		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
 		ui.report.summary_filter_users_all.on ('click', function () {
 			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_users_all, ui.report.summary_filter_users);
 		});
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
+		ui.report.summary_filter_shifts.ava_select ();
+		ui.report.summary_filter_shifts.on ('avanty:optionSelect', super_report_summary_filter_select_toggled);
 		ui.report.summary_filter_shifts_all = $('#super-report-summary-shifts-all');
 		ui.report.summary_filter_shifts_all.on ('click', function () {
 			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
@@ -467,12 +471,12 @@
 			button.data ('state', 'none');
 			button.find ('span').text ('Seleccionar ninguno');
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'none.svg'));
-			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', true); });
+			select.find ('div').each (function (i, opt) { $(opt).ava_option ('selected', true); });
 		} else {
 			button.data ('state', 'all');
 			button.find ('span').text ('Seleccionar todos');
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'all.svg'));
-			select.find ('option').each (function (i, opt) { $(opt).prop ('selected', false); });
+			select.find ('div').each (function (i, opt) { $(opt).ava_option ('selected', false); });
 		}
 
 		if (button.prop ('id') == 'super-report-summary-users-all')
@@ -500,19 +504,19 @@
 		var cashiers = {};
 		var shifts = super_report_summary_shifts;
 
-		ui.report.summary_filter_users.find ('option').each (
+		ui.report.summary_filter_users.find ('div').each (
 			function (i, opt) {
-				cashiers[opt.value] = { selected: opt.selected? true: false }
+				cashiers[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') }
 			});
 
-		ui.report.summary_filter_shifts.find ('option').each (
+		ui.report.summary_filter_shifts.find ('div').each (
 			function (i, opt) {
-				$(opt).prop ('selected', cashiers[shifts.byId[opt.value].cashier].selected);
+				$(opt).ava_option ('selected', cashiers[shifts.byId[$(opt).ava_option ('value')].cashier].selected);
 			});
 	}
 
 	function super_report_summary_filter_validate_shifts () {
-		if (ui.report.summary_filter_shifts.find ('option:selected').length == 0) {
+		if (ui.report.summary_filter_shifts.find ('.selected').length == 0) {
 			ui.report.summary_filter_submit.addClass ('error');
 			ui.report.summary_filter_error.show ();
 			return false;
@@ -523,22 +527,14 @@
 		return true;
 	}		
 
-	function super_report_summary_filter_multi_select_mousedown (evt) {
-		evt.preventDefault ();
-		var option = $(evt.target);
+	function super_report_summary_filter_select_toggled (evt, option, selected) {
 		var select = option.parent ();
-		var originalScrollTop = select.scrollTop ();
-		option.prop ('selected', option.prop ('selected') ? false : true);
-		select.focus ();
 		window.setTimeout (function () {
-			select.scrollTop (originalScrollTop);
 			if (select.prop ('id') == ui.report.summary_filter_users.prop ('id'))
 				super_report_summary_filter_update_shifts ();
 
 			super_report_summary_filter_validate_shifts ();
 		}, 0);
-		
-		return false;
 	}
 	
 	function super_report_summary_filter_cal_selected (date, inst, txt) {
@@ -597,10 +593,7 @@
 		select.data ('opts', opts);
 		for (var val of Object.keys (opts).sort ())
 			if (opts[val].found) {
-				var option = $('<option value="' + val + '"' +
-								 ((opts[val].selected)? ' selected="selected"': '') +
-							   '>' + val + '</option>');
-				option.on ('mousedown', super_report_summary_filter_multi_select_mousedown);
+				var option = $('<div>' + val + '</div>').ava_option ({ value: val, selected: opts[val].selected });
 				select.append (option);
 			}
 	}

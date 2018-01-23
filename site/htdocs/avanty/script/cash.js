@@ -121,7 +121,7 @@
 		ui[prefix + '_charge_print'].on ('click', cash_park_charge_print);
 
 		ui[prefix + '_charge_close'] = $('#cash-' + id + '-charge-close');
-		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close (process); });
+		ui[prefix + '_charge_close'].on ('click', function () { cash_park_charge_close (process, prefix); });
 		ui[prefix + '_charge_close_html'] = ui[prefix + '_charge_close'].html ();
 
 		ui[prefix + '_charge_detail'] = section.find ('.detail');
@@ -601,6 +601,8 @@
 
 	var cash_charge_state = [];
 	function cash_charge_state_get (key) {
+		if (cash_charge_state.length == 0)
+			throw 'cash_charge_state_get: state underflow.';
 		return cash_charge_state[cash_charge_state.length - 1][key];
 	}
 
@@ -728,7 +730,10 @@
 		ui[prefix + '_charge_change'].text ((change < 0)? '-.--': APP.Util.asMoney (change));
 	}
 
-	function cash_park_charge_reset (prefix) {
+	function cash_park_charge_reset (prefix, force) {
+		if (!force && ui[prefix + '_charge_submit'].is (':disabled'))
+			return;
+
 		ui[prefix + '_charge_form'].validate ().resetForm ();
 		ui[prefix + '_charge_received'].input ('enable');
 		ui[prefix + '_charge_submit'].button ('enable');
@@ -833,7 +838,9 @@
 		APP.mod.devices.print (ui.tickets.exit);
 	}
 
-	function cash_park_charge_close (process) {
+	function cash_park_charge_close (process, prefix) {
+		cash_park_charge_reset (prefix, true);
+
 		APP.mod.devices.display ('client', '');
 		APP.history.back (process);
 		shell.navShow ();

@@ -85,3 +85,7 @@ input[name="shift-begin-amount"] {
 .shift-report > div button:first-child {
 	margin-left: 0;
 }
+
+label.error[for="cash-park-lost-charge-received"], label.error[for="cash-park-exit-charge-received"] {
+	top: 25px;
+}

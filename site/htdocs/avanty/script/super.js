@@ -504,12 +504,12 @@
 		var cashiers = {};
 		var shifts = super_report_summary_shifts;
 
-		ui.report.summary_filter_users.find ('div').each (
+		ui.report.summary_filter_users.find ('.avanty-option').each (
 			function (i, opt) {
 				cashiers[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') }
 			});
 
-		ui.report.summary_filter_shifts.find ('div').each (
+		ui.report.summary_filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
 				$(opt).ava_option ('selected', cashiers[shifts.byId[$(opt).ava_option ('value')].cashier].selected);
 			});
@@ -578,9 +578,9 @@
 		var opts = {};
 		var shifts = super_report_summary_shifts;
 
-		select.find ('option').each (
+		select.find ('.avanty-option').each (
 			function (i, opt) {
-				opts[opt.value] = { selected: opt.selected };
+				opts[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') };
 			});
 		for (var shift of shifts) {
 			if (opts[shift[key]])
@@ -636,11 +636,11 @@
 		shell.navShow ();
 
 		var shifts = [];
-		ui.report.summary_filter_shifts.find ('option').each (
+		ui.report.summary_filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
 				var opt = $(opt);
-				if (opt.is (':selected'))
-					shifts.push (parseInt (opt.prop ('value')));
+				if (opt.ava_option ('selected'))
+					shifts.push (parseInt (opt.ava_option ('value')));
 			});
 		if (shifts.length == 0)
 			shifts = null;

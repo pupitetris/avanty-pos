@@ -1041,7 +1041,7 @@
 			APP.devconf = {};
 			APP.config = {
 				DEVEL: true,
-				version: '1.0.1',
+				version: '1.0.2',
 				establishment: 'Piloto',
 				firstWeekDay: 1, // 0 is Sunday, Monday is 1..
 				barcodeSecret: 'secret',

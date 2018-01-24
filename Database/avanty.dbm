@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,661" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-alpha" author="Arturo Espinosa" last-position="0,18" last-zoom="1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -15,6 +15,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 </role>
 
 <database name="avanty" encoding="UTF8" template="template0" append-at-eod="true">
+	<comment><![CDATA[ver. 1.0.2]]></comment>
 	<appended-sql><![CDATA[ALTER DATABASE avanty SET search_path TO av,public;
 
 GRANT USAGE ON SEQUENCE av.account_user_id_seq TO avanty;
@@ -178,7 +179,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.user_maintenance"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="user_cashier_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
@@ -238,7 +240,10 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.user_activity"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"
+	upd-action="NO ACTION"
+	del-action="NO ACTION"/>
 
 <table name="supervisor_challenge">
 	<schema name="av"/>
@@ -301,6 +306,10 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 		<type name="integer" length="0"/>
 		<comment><![CDATA[A serial number for entry tickets which is independent for each terminal.]]></comment>
 	</column>
+	<column name="shift_consecutive" not-null="true" default-value="0">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Consecutive number for shifts assigned to this terminal.]]></comment>
+	</column>
 	<column name="qz_private_key">
 		<type name="text" length="0"/>
 		<comment><![CDATA[Private RSA key for qz-tray request signing.]]></comment>
@@ -321,7 +330,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#aa0000"
 	 src-table="av.terminal"
 	 dst-table="av.user_activity"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <usertype name="ticket_type" configuration="enumeration">
 	<schema name="av"/>
@@ -464,7 +474,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#aa0000"
 	 src-table="av.rate"
 	 dst-table="av.movement"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <usertype name="tender_type" configuration="enumeration">
 	<schema name="av"/>
@@ -531,7 +542,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.tender_exchange"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <table name="owner">
 	<schema name="av"/>
@@ -614,7 +626,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.owner"
 	 dst-table="av.vehicle"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <table name="rent">
 	<schema name="av"/>
@@ -665,7 +678,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.ticket"
 	 dst-table="av.rent"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="vehicle_has_many_rent" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -674,7 +688,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.vehicle"
 	 dst-table="av.rent"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="rate_has_many_rent" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -683,7 +698,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#aa0000"
 	 src-table="av.rate"
 	 dst-table="av.rent"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <usertype name="rent_operation_type" configuration="enumeration">
 	<schema name="av"/>
@@ -729,7 +745,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.rent_operation"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="rate_has_many_rent_operation" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -738,7 +755,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#aa0000"
 	 src-table="av.rate"
 	 dst-table="av.rent_operation"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <usertype name="rent_activity_type" configuration="enumeration">
 	<schema name="av"/>
@@ -779,7 +797,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.rent_activity"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <table name="cashier_shift">
 	<schema name="av"/>
@@ -788,6 +807,10 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	<position x="1080" y="1020"/>
 	<column name="shift_id" not-null="true">
 		<type name="serial" length="0"/>
+	</column>
+	<column name="consecutive" not-null="true">
+		<type name="integer" length="0"/>
+		<comment><![CDATA[Consecutive number, where terminal_id,consecutive is unique.]]></comment>
 	</column>
 	<column name="last_event" not-null="true">
 		<type name="av.ts" length="0"/>
@@ -866,7 +889,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.account"
 	 dst-table="av.request"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <usertype name="charp_request_status" configuration="enumeration">
 	<schema name="av"/>
@@ -940,7 +964,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.account"
 	 dst-table="av.request_log"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="user_supervisor_has_one_account" type="rel11"
 	 src-col-pattern="{sc}"
@@ -996,7 +1021,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 dst-table="av.tender_exchange"
 	 src-required="true" dst-required="false"
 	 identifier="true"
-/>
+
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="rent_operation_has_one_payment" type="rel11"
 	 src-col-pattern="{sc}"
@@ -1005,7 +1031,8 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	 custom-color="#83af1f"
 	 src-table="av.movement"
 	 dst-table="av.rent_operation"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <schema name="rp" rect-visible="true" fill-color="#e1e1e1">
 	<role name="postgres"/>
@@ -1075,7 +1102,7 @@ BEGIN
 				FROM request AS r WHERE r.request_id = _request_id;
 		DELETE FROM request WHERE request_id = _request_id;
 	END IF;
-END]]></definition>
+END;]]></definition>
 </function>
 
 <function name="charp_raise"
@@ -1731,7 +1758,8 @@ END;]]></definition>
 	 custom-color="#83af1f"
 	 src-table="av.user_supervisor"
 	 dst-table="av.supervisor_challenge"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <function name="anon_activation_challenge_check"
 		window-func="false"
@@ -2307,9 +2335,12 @@ BEGIN
 	IF FOUND THEN PERFORM charp_raise ('DATADUP'); END IF;
 
 	INSERT INTO
-		cashier_shift (shift_id, terminal_id, user_id, last_event, shift_start, shift_end)
-		VALUES (DEFAULT, _terminal_id, _uid, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
+		cashier_shift (shift_id, terminal_id, user_id, consecutive,
+			last_event, shift_start, shift_end)
+		VALUES (DEFAULT, _terminal_id, _uid, av.terminal_shift_consecutive_next(_terminal_id),
+			CURRENT_TIMESTAMP, CURRENT_TIMESTAMP, NULL)
 		RETURNING shift_id INTO _shift_id;
+
 	INSERT INTO
 		user_activity (user_id, timestamp, terminal_id, type, 
 			detail)
@@ -3013,7 +3044,8 @@ END;]]></definition>
 	 custom-color="#83af1f"
 	 src-table="av.user_cashier"
 	 dst-table="av.cashier_shift"
-	 src-required="false" dst-required="false"/>
+	 src-required="false" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <relationship name="terminal_has_many_cashier_shift" type="rel1n"
 	 src-col-pattern="{sc}"
@@ -3022,7 +3054,8 @@ END;]]></definition>
 	 custom-color="#aa0000"
 	 src-table="av.terminal"
 	 dst-table="av.cashier_shift"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <index name="cashier_shift_end_unique_null" table="av.cashier_shift"
 	 concurrent="false" unique="true" fast-update="false" buffering="false"
@@ -3072,7 +3105,8 @@ END;]]></definition>
 	 custom-color="#83af1f"
 	 src-table="av.cashier_shift"
 	 dst-table="av.ticket"
-	 src-required="true" dst-required="false"/>
+	 src-required="true" dst-required="false"
+	 deferrable="true" defer-type="INITIALLY DEFERRED"/>
 
 <index name="ticket_timestamp_idx" table="av.ticket"
 	 concurrent="false" unique="false" fast-update="false" buffering="false"
@@ -3296,6 +3330,30 @@ END;]]></definition>
 			WHERE ((m.timestamp IS NULL AND _start <= t.timestamp) OR (_start <= m.timestamp AND m.timestamp < _end))
 				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts));
 END;]]></definition>
+</function>
+
+<function name="terminal_shift_consecutive_next"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="av"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Increment the shift consecutive for the given terminal, returning the new value.]]></comment>
+	<language name="sql" sql-disabled="true"/>
+	<return-type>
+	<type name="integer" length="0"/>
+	</return-type>
+	<parameter name="_terminal_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<definition><![CDATA[UPDATE terminal SET shift_consecutive = shift_consecutive + 1
+	WHERE terminal_id = _terminal_id
+	RETURNING shift_consecutive;
+]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

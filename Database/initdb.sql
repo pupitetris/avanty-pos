@@ -21,7 +21,7 @@ BEGIN TRANSACTION;
     
     DELETE FROM terminal;
     ALTER SEQUENCE terminal_terminal_id_seq RESTART;
-    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS1', '127.0.0.1', 0,
+    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS1', '127.0.0.1', 0, 0,
 '-----BEGIN RSA PRIVATE KEY-----
 MIIEpgIBAAKCAQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQX
 bTSkWyhZF5y48kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPil
@@ -86,9 +86,9 @@ qyggkrzF8BoHCRCvSRMUDmipczEsLDh93H+p8R/K8Ob7qtct0sZthwWBU2ZJXvhX
 zozCzYdSCBfnRztD8A==
 -----END CERTIFICATE-----
 ');
-	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY1', '0.0.0.0', 0, NULL, NULL );
-	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY2', '0.0.0.0', 0, NULL, NULL );
-	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY3', '0.0.0.0', 0, NULL, NULL );
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY1', '0.0.0.0', 0, 0, NULL, NULL );
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY2', '0.0.0.0', 0, 0, NULL, NULL );
+	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY3', '0.0.0.0', 0, 0, NULL, NULL );
 
     DELETE FROM tender;
     ALTER SEQUENCE tender_tender_id_seq RESTART;

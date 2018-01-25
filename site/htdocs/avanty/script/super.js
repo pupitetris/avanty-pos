@@ -195,7 +195,7 @@
 		ui.report.tickets.summary_end = ui.report.tickets.summary.find ('.end');
 		ui.report.tickets.summary_terminal = ui.report.tickets.summary.find ('.term');
 		ui.report.tickets.summary_user = ui.report.tickets.summary.find ('.user');
-		ui.report.tickets.summary_items = ui.report.tickets.summary.find ('.items span');
+		ui.report.tickets.summary_items = ui.report.tickets.summary.find ('.items');
 
 		mod.loaded = true;
 		mod.onLoad ();

@@ -446,7 +446,8 @@
 			// End of first login exception. Restore and go back to main screen.
 			APP.mod.login.isFirst = false;
 			ui.chpass_title.text (chpass_title);
-			cash_main ();
+
+			APP.charp.request ('log_remove_first', [], cash_main);
 		} else {
 			APP.history.back ('cash-change-password', false);
 			shell.navShow ();

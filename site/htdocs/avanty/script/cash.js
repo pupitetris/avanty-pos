@@ -371,6 +371,11 @@
 	var chpass_title;
 
 	function cash_chpass () {
+		ui.chpass_orig_pass.val ('');
+		ui.chpass_pass.val ('');
+		ui.chpass_pass2.val ('');
+		ui.chpass_submit.button ('enable');
+		
 		if (APP.mod.login.isFirst) {
 			// This is the first login for the user. Setup page accordingly.
 			chpass_title = ui.chpass_title.text ();
@@ -378,11 +383,6 @@
 			shell.show (false);
 			APP.switchSection (ui.section_chpass);
 		} else {
-			ui.chpass_orig_pass.val ('');
-			ui.chpass_pass.val ('');
-			ui.chpass_pass2.val ('');
-			ui.chpass_submit.button ('enable');
-
 			APP.history.go (MOD_NAME, ui.section_chpass, 'cash-change-password');
 			shell.navShow ();
 			shell.menuCollapse ();

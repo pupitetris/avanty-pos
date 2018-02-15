@@ -19,8 +19,8 @@
 	box-sizing: border-box;
 }
 
-#super-newuser button[type="submit"] {
-	margin-top: 1em;
+#super-newuser .button-bar-h button {
+	margin-left: 1em;
 }
 
 #super-newuser li.ui-state-disabled {

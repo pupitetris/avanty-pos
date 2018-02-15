@@ -14,6 +14,8 @@
 	function newuser_layout_init (name, validator_options) {
 		var section = ui['section_' + name] = $('#super-' + name);
 		
+		section.find ('button').button ();
+
 		var login = ui[name + '_login'] = section.find ('input[name="' + name + '-login"]');
 		login.input ();
 
@@ -23,8 +25,13 @@
 		var pass2 = ui[name + '_pass2'] = section.find ('input[name="' + name + '-pass2"]');
 		pass2.input ();
 
-		var submit = ui[name + '_submit'] = section.find ('button[type="submit"]');
-		submit.button ();
+		ui[name + '_submit'] = section.find ('button[type="submit"]');
+
+		var cancel = section.find ('button[type="button"]');
+		if (cancel.length > 0) {
+			ui[name + '_cancel'] = cancel;
+			cancel.on ('click', function () { shell.backGo (); });
+		}
 
 		var form = ui[name + '_form'] = section.find ('form');
 		form.attr ('autocomplete', 'off');

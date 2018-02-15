@@ -98,7 +98,8 @@
 
 					switch (rec.concept) {
 					case 'entry':
-						printed_tickets ++;
+						if (rec.terminal_name == APP.terminal.name)
+							printed_tickets ++;
 						if (!rec.rate)
 							break;
 					case 'exit':

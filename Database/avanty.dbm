@@ -2633,6 +2633,9 @@ END;]]></definition>
 	<comment><![CDATA[Remove corresponding cashier_shift and return accounting for the shift.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="concept">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -2680,12 +2683,12 @@ BEGIN
 	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT r.concept, r.rate, r.amount, r.change, r.timestamp
+		SELECT r.terminal_name, r.concept, r.rate, r.amount, r.change, r.timestamp
 			FROM av.cashier_shift_report (_uid, _start, NULL) AS r;
 
 	-- Provide the shift number by counting the number of shifts for the user.
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT ''::varchar, 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>
@@ -2905,6 +2908,9 @@ END;]]></definition>
 	<comment><![CDATA[Return accounting for the shift starting at _start for the given user.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="concept">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -2947,8 +2953,9 @@ END;]]></definition>
 	END IF;
 
 	RETURN QUERY
-		SELECT ua.type::varchar, NULL::varchar, movement.amount, s.shift_id, _start::timestamptz, s.user_id, s.shift_id
-			FROM user_activity AS ua 
+		SELECT term.name, ua.type::varchar, NULL::varchar, movement.amount, s.shift_id, _start::timestamptz, s.user_id, s.shift_id
+			FROM user_activity AS ua
+				NATURAL JOIN terminal AS term 
 				NATURAL JOIN cashier_shift AS s
 				JOIN ticket USING (shift_id, timestamp)
 				JOIN movement USING (ticket_id)
@@ -2956,9 +2963,10 @@ END;]]></definition>
 				AND (_user_id IS NULL OR s.user_id = _user_id);
 
 	RETURN QUERY
-		SELECT t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz, s.user_id, s.shift_id
+		SELECT term.name, t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz, s.user_id, s.shift_id
 			FROM ticket AS t 
 				NATURAL JOIN cashier_shift AS s
+				NATURAL JOIN terminal AS term
 				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)
 			WHERE ((m.timestamp IS NULL AND _start < t.timestamp) OR (_start < m.timestamp AND m.timestamp <= _end))
@@ -2979,6 +2987,9 @@ END;]]></definition>
 	<comment><![CDATA[Show current balance for the running shift.]]></comment>
 	<language name="plpgsql" sql-disabled="true"/>
 	<return-type>
+	<parameter name="terminal_name">
+		<type name="varchar" length="0"/>
+	</parameter>
 	<parameter name="concept">
 		<type name="varchar" length="0"/>
 	</parameter>
@@ -3008,11 +3019,12 @@ BEGIN
 	IF NOT FOUND THEN PERFORM charp_raise ('NOTFOUND'); END IF;
 
 	RETURN QUERY
-		SELECT r.concept, r.rate, r.amount, r.change, r.timestamp
+		SELECT r.terminal_name, r.concept, r.rate, r.amount, r.change, r.timestamp
 			FROM av.cashier_shift_report (_uid, _start, NULL) AS r;
 
+	-- Provide the shift number by counting the number of shifts for the user.
 	RETURN QUERY
-		SELECT 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
+		SELECT ''::varchar, 'shift_end'::varchar, NULL::varchar, COUNT(*)::integer, 0, CURRENT_TIMESTAMP
 			FROM user_activity WHERE user_id = _uid AND type = 'shift_begin';
 END;]]></definition>
 </function>

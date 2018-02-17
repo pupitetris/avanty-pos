@@ -9,7 +9,7 @@
 	  <div id="super-tab-report">
 		<div>
 		  <button id="super-tab-report-summary">Resumen de operaciones</button>
-<!--		  <button id="super-tab-report-detail">Detallado</button>-->
+		  <button id="super-tab-report-detail">Detalle de operaciones</button>
 		</div>
 	  </div>
 	  <div id="super-tab-user">
@@ -215,6 +215,57 @@
 	  <button id="super-report-summary-print" class="button-icon"><img src="img/symbolic/print.svg" />Imprimir</button>
 	  <button id="super-report-summary-close" class="button-icon"><img src="img/symbolic/close.svg" />Cerrar</button>
 	</div>
+  </div>
+  <div class="section" id="super-report-detail-filter">
+	<h3>Detalle de operaciones</h3>
+	<form>
+	  <div>
+		<div>
+		  <h4>Período</h4>
+		  <table>
+			<tr>
+			  <th><label for="super-report-detail-start-d">Inicio:</label></th>
+			  <td>
+				<div id="super-report-detail-start-d-cal" class="cal"></div>
+				<button id="super-report-detail-start-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
+				<div class="hm"><select name="start_h"></select></div>:&nbsp;<div class="hm"><select name="start_m" class="hm"></select></div>
+				<div class="hm"><select name="start_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
+			  </td>
+			</tr>
+			<tr>
+			  <th><label for="super-report-detail-end-d">Fin:</label></th>
+			  <td>
+				<div id="super-report-detail-end-d-cal" class="cal"></div>
+				<button id="super-report-detail-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span><label class="error">Fecha final menor que fecha inicial.</label></button>
+				
+				<div class="hm"><select name="end_h"></select></div>:&nbsp;<div class="hm"><select name="end_m" class="hm"></select></div>
+				<div class="hm"><select name="end_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
+			  </td>
+			</tr>
+		  </table>
+		</div>
+	  </div>
+	  <div>
+		<div>
+		  <h4>Usuarios cajeros</h4>
+		  <div>
+			<button id="super-report-detail-users-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
+		  </div>
+		  <div id="super-report-detail-users"></div>
+		</div>
+		<div>
+		  <h4>Turnos</h4>
+		  <div>
+			<button id="super-report-detail-shifts-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
+		  </div>
+		  <div id="super-report-detail-shifts"></div>
+		</div>
+	  </div>
+	  <div class="button-bar-h">
+		<button type="button" id="super-report-detail-filter-cancel" class="button-icon"><img src="img/symbolic/close.svg" />Cancelar</button>
+		<button type="submit" class="button-icon"><img src="img/symbolic/yes.svg" />Mostrar reporte<label class="error">Selecciona por lo menos un turno.</label></button>
+	  </div>
+	</form>
   </div>
   <div class="ticket-cont">
 	<article class="ticket" id="super-ticket-report-summary">

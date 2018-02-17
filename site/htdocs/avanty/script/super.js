@@ -59,6 +59,103 @@
 		form.validate (validator_options);
 	}
 
+	function report_layout_init (prefix) {
+		var report = {};
+
+		report.filter_section = $('#super-report-' + prefix + '-filter');
+		report.filter_section.find ('button').button ();
+		report.filter_form = report.filter_section.find ('form');
+		report.filter_form.on ('submit', function (evt) { super_report_filter_submit (prefix, evt); });
+		report.filter_submit = report.filter_form.find ('button[type="submit"]');
+		report.filter_error = report.filter_submit.find ('.error');
+		report.filter_error.hide ();
+		report.filter_start_d = $('#super-report-' + prefix + '-start-d');
+		report.filter_start_d_txt = report.filter_start_d.find ('span');
+		report.filter_start_d_cal = $('#super-report-' + prefix + '-start-d-cal');
+		report.filter_end_d = $('#super-report-' + prefix + '-end-d');
+		report.filter_end_d_txt = report.filter_end_d.find ('span');
+		report.filter_end_d_error = report.filter_end_d.find ('.error');
+		report.filter_end_d_error.hide ();
+		report.filter_end_d_cal = $('#super-report-' + prefix + '-end-d-cal');
+
+		report.filter_users = $('#super-report-' + prefix + '-users');
+		report.filter_users.ava_select ();
+		report.filter_users.on ('avanty:optionSelect',
+								function (evt, option, selected) {
+									super_report_filter_select_toggled (prefix, evt, option, selected);
+								});
+		report.filter_users_all = $('#super-report-' + prefix + '-users-all');
+		report.filter_users_all.on ('click',
+									function () {
+										super_report_filter_select_all_or_none (prefix, report.filter_users_all, report.filter_users);
+									});
+		report.filter_shifts = $('#super-report-' + prefix + '-shifts');
+		report.filter_shifts.ava_select ();
+		report.filter_shifts.on ('avanty:optionSelect',
+										   function (evt, option, selected) {
+											   super_report_filter_select_toggled (prefix, evt, option, selected);
+										   });
+		report.filter_shifts_all = $('#super-report-' + prefix + '-shifts-all');
+		report.filter_shifts_all.on ('click',
+									 function () {
+										 super_report_filter_select_all_or_none (prefix, report.filter_shifts_all, report.filter_shifts);
+									 });
+
+		var now = new Date ();
+		var todayStr = now.getFullYear () + '/' +
+			APP.Util.padZeroes (now.getMonth () + 1, 2) + '/' +
+			APP.Util.padZeroes (now.getDate (), 2);
+		report.filter_start_d_txt.text (todayStr);
+		report.filter_end_d_txt.text (todayStr);
+
+		report.filter_start_d.on ('click', function () {
+			super_report_filter_cal_toggle (report.filter_start_d_cal, report.filter_end_d_cal);
+		})
+		report.filter_end_d.on ('click', function () {
+			super_report_filter_cal_toggle (report.filter_end_d_cal, report.filter_start_d_cal);
+		})
+
+		var calopts = {
+			minDate: APP.config.startDate, // activation date, recovered from DB during activation check.
+			maxDate: 0,
+			firstDay: APP.config.weekFirstDay,
+			changeMonth: true,
+			changeYear: true,
+			dateFormat: 'yy/mm/dd'
+		};
+
+		report.filter_start_d_cal.datepicker ($.extend ({
+			onSelect: function (date, inst) {
+				super_report_filter_cal_selected (prefix, date, inst, report.filter_start_d_txt); }
+		}, calopts));
+
+		report.filter_end_d_cal.datepicker ($.extend ({
+			onSelect: function (date, inst) {
+				super_report_filter_cal_selected (prefix, date, inst, report.filter_end_d_txt); }
+		}, calopts));
+
+		report.filter_cancel = $('#super-report-' + prefix + '-filter-cancel');
+		report.filter_cancel.on ('click', function () { super_report_close (prefix); });
+
+		report.section = $('#super-report-summary');
+		report.section.find ('button').button ();
+		report.start = report.section.find ('.start');
+		report.end = report.section.find ('.end');
+		report.table = report.section.find ('tbody');
+		report.received = report.section.find ('.received');
+		report.change = report.section.find ('.change');
+		report.charged = report.section.find ('.charged');
+		report.balance = report.section.find ('.balance');
+		report.charged_tickets = report.section.find ('.charged-tickets');
+		report.printed_tickets = report.section.find ('.printed-tickets');
+		report.reload = $('#super-report-' + prefix + '-reload');
+		report.reload.on ('click', function () { super_report_reload (prefix); });
+		report.close = $('#super-report-' + prefix + '-close');
+		report.close.on ('click', function () { super_report_close (prefix); });
+
+		return report;
+	}
+
 	function layout_init () {
 		ui.sections_parent = $('#super-sections');
 		ui.section_main = $('#super-main');
@@ -112,107 +209,21 @@
 		ui.super_chpass_cancel.on ('click', super_chpass_finish);
 
 		ui.report = {};
-
-		ui.report.summary_filter_section = $('#super-report-summary-filter');
-		ui.report.summary_filter_section.find ('button').button ();
-		ui.report.summary_filter_form = ui.report.summary_filter_section.find ('form');
-		ui.report.summary_filter_form.on ('submit', function (evt) { super_report_filter_submit ('summary', evt); });
-		ui.report.summary_filter_submit = ui.report.summary_filter_form.find ('button[type="submit"]');
-		ui.report.summary_filter_error = ui.report.summary_filter_submit.find ('.error');
-		ui.report.summary_filter_error.hide ();
-		ui.report.summary_filter_start_d = $('#super-report-summary-start-d');
-		ui.report.summary_filter_start_d_txt = ui.report.summary_filter_start_d.find ('span');
-		ui.report.summary_filter_start_d_cal = $('#super-report-summary-start-d-cal');
-		ui.report.summary_filter_end_d = $('#super-report-summary-end-d');
-		ui.report.summary_filter_end_d_txt = ui.report.summary_filter_end_d.find ('span');
-		ui.report.summary_filter_end_d_error = ui.report.summary_filter_end_d.find ('.error');
-		ui.report.summary_filter_end_d_error.hide ();
-		ui.report.summary_filter_end_d_cal = $('#super-report-summary-end-d-cal');
-
-		ui.report.summary_filter_users = $('#super-report-summary-users');
-		ui.report.summary_filter_users.ava_select ();
-		ui.report.summary_filter_users.on ('avanty:optionSelect',
-										   function (evt, option, selected) {
-											   super_report_filter_select_toggled ('summary', evt, option, selected);
-										   });
-		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
-		ui.report.summary_filter_users_all.on ('click', function () {
-			super_report_filter_select_all_or_none ('summary', ui.report.summary_filter_users_all, ui.report.summary_filter_users);
-		});
-		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
-		ui.report.summary_filter_shifts.ava_select ();
-		ui.report.summary_filter_shifts.on ('avanty:optionSelect',
-										   function (evt, option, selected) {
-											   super_report_filter_select_toggled ('summary', evt, option, selected);
-										   });
-		ui.report.summary_filter_shifts_all = $('#super-report-summary-shifts-all');
-		ui.report.summary_filter_shifts_all.on ('click', function () {
-			super_report_filter_select_all_or_none ('summary', ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
-		});
-
-		var now = new Date ();
-		var todayStr = now.getFullYear () + '/' +
-			APP.Util.padZeroes (now.getMonth () + 1, 2) + '/' +
-			APP.Util.padZeroes (now.getDate (), 2);
-		ui.report.summary_filter_start_d_txt.text (todayStr);
-		ui.report.summary_filter_end_d_txt.text (todayStr);
-
-		ui.report.summary_filter_start_d.on ('click', function () {
-			super_report_filter_cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
-		})
-		ui.report.summary_filter_end_d.on ('click', function () {
-			super_report_filter_cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
-		})
-
-		var calopts = {
-			minDate: APP.config.startDate, // activation date, recovered from DB during activation check.
-			maxDate: 0,
-			firstDay: APP.config.weekFirstDay,
-			changeMonth: true,
-			changeYear: true,
-			dateFormat: 'yy/mm/dd'
-		};
-
-		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) {
-				super_report_filter_cal_selected ('summary', date, inst, ui.report.summary_filter_start_d_txt); }
-		}, calopts));
-
-		ui.report.summary_filter_end_d_cal.datepicker ($.extend ({
-			onSelect: function (date, inst) {
-				super_report_filter_cal_selected ('summary', date, inst, ui.report.summary_filter_end_d_txt); }
-		}, calopts));
-
-		ui.report.summary_filter_cancel = $('#super-report-summary-filter-cancel');
-		ui.report.summary_filter_cancel.on ('click', function () { super_report_close ('summary'); });
-
-		ui.report.summary = $('#super-report-summary');
-		ui.report.summary.find ('button').button ();
-		ui.report.summary_start = ui.report.summary.find ('.start');
-		ui.report.summary_end = ui.report.summary.find ('.end');
-		ui.report.summary_table = ui.report.summary.find ('tbody');
-		ui.report.summary_received = ui.report.summary.find ('.received');
-		ui.report.summary_change = ui.report.summary.find ('.change');
-		ui.report.summary_charged = ui.report.summary.find ('.charged');
-		ui.report.summary_balance = ui.report.summary.find ('.balance');
-		ui.report.summary_charged_tickets = ui.report.summary.find ('.charged-tickets');
-		ui.report.summary_printed_tickets = ui.report.summary.find ('.printed-tickets');
-		ui.report.summary_reload = $('#super-report-summary-reload');
-		ui.report.summary_reload.on ('click', function () { super_report_reload ('summary'); });
-		ui.report.summary_close = $('#super-report-summary-close');
-		ui.report.summary_close.on ('click', function () { super_report_close ('summary'); });
+		ui.report.summary = report_layout_init ('summary');
+		ui.report.detail = report_layout_init ('detail');
 		
-		ui.report.summary_print = $('#super-report-summary-print');
-		ui.report.summary_print.on ('click', super_report_summary_print);
+		ui.report.summary.print = $('#super-report-summary-print');
+		ui.report.summary.print.on ('click', super_report_summary_print);
 
 		ui.report.tickets = {};
-		ui.report.tickets.summary = $('#super-ticket-report-summary');
-		ui.report.tickets.summary_timestamp = ui.report.tickets.summary.find ('.ts');
-		ui.report.tickets.summary_start = ui.report.tickets.summary.find ('.start');
-		ui.report.tickets.summary_end = ui.report.tickets.summary.find ('.end');
-		ui.report.tickets.summary_terminal = ui.report.tickets.summary.find ('.term');
-		ui.report.tickets.summary_user = ui.report.tickets.summary.find ('.user');
-		ui.report.tickets.summary_items = ui.report.tickets.summary.find ('.items');
+		ui.report.tickets.summary = {};
+		ui.report.tickets.summary.section = $('#super-ticket-report-summary');
+		ui.report.tickets.summary.timestamp = ui.report.tickets.summary.section.find ('.ts');
+		ui.report.tickets.summary.start = ui.report.tickets.summary.section.find ('.start');
+		ui.report.tickets.summary.end = ui.report.tickets.summary.section.find ('.end');
+		ui.report.tickets.summary.terminal = ui.report.tickets.summary.section.find ('.term');
+		ui.report.tickets.summary.user = ui.report.tickets.summary.section.find ('.user');
+		ui.report.tickets.summary.items = ui.report.tickets.summary.section.find ('.items');
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -465,15 +476,19 @@
 	}
 
 	function super_report_filter (prefix) {
-		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-' + prefix);
+		APP.history.go (MOD_NAME, ui.report[prefix].filter_section, 'super-report-' + prefix);
 		shell.navShow ();
 		shell.menuCollapse ();
 
 		super_report_filter_refresh (prefix, function () {
-			ui.report.summary_filter_users_all.data ('state', 'all');
-			ui.report.summary_filter_shifts_all.data ('state', 'all');
-			super_report_filter_select_all_or_none (prefix, ui.report.summary_filter_users_all, ui.report.summary_filter_users);
-			super_report_filter_select_all_or_none (prefix, ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
+			ui.report[prefix].filter_users_all.data ('state', 'all');
+			ui.report[prefix].filter_shifts_all.data ('state', 'all');
+			super_report_filter_select_all_or_none (prefix,
+													ui.report[prefix].filter_users_all,
+													ui.report[prefix].filter_users);
+			super_report_filter_select_all_or_none (prefix,
+													ui.report[prefix].filter_shifts_all,
+													ui.report[prefix].filter_shifts);
 		});
 	}
 
@@ -521,33 +536,33 @@
 		var cashiers = {};
 		var shifts = super_report_shifts[prefix];
 
-		ui.report[prefix + '_filter_users'].find ('.avanty-option').each (
+		ui.report[prefix].filter_users.find ('.avanty-option').each (
 			function (i, opt) {
 				cashiers[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') }
 			});
 
-		ui.report[prefix + '_filter_shifts'].find ('.avanty-option').each (
+		ui.report[prefix].filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
 				$(opt).ava_option ('selected', cashiers[shifts.byId[$(opt).ava_option ('value')].cashier].selected);
 			});
 	}
 
 	function super_report_filter_validate_shifts (prefix) {
-		if (ui.report[prefix + '_filter_shifts'].find ('.selected').length == 0) {
-			ui.report[prefix + '_filter_submit'].addClass ('error');
-			ui.report[prefix + '_filter_error'].show ();
+		if (ui.report[prefix].filter_shifts.find ('.selected').length == 0) {
+			ui.report[prefix].filter_submit.addClass ('error');
+			ui.report[prefix].filter_error.show ();
 			return false;
 		}
 		
-		ui.report[prefix + '_filter_submit'].removeClass ('error');
-		ui.report[prefix + '_filter_error'].hide ();
+		ui.report[prefix].filter_submit.removeClass ('error');
+		ui.report[prefix].filter_error.hide ();
 		return true;
 	}		
 
 	function super_report_filter_select_toggled (prefix, evt, option, selected) {
 		var select = option.parent ();
 		window.setTimeout (function () {
-			if (select.prop ('id') == ui.report[prefix + '_filter_users'].prop ('id'))
+			if (select.prop ('id') == ui.report[prefix].filter_users.prop ('id'))
 				super_report_filter_update_shifts (prefix);
 
 			super_report_filter_validate_shifts (prefix);
@@ -564,19 +579,19 @@
 	}
 
 	function super_report_filter_validate_start_end (prefix) {
-		var start = new Date (ui.report[prefix + '_filter_start_d_txt'].text ());
-		var end = new Date (ui.report[prefix + '_filter_end_d_txt'].text ());
+		var start = new Date (ui.report[prefix].filter_start_d_txt.text ());
+		var end = new Date (ui.report[prefix].filter_end_d_txt.text ());
 
 		if (start > end) {
-			ui.report[prefix + '_filter_end_d'].addClass ('error');
-			ui.report[prefix + '_filter_end_d_error'].show ();
-			ui.report[prefix + '_filter_shifts'].empty ();
-			ui.report[prefix + '_filter_users'].empty ();
+			ui.report[prefix].filter_end_d.addClass ('error');
+			ui.report[prefix].filter_end_d_error.show ();
+			ui.report[prefix].filter_shifts.empty ();
+			ui.report[prefix].filter_users.empty ();
 			return undefined;
 		}
 
-		ui.report[prefix + '_filter_end_d'].removeClass ('error');
-		ui.report[prefix + '_filter_end_d_error'].hide ();
+		ui.report[prefix].filter_end_d.removeClass ('error');
+		ui.report[prefix].filter_end_d_error.hide ();
 
 		end.setDate (end.getDate () + 1); // Range is start <= x < end
 		return { start: start, end: end };
@@ -622,15 +637,15 @@
 		shifts.byId = dict;
 		super_report_shifts[prefix] = shifts;
 		
-		super_report_select_populate (prefix, ui.report[prefix + '_filter_users'], 'cashier');
-		super_report_select_populate (prefix, ui.report[prefix + '_filter_shifts'], 'shift_id');
+		super_report_select_populate (prefix, ui.report[prefix].filter_users, 'cashier');
+		super_report_select_populate (prefix, ui.report[prefix].filter_shifts, 'shift_id');
 
 		if (shifts.length > 0) {
-			ui.report[prefix + '_filter_users_all'].button ('enable');
-			ui.report[prefix + '_filter_shifts_all'].button ('enable');
+			ui.report[prefix].filter_users_all.button ('enable');
+			ui.report[prefix].filter_shifts_all.button ('enable');
 		} else {
-			ui.report[prefix + '_filter_users_all'].button ('disable');
-			ui.report[prefix + '_filter_shifts_all'].button ('disable');
+			ui.report[prefix].filter_users_all.button ('disable');
+			ui.report[prefix].filter_shifts_all.button ('disable');
 		}
 
 		if (cb)	cb ();
@@ -649,11 +664,11 @@
 		if (!super_report_filter_validate_shifts (prefix))
 			return;
 
-		APP.history.go (MOD_NAME, ui.report.summary, 'super-report-' + prefix);
+		APP.history.go (MOD_NAME, ui.report[prefix].section, 'super-report-' + prefix);
 		shell.navShow ();
 
 		var shifts = [];
-		ui.report[prefix + '_filter_shifts'].find ('.avanty-option').each (
+		ui.report[prefix].filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
 				var opt = $(opt);
 				if (opt.ava_option ('selected'))
@@ -694,21 +709,21 @@
 	}
 
 	function super_report_summary_do (records) {
-		ui.report.tickets.summary_timestamp.text (new Date ().toLocaleString ());
-		ui.report.tickets.summary_start.text (super_report_params['summary'].dates.start.toLocaleString ());
-		ui.report.tickets.summary_end.text (super_report_params['summary'].dates.end.toLocaleString ());
+		ui.report.tickets.summary.timestamp.text (new Date ().toLocaleString ());
+		ui.report.tickets.summary.start.text (super_report_params['summary'].dates.start.toLocaleString ());
+		ui.report.tickets.summary.end.text (super_report_params['summary'].dates.end.toLocaleString ());
 
-		ui.report.summary_start.text (super_report_params['summary'].dates.start.toLocaleString ());
-		ui.report.summary_end.text (super_report_params['summary'].dates.end.toLocaleString ());
+		ui.report.summary.start.text (super_report_params['summary'].dates.start.toLocaleString ());
+		ui.report.summary.end.text (super_report_params['summary'].dates.end.toLocaleString ());
 
 		APP.mod.report.shiftSummaryReport (ui.report, 'summary', records);
 	}
 
 	function super_report_reload (prefix) {
-		ui.report[prefix + '_reload'].button ('disable');
+		ui.report[prefix].reload.button ('disable');
 		super_report_request (prefix, super_report_params[prefix], super_report_params_str[prefix]);
 		APP.later (function () {
-			ui.report[prefix + '_reload'].button ('enable');
+			ui.report[prefix].reload.button ('enable');
 		}, 1000);
 	}
 

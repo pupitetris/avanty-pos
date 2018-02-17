@@ -47,6 +47,16 @@
 		return shift_str;
 	}
 
+	function find_ui (ui, prefix, key) {
+		var ele = ui[prefix + '_' + key];
+		if (ele) return ele;
+
+		if (ui[prefix] && ui[prefix][key])
+			return ui[prefix][key];
+
+		return undefined;
+	}
+
 	var mod = {
 		init: function () {
 			mod.initialized = true;
@@ -88,7 +98,9 @@
 				var shift_ids = [];
 				var last_shift_id = 0;
 
-				ui[prefix + '_table'].empty ();
+				var table = find_ui (ui, prefix, 'table');
+				table.empty ();
+
 				for (var rec of records) {
 					if (rec.rate) {
 						var rate = rates[rec.rate];
@@ -116,16 +128,16 @@
 						shift_ids.push (last_shift_id);
 						if (shift_ids.length == 1) {
 							shift_begin_ts = rec.timestamp.toLocaleString ();
-							if (ui.tickets[prefix + '_begin_time'])
-								ui.tickets[prefix + '_begin_time'].text (shift_begin_ts);
+							if (find_ui (ui.tickets, prefix, 'begin_time'))
+								find_ui (ui.tickets, prefix, 'begin_time').text (shift_begin_ts);
 						} else
 							shift_begin_ts = '';
 						break;
 					case 'shift_end':
-						if (ui.tickets[prefix + '_num'])
-							ui.tickets[prefix + '_num'].text (rec.amount);
-						if (ui.tickets[prefix + '_time'])
-							ui.tickets[prefix + '_time'].text (rec.timestamp.toLocaleString ());
+						if (find_ui (ui.tickets, prefix, 'num'))
+							find_ui (ui.tickets, prefix, 'num').text (rec.amount);
+						if (find_ui (ui.tickets, prefix, 'time'))
+							find_ui (ui.tickets, prefix, 'time').text (rec.timestamp.toLocaleString ());
 						break;
 					case 'deposit':
 						if (rec.shift_id && rec.shift_id != last_shift_id) // New shift record coming, this is the initial deposit.
@@ -141,39 +153,39 @@
 
 						pre += '<div class="desc">' + rec.timestamp.toLocaleString () + ' ' + desc[rec.concept] + '</div>\n' +
 							'<div class="sum">$' + APP.Util.asMoney (rec.amount) + '</div>\n';
-						ui[prefix + '_table'].append ($('<tr>' +
-														'<td>' + rec.timestamp.toLocaleString () + '</td>' +
-														'<th>' + desc[rec.concept] + '</th>' +
-														'<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
-														'</tr>'));
+						table.append ($('<tr>' +
+										'<td>' + rec.timestamp.toLocaleString () + '</td>' +
+										'<th>' + desc[rec.concept] + '</th>' +
+										'<td><s/></td><td class="money">' + APP.Util.asMoney (rec.amount) + '</td>' +
+										'</tr>'));
 					}
 
 				}
 
 				var shift_ids_str = render_shift_ids (shift_ids);
-				if (ui.tickets[prefix + '_shift_id'])
-					ui.tickets[prefix + '_shift_id'].text (shift_ids_str);
-				if (ui[prefix + '_shift_id'])
-					ui[prefix + '_shift_id'].text (shift_ids_str);
+				if (find_ui (ui.tickets, prefix, 'shift_id'))
+					find_ui (ui.tickets, prefix, 'shift_id').text (shift_ids_str);
+				if (find_ui (ui, prefix, 'shift_id'))
+					find_ui (ui, prefix, 'shift_id').text (shift_ids_str);
 
 				var deposit_str = (num_deposits > 1)? 'Dotaciones:': 'Dotación:';
 				pre += '<div class="desc">' + shift_begin_ts + ' ' + deposit_str + '</div>\n' +
 					'<div class="sum">$' + APP.Util.asMoney (deposit) + '</div>\n';
-				ui[prefix + '_table'].append ($('<tr>' +
-												'<td style="text-align: right">' + shift_begin_ts + ' (' + num_deposits + ')</td>' +
-												'<th>' + deposit_str + '</th>' +
-												'<td><s/></td><td class="money">' + APP.Util.asMoney (deposit) + '</td>' +
-												'</tr>'));
+				table.append ($('<tr>' +
+								'<td style="text-align: right">' + shift_begin_ts + ' (' + num_deposits + ')</td>' +
+								'<th>' + deposit_str + '</th>' +
+								'<td><s/></td><td class="money">' + APP.Util.asMoney (deposit) + '</td>' +
+								'</tr>'));
 				
-				ui[prefix + '_table'].append ($('<tr><th>Cobros por tarifa:</th><td colspan="3"></td></tr>'));
+				table.append ($('<tr><th>Cobros por tarifa:</th><td colspan="3"></td></tr>'));
 				for (var rate of rate_data) {
 					pre += '<div class="desc">Tarifa: ' + rate.label_client + '</div>\n' +
 						'<div class="sum">(' + rate.count + ') $' + APP.Util.asMoney (rate.amount) + '</div>\n';
-					ui[prefix + '_table'].append ($('<tr>' +
-													'<td style="text-align: right">(' + rate.count + ')</td>' +
-													'<th>' + rate.label + ':</th>' +
-													'<td><s/></td><td class="money">' + APP.Util.asMoney (rate.amount) + '</td>' +
-													'</tr>'));
+					table.append ($('<tr>' +
+									'<td style="text-align: right">(' + rate.count + ')</td>' +
+									'<th>' + rate.label + ':</th>' +
+									'<td><s/></td><td class="money">' + APP.Util.asMoney (rate.amount) + '</td>' +
+									'</tr>'));
 				}
 
 				var received = charged + deposit + change;
@@ -181,30 +193,34 @@
 
 				received = APP.Util.asMoney (received);
 				pre += '<br /><div class="sum">Recibido: $' + received + '</div><br />\n';
-				ui[prefix + '_received'].text (received);
+				find_ui (ui, prefix, 'received').text (received);
 
 				change = APP.Util.asMoney (change);
 				pre += '<div class="sum">Devuelto: $' + change + '</div><br />\n';
-				ui[prefix + '_change'].text (change);
+				find_ui (ui, prefix, 'change').text (change);
 
 				charged = APP.Util.asMoney (charged);
 				pre += '<div class="sum">Cobrado: $' + charged + '</div><br />\n';
-				ui[prefix + '_charged'].text (charged);
+				find_ui (ui, prefix, 'charged').text (charged);
 
 				balance = APP.Util.asMoney (balance);
 				pre += '<div class="sum">Balance: $' + balance + '</div>\n';
-				ui[prefix + '_balance'].text (balance);
+				find_ui (ui, prefix, 'balance').text (balance);
 
 				pre += '<div class="sum">Boletos cobrados: ' + charged_tickets + '</div>';
-				ui[prefix + '_charged_tickets'].text (charged_tickets);
+				find_ui (ui, prefix, 'charged_tickets').text (charged_tickets);
 
 				pre += '<div class="sum">Boletos emitidos: ' + printed_tickets + '</div>';
-				ui[prefix + '_printed_tickets'].text (printed_tickets);
+				find_ui (ui, prefix, 'printed_tickets').text (printed_tickets);
 
-				ui.tickets[prefix + '_terminal'].text (APP.terminal.name);
-				ui.tickets[prefix + '_user'].text (APP.charp.credentialsGet ().login);
-				ui.tickets[prefix + '_items'].html (pre);
-				APP.mod.devices.layoutTicket (ui.tickets[prefix]);
+				find_ui (ui.tickets, prefix, 'terminal').text (APP.terminal.name);
+				find_ui (ui.tickets, prefix, 'user').text (APP.charp.credentialsGet ().login);
+				find_ui (ui.tickets, prefix, 'items').html (pre);
+
+				var ticket = ui.tickets[prefix];
+				if (!ticket.length)
+					ticket = ticket.section;
+				APP.mod.devices.layoutTicket (ticket);
 			});
 		}
 

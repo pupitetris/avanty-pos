@@ -71,7 +71,7 @@
 		shell.ui.user_create.on ('click', super_create_user);
 
 		shell.ui.report_summary = $('#super-tab-report-summary');
-		shell.ui.report_summary.on ('click', super_report_summary_filter);
+		shell.ui.report_summary.on ('click', function () { super_report_filter ('summary'); });
 
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });
 		newuser_layout_init ('newuser', {
@@ -113,7 +113,7 @@
 		ui.report.summary_filter_section = $('#super-report-summary-filter');
 		ui.report.summary_filter_section.find ('button').button ();
 		ui.report.summary_filter_form = ui.report.summary_filter_section.find ('form');
-		ui.report.summary_filter_form.on ('submit', super_report_summary_filter_submit);
+		ui.report.summary_filter_form.on ('submit', function (evt) { super_report_filter_submit ('summary', evt); });
 		ui.report.summary_filter_submit = ui.report.summary_filter_form.find ('button[type="submit"]');
 		ui.report.summary_filter_error = ui.report.summary_filter_submit.find ('.error');
 		ui.report.summary_filter_error.hide ();
@@ -128,17 +128,23 @@
 
 		ui.report.summary_filter_users = $('#super-report-summary-users');
 		ui.report.summary_filter_users.ava_select ();
-		ui.report.summary_filter_users.on ('avanty:optionSelect', super_report_summary_filter_select_toggled);
+		ui.report.summary_filter_users.on ('avanty:optionSelect',
+										   function (evt, option, selected) {
+											   super_report_filter_select_toggled ('summary', evt, option, selected);
+										   });
 		ui.report.summary_filter_users_all = $('#super-report-summary-users-all');
 		ui.report.summary_filter_users_all.on ('click', function () {
-			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_users_all, ui.report.summary_filter_users);
+			super_report_filter_select_all_or_none ('summary', ui.report.summary_filter_users_all, ui.report.summary_filter_users);
 		});
 		ui.report.summary_filter_shifts = $('#super-report-summary-shifts');
 		ui.report.summary_filter_shifts.ava_select ();
-		ui.report.summary_filter_shifts.on ('avanty:optionSelect', super_report_summary_filter_select_toggled);
+		ui.report.summary_filter_shifts.on ('avanty:optionSelect',
+										   function (evt, option, selected) {
+											   super_report_filter_select_toggled ('summary', evt, option, selected);
+										   });
 		ui.report.summary_filter_shifts_all = $('#super-report-summary-shifts-all');
 		ui.report.summary_filter_shifts_all.on ('click', function () {
-			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
+			super_report_filter_select_all_or_none ('summary', ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
 		});
 
 		var now = new Date ();
@@ -149,10 +155,10 @@
 		ui.report.summary_filter_end_d_txt.text (todayStr);
 
 		ui.report.summary_filter_start_d.on ('click', function () {
-			super_report_summary_filter_cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
+			super_report_filter_cal_toggle (ui.report.summary_filter_start_d_cal, ui.report.summary_filter_end_d_cal);
 		})
 		ui.report.summary_filter_end_d.on ('click', function () {
-			super_report_summary_filter_cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
+			super_report_filter_cal_toggle (ui.report.summary_filter_end_d_cal, ui.report.summary_filter_start_d_cal);
 		})
 
 		var calopts = {
@@ -166,16 +172,16 @@
 
 		ui.report.summary_filter_start_d_cal.datepicker ($.extend ({
 			onSelect: function (date, inst) {
-				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_start_d_txt); }
+				super_report_filter_cal_selected ('summary', date, inst, ui.report.summary_filter_start_d_txt); }
 		}, calopts));
 
 		ui.report.summary_filter_end_d_cal.datepicker ($.extend ({
 			onSelect: function (date, inst) {
-				super_report_summary_filter_cal_selected (date, inst, ui.report.summary_filter_end_d_txt); }
+				super_report_filter_cal_selected ('summary', date, inst, ui.report.summary_filter_end_d_txt); }
 		}, calopts));
 
 		ui.report.summary_filter_cancel = $('#super-report-summary-filter-cancel');
-		ui.report.summary_filter_cancel.on ('click', super_report_summary_close);
+		ui.report.summary_filter_cancel.on ('click', function () { super_report_close ('summary'); });
 
 		ui.report.summary = $('#super-report-summary');
 		ui.report.summary.find ('button').button ();
@@ -189,12 +195,13 @@
 		ui.report.summary_charged_tickets = ui.report.summary.find ('.charged-tickets');
 		ui.report.summary_printed_tickets = ui.report.summary.find ('.printed-tickets');
 		ui.report.summary_reload = $('#super-report-summary-reload');
-		ui.report.summary_reload.on ('click', super_report_summary_reload);
+		ui.report.summary_reload.on ('click', function () { super_report_reload ('summary'); });
+		ui.report.summary_close = $('#super-report-summary-close');
+		ui.report.summary_close.on ('click', function () { super_report_close ('summary'); });
+		
 		ui.report.summary_print = $('#super-report-summary-print');
 		ui.report.summary_print.on ('click', super_report_summary_print);
-		ui.report.summary_close = $('#super-report-summary-close');
-		ui.report.summary_close.on ('click', super_report_summary_close);
-		
+
 		ui.report.tickets = {};
 		ui.report.tickets.summary = $('#super-ticket-report-summary');
 		ui.report.tickets.summary_timestamp = ui.report.tickets.summary.find ('.ts');
@@ -454,25 +461,25 @@
 		APP.switchSection (ui.section_main);
 	}
 
-	function super_report_summary_filter () {
-		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-summary');
+	function super_report_filter (prefix) {
+		APP.history.go (MOD_NAME, ui.report.summary_filter_section, 'super-report-' + prefix);
 		shell.navShow ();
 		shell.menuCollapse ();
 
-		super_report_summary_filter_refresh (function () {
+		super_report_filter_refresh (prefix, function () {
 			ui.report.summary_filter_users_all.data ('state', 'all');
 			ui.report.summary_filter_shifts_all.data ('state', 'all');
-			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_users_all, ui.report.summary_filter_users);
-			super_report_summary_filter_select_all_or_none (ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
+			super_report_filter_select_all_or_none (prefix, ui.report.summary_filter_users_all, ui.report.summary_filter_users);
+			super_report_filter_select_all_or_none (prefix, ui.report.summary_filter_shifts_all, ui.report.summary_filter_shifts);
 		});
 	}
 
-	function super_report_summary_filter_window_click (evt, cal1, cal2) {
+	function super_report_filter_window_click (evt, cal1, cal2) {
 		if ($(evt.target).closest (cal1).length < 1)
-			super_report_summary_filter_cal_toggle (cal1, cal2);
+			super_report_filter_cal_toggle (cal1, cal2);
 	}
 
-	function super_report_summary_filter_select_all_or_none (button, select) {
+	function super_report_filter_select_all_or_none (prefix, button, select) {
 		var state = button.data ('state');
 		if (!state || state == 'all') {
 			button.data ('state', 'none');
@@ -486,18 +493,18 @@
 			select.find ('div').each (function (i, opt) { $(opt).ava_option ('selected', false); });
 		}
 
-		if (button.prop ('id') == 'super-report-summary-users-all')
-			super_report_summary_filter_update_shifts ();
+		if (button.prop ('id') == 'super-report-' + prefix + '-users-all')
+			super_report_filter_update_shifts (prefix);
 
-		super_report_summary_filter_validate_shifts ();
+		super_report_filter_validate_shifts (prefix);
 	}
 
-	function super_report_summary_filter_cal_toggle (cal1, cal2) {
-		$(window).off ('click.super_report_summary_toggle');
+	function super_report_filter_cal_toggle (cal1, cal2) {
+		$(window).off ('click.super_report_toggle');
 		if (cal1.is (':hidden')) {
 			APP.later (function () {
-				$(window).on ('click.super_report_summary_toggle',
-							  function (evt) { super_report_summary_filter_window_click (evt, cal1, cal2); });
+				$(window).on ('click.super_report_toggle',
+							  function (evt) { super_report_filter_window_click (evt, cal1, cal2); });
  			}, 200);
 			cal1.show ('drop', { direction: 'up' }, 200);
 			cal2.hide ();
@@ -506,84 +513,84 @@
 		}
 	}
 
-	var super_report_summary_shifts;
-	function super_report_summary_filter_update_shifts () {
+	var super_report_shifts = {};
+	function super_report_filter_update_shifts (prefix) {
 		var cashiers = {};
-		var shifts = super_report_summary_shifts;
+		var shifts = super_report_shifts[prefix];
 
-		ui.report.summary_filter_users.find ('.avanty-option').each (
+		ui.report[prefix + '_filter_users'].find ('.avanty-option').each (
 			function (i, opt) {
 				cashiers[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') }
 			});
 
-		ui.report.summary_filter_shifts.find ('.avanty-option').each (
+		ui.report[prefix + '_filter_shifts'].find ('.avanty-option').each (
 			function (i, opt) {
 				$(opt).ava_option ('selected', cashiers[shifts.byId[$(opt).ava_option ('value')].cashier].selected);
 			});
 	}
 
-	function super_report_summary_filter_validate_shifts () {
-		if (ui.report.summary_filter_shifts.find ('.selected').length == 0) {
-			ui.report.summary_filter_submit.addClass ('error');
-			ui.report.summary_filter_error.show ();
+	function super_report_filter_validate_shifts (prefix) {
+		if (ui.report[prefix + '_filter_shifts'].find ('.selected').length == 0) {
+			ui.report[prefix + '_filter_submit'].addClass ('error');
+			ui.report[prefix + '_filter_error'].show ();
 			return false;
 		}
 		
-		ui.report.summary_filter_submit.removeClass ('error');
-		ui.report.summary_filter_error.hide ();
+		ui.report[prefix + '_filter_submit'].removeClass ('error');
+		ui.report[prefix + '_filter_error'].hide ();
 		return true;
 	}		
 
-	function super_report_summary_filter_select_toggled (evt, option, selected) {
+	function super_report_filter_select_toggled (prefix, evt, option, selected) {
 		var select = option.parent ();
 		window.setTimeout (function () {
-			if (select.prop ('id') == ui.report.summary_filter_users.prop ('id'))
-				super_report_summary_filter_update_shifts ();
+			if (select.prop ('id') == ui.report[prefix + '_filter_users'].prop ('id'))
+				super_report_filter_update_shifts (prefix);
 
-			super_report_summary_filter_validate_shifts ();
+			super_report_filter_validate_shifts (prefix);
 		}, 0);
 	}
 	
-	function super_report_summary_filter_cal_selected (date, inst, txt) {
-		$(window).off ('click.super_report_summary_toggle');
+	function super_report_filter_cal_selected (prefix, date, inst, txt) {
+		$(window).off ('click.super_report_toggle');
 
 		txt.text (date);
 		inst.dpDiv.parent ().fadeOut ();
 
-		super_report_summary_filter_refresh ();
+		super_report_filter_refresh (prefix);
 	}
 
-	function super_report_summary_filter_validate_start_end () {
-		var start = new Date (ui.report.summary_filter_start_d_txt.text ());
-		var end = new Date (ui.report.summary_filter_end_d_txt.text ());
+	function super_report_filter_validate_start_end (prefix) {
+		var start = new Date (ui.report[prefix + '_filter_start_d_txt'].text ());
+		var end = new Date (ui.report[prefix + '_filter_end_d_txt'].text ());
 
 		if (start > end) {
-			ui.report.summary_filter_end_d.addClass ('error');
-			ui.report.summary_filter_end_d_error.show ();
-			ui.report.summary_filter_shifts.empty ();
-			ui.report.summary_filter_users.empty ();
+			ui.report[prefix + '_filter_end_d'].addClass ('error');
+			ui.report[prefix + '_filter_end_d_error'].show ();
+			ui.report[prefix + '_filter_shifts'].empty ();
+			ui.report[prefix + '_filter_users'].empty ();
 			return undefined;
 		}
 
-		ui.report.summary_filter_end_d.removeClass ('error');
-		ui.report.summary_filter_end_d_error.hide ();
+		ui.report[prefix + '_filter_end_d'].removeClass ('error');
+		ui.report[prefix + '_filter_end_d_error'].hide ();
 
 		end.setDate (end.getDate () + 1); // Range is start <= x < end
 		return { start: start, end: end };
 	}
 
-	function super_report_summary_filter_refresh (cb) {
-		var res = super_report_summary_filter_validate_start_end ();
+	function super_report_filter_refresh (prefix, cb) {
+		var res = super_report_filter_validate_start_end (prefix);
 		if (!res)
 			return;
 
 		APP.charp.request ('supervisor_get_shifts', [res.start, res.end],
-						   function (shifts) { super_report_summary_filter_refresh_success (shifts, cb); });
+						   function (shifts) { super_report_filter_refresh_success (prefix, shifts, cb); });
 	}
 
-	function super_report_summary_select_populate (select, key) {
+	function super_report_select_populate (prefix, select, key) {
 		var opts = {};
-		var shifts = super_report_summary_shifts;
+		var shifts = super_report_shifts[prefix];
 
 		select.find ('.avanty-option').each (
 			function (i, opt) {
@@ -605,45 +612,45 @@
 			}
 	}
 
-	function super_report_summary_filter_refresh_success (shifts, cb) {
+	function super_report_filter_refresh_success (prefix, shifts, cb) {
 		var dict = {};
 		for (var shift of shifts)
 			dict[shift.shift_id] = shift;
 		shifts.byId = dict;
-		super_report_summary_shifts = shifts;
+		super_report_shifts[prefix] = shifts;
 		
-		super_report_summary_select_populate (ui.report.summary_filter_users, 'cashier');
-		super_report_summary_select_populate (ui.report.summary_filter_shifts, 'shift_id');
+		super_report_select_populate (prefix, ui.report[prefix + '_filter_users'], 'cashier');
+		super_report_select_populate (prefix, ui.report[prefix + '_filter_shifts'], 'shift_id');
 
 		if (shifts.length > 0) {
-			ui.report.summary_filter_users_all.button ('enable');
-			ui.report.summary_filter_shifts_all.button ('enable');
+			ui.report[prefix + '_filter_users_all'].button ('enable');
+			ui.report[prefix + '_filter_shifts_all'].button ('enable');
 		} else {
-			ui.report.summary_filter_users_all.button ('disable');
-			ui.report.summary_filter_shifts_all.button ('disable');
+			ui.report[prefix + '_filter_users_all'].button ('disable');
+			ui.report[prefix + '_filter_shifts_all'].button ('disable');
 		}
 
 		if (cb)	cb ();
 	}
 
-	var super_report_summary_params;
-	var super_report_summary_params_str;
-	var super_report_summary_records;
-	function super_report_summary_filter_submit (evt) {
+	var super_report_params = {};
+	var super_report_params_str = {};
+	var super_report_records = {};
+	function super_report_filter_submit (prefix, evt) {
 		evt.preventDefault ();
 
-		var dates = super_report_summary_filter_validate_start_end ();
+		var dates = super_report_filter_validate_start_end (prefix);
 		if (!dates)
 			return;
 
-		if (!super_report_summary_filter_validate_shifts ())
+		if (!super_report_filter_validate_shifts (prefix))
 			return;
 
-		APP.history.go (MOD_NAME, ui.report.summary, 'super-report-summary');
+		APP.history.go (MOD_NAME, ui.report.summary, 'super-report-' + prefix);
 		shell.navShow ();
 
 		var shifts = [];
-		ui.report.summary_filter_shifts.find ('.avanty-option').each (
+		ui.report[prefix + '_filter_shifts'].find ('.avanty-option').each (
 			function (i, opt) {
 				var opt = $(opt);
 				if (opt.ava_option ('selected'))
@@ -654,51 +661,62 @@
 		
 		var params = { dates: dates, shifts: shifts };
 		var params_str = JSON.stringify (params);
-		if (super_report_summary_params_str && params_str == super_report_summary_params_str) {
-			super_report_summary_do (super_report_summary_records);
+		if (super_report_params_str[prefix] && params_str == super_report_params_str[prefix]) {
+			super_report_do (prefix, super_report_records[prefix])
 			return;
 		}
 
-		super_report_summary_request (params, params_str);
+		super_report_request (prefix, params, params_str);
 	}
 
-	function super_report_summary_request (params, params_str) {
+	function super_report_request (prefix, params, params_str) {
 		APP.charp.request ('supervisor_summary_report', [params.dates.start, params.dates.end, params.shifts],
 						   function (records) {
-							   super_report_summary_params = params;
-							   super_report_summary_params_str = params_str;
-							   super_report_summary_records = records; 
-							   super_report_summary_do (records)
+							   super_report_params[prefix] = params;
+							   super_report_params_str[prefix] = params_str;
+							   super_report_records[prefix] = records; 
+							   super_report_do (prefix, records)
 						   });
+	}
+
+	function super_report_do (prefix, records) {
+		switch (prefix) {
+		case 'summary':
+			return super_report_summary_do (super_report_records[prefix]);
+		case 'detail':
+			return super_report_detail_do (super_report_records[prefix]);
+		}
+
+		throw 'invalid prefix ' + prefix;
 	}
 
 	function super_report_summary_do (records) {
 		ui.report.tickets.summary_timestamp.text (new Date ().toLocaleString ());
-		ui.report.tickets.summary_start.text (super_report_summary_params.dates.start.toLocaleString ());
-		ui.report.tickets.summary_end.text (super_report_summary_params.dates.end.toLocaleString ());
+		ui.report.tickets.summary_start.text (super_report_params['summary'].dates.start.toLocaleString ());
+		ui.report.tickets.summary_end.text (super_report_params['summary'].dates.end.toLocaleString ());
 
-		ui.report.summary_start.text (super_report_summary_params.dates.start.toLocaleString ());
-		ui.report.summary_end.text (super_report_summary_params.dates.end.toLocaleString ());
+		ui.report.summary_start.text (super_report_params['summary'].dates.start.toLocaleString ());
+		ui.report.summary_end.text (super_report_params['summary'].dates.end.toLocaleString ());
 
 		APP.mod.report.shiftSummaryReport (ui.report, 'summary', records);
 	}
 
-	function super_report_summary_reload () {
-		ui.report.summary_reload.button ('disable');
-		super_report_summary_request (super_report_summary_params, super_report_summary_params_str);
+	function super_report_reload (prefix) {
+		ui.report[prefix + '_reload'].button ('disable');
+		super_report_request (prefix, super_report_params[prefix], super_report_params_str[prefix]);
 		APP.later (function () {
-			ui.report.summary_reload.button ('enable');
+			ui.report[prefix + '_reload'].button ('enable');
 		}, 1000);
+	}
+
+	function super_report_close (prefix) {
+		APP.history.back ('super-report-' + prefix);
+		shell.navShow ();
+		shell.menuCollapse (false);
 	}
 
 	function super_report_summary_print () {
 		APP.mod.devices.print (ui.report.tickets.summary);
-	}
-
-	function super_report_summary_close () {
-		APP.history.back ('super-report-summary');
-		shell.navShow ();
-		shell.menuCollapse (false);
 	}
 
 	var mod = {

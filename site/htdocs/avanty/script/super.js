@@ -170,7 +170,7 @@
 		shell.ui.report_summary = $('#super-tab-report-summary');
 		shell.ui.report_summary.on ('click', function () { super_report_filter ('summary'); });
 
-		shell.ui.report_detail = $('#super-tab-detail-summary');
+		shell.ui.report_detail = $('#super-tab-report-detail');
 		shell.ui.report_detail.on ('click', function () { super_report_filter ('detail'); });
 
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });

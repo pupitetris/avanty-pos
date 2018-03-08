@@ -1,6 +1,6 @@
 {
 	"qz_connect": {
-		"host": "localhost.qz.io",
+		"host": "www.avanty.local",
 		"port": { "secure": [8181] },
 		"usingSecure": true,
 		"keepAlive": 60,
@@ -24,7 +24,7 @@
 	},
 	"displays": {
 		"client": {
-			"type": "DUMMY",
+			"type": "EPSON",
 			"port": "/dev/ttyS2",
 			"width": 20,
 			"height": 2,

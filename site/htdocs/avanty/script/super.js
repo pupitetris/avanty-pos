@@ -134,6 +134,35 @@
 				super_report_filter_cal_selected (prefix, date, inst, report.filter_end_d_txt); }
 		}, calopts));
 
+		// Initialize time filter controls if they are present.
+		if (report.filter_section.find ('.hm').length > 0) {
+			report.filter_start_h = report.filter_section.find ('select[name="start_h"]');
+			report.filter_start_m = report.filter_section.find ('select[name="start_m"]');
+			report.filter_start_ampm = report.filter_section.find ('select[name="start_ampm"]');
+			report.filter_end_h = report.filter_section.find ('select[name="end_h"]');
+			report.filter_end_m = report.filter_section.find ('select[name="end_m"]');
+			report.filter_end_ampm = report.filter_section.find ('select[name="end_ampm"]');
+			
+			for (var i = 1; i <= 12; i++) {
+				var num = APP.Util.padZeroes (i, 2);
+				report.filter_start_h.append ($('<option value="' + i + '">' + num + '</option>'));
+				report.filter_end_h.append ($('<option value="' + i + '">' + num + '</option>'));
+			}
+
+			for (var i = 0; i < 60; i += 5) {
+				var num = APP.Util.padZeroes (i, 2);
+				report.filter_start_m.append ($('<option value="' + i + '">' + num + '</option>'));
+				report.filter_end_m.append ($('<option value="' + i + '">' + num + '</option>'));
+			}
+
+			report.filter_start_h.selectmenu ();
+			report.filter_start_m.selectmenu ();
+			report.filter_start_ampm.selectmenu ();
+			report.filter_end_h.selectmenu ();
+			report.filter_end_m.selectmenu ();
+			report.filter_end_ampm.selectmenu ();
+		}
+
 		report.filter_cancel = $('#super-report-' + prefix + '-filter-cancel');
 		report.filter_cancel.on ('click', function () { super_report_close (prefix); });
 

@@ -166,21 +166,11 @@
 		report.filter_cancel = $('#super-report-' + prefix + '-filter-cancel');
 		report.filter_cancel.on ('click', function () { super_report_close (prefix); });
 
-		report.section = $('#super-report-summary');
+		report.section = $('#super-report-' + prefix);
 		report.section.find ('button').button ();
-		report.start = report.section.find ('.start');
-		report.end = report.section.find ('.end');
-		report.table = report.section.find ('tbody');
-		report.received = report.section.find ('.received');
-		report.change = report.section.find ('.change');
-		report.charged = report.section.find ('.charged');
-		report.balance = report.section.find ('.balance');
-		report.charged_tickets = report.section.find ('.charged-tickets');
-		report.printed_tickets = report.section.find ('.printed-tickets');
-		report.reload = $('#super-report-' + prefix + '-reload');
-		report.reload.on ('click', function () { super_report_reload (prefix); });
-		report.close = $('#super-report-' + prefix + '-close');
-		report.close.on ('click', function () { super_report_close (prefix); });
+		report.start = ui.report.summary.section.find ('.start');
+		report.end = ui.report.summary.section.find ('.end');
+		report.table = ui.report.summary.section.find ('tbody');
 
 		return report;
 	}
@@ -241,6 +231,16 @@
 		ui.report.summary = report_layout_init ('summary');
 		ui.report.detail = report_layout_init ('detail');
 		
+		ui.report.summary.received = ui.report.summary.section.find ('.received');
+		ui.report.summary.change = ui.report.summary.section.find ('.change');
+		ui.report.summary.charged = ui.report.summary.section.find ('.charged');
+		ui.report.summary.balance = ui.report.summary.section.find ('.balance');
+		ui.report.summary.charged_tickets = ui.report.summary.section.find ('.charged-tickets');
+		ui.report.summary.printed_tickets = ui.report.summary.section.find ('.printed-tickets');
+		ui.report.summary.reload = $('#super-report-' + prefix + '-reload');
+		ui.report.summary.reload.on ('click', function () { super_report_reload (prefix); });
+		ui.report.summary.close = $('#super-report-' + prefix + '-close');
+		ui.report.summary.close.on ('click', function () { super_report_close (prefix); });
 		ui.report.summary.print = $('#super-report-summary-print');
 		ui.report.summary.print.on ('click', super_report_summary_print);
 

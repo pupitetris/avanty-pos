@@ -222,8 +222,74 @@
 					ticket = ticket.section;
 				APP.mod.devices.layoutTicket (ticket);
 			});
-		}
+		},
 
+		shiftDetailReport: function (ui, prefix, records) {
+			APP.fetch ('rates_get', 'REPORT', [], true, function (rate_data) {
+
+				var rates = {unknown: { label_client: 'Desconocido'} };
+				for (var rate of rate_data)
+					rates[rate.name] = rate;
+
+				var table = find_ui (ui, prefix, 'table');
+				
+				function td_create (val, td_class) {
+					if (val === null || val === undefined)
+						val = '';
+					else {
+						switch (td_class) {
+						case 'money': val = APP.Util.asMoney (val); break;
+						case 'date': val = val.getFullYear () + '/' + (val.getMonth () + 1) + '/' + val.getDate () + ' ' +
+								APP.Util.padString (val.getHours ().toString (), 2) + ':' +
+								APP.Util.padZeroes (val.getMinutes (), 2) + ':' +
+								APP.Util.padZeroes (val.getSeconds (), 2);
+							break;
+						}
+					}
+					var class_str = (td_class === undefined)? '': ' class="' + td_class + '"';
+					
+					return $('<td' + class_str + '>' + ((val === null || val === undefined)? '': val.toString ()) + '</td>');
+				}
+
+				var concept2label = {
+					deposit: 'Depósito',
+					shift_begin: 'Inicio turno',
+					entry: 'Entrada manual',
+					shift_end: 'Fin turno'
+				};
+				var row = 0;
+				var last_shift_id = 0;
+				for (var rec of records) {
+					switch (rec.concept) {
+					case 'deposit':
+						if (rec.shift_id != last_shift_id)
+							continue;
+						break;
+					case 'shift_begin':
+						last_shift_id = rec.shift_id;
+						break;
+					}
+
+					var rate = APP.Util.objGet (rec.rate, 'unknown', rates);
+					var rate_label = (rate)? rate.label_client: null;
+					var tr = $('<tr />');
+					tr.append (td_create (rec.timestamp, 'date'));
+					tr.append (td_create (rec.terminal_name));
+					tr.append (td_create (rec.shift_id, 'num'));
+					tr.append (td_create (rec.cashier));
+					tr.append (td_create (APP.Util.objGet (rec.concept, null, concept2label), 'concept'));
+					tr.append (td_create (rate_label));
+					tr.append (td_create (rec.amount, 'money'));
+					tr.append (td_create (rec.change, 'money'));
+					tr.find ('td').each (function (i, ele) { if (i % 2) $(ele).addClass ('odd'); });
+
+					if (row % 2)
+						tr.addClass ('odd');
+					table.append (tr);
+					row++;
+				}
+			});
+		}
 	};
 
 	APP.addModule (MOD_NAME, mod);

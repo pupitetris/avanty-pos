@@ -1,3 +1,12 @@
+.detail-report h4, .shift-report h4 {
+	width: 95%;
+	height: 3em;
+	line-height: 4.5em;
+	margin-bottom: 0;
+	text-align: left;
+	border-bottom: 1px solid lightgray;
+}
+
 .shift-report table {
 	border-spacing: 0;
 }
@@ -12,14 +21,14 @@
 	padding-right: 0.25em;
 }
 
+.shift-report td:first-child {
+	padding-right: 1em;
+}
+
 .shift-report tbody td, .shift-report tfoot td, .shift-report tfoot td:last-child {
 	position: relative;
 	padding: 0;
 	text-align: right;
-}
-
-.shift-report table .money {
-	width: 9ex;
 }
 
 .shift-report tbody th, .shift-report tfoot th {
@@ -34,6 +43,17 @@
 .shift-report tbody td.qty {
 	text-align: center;
 	width: 8em;
+}
+
+.shift-report td.tickets {
+	text-align: left;
+}
+
+.shift-report table .money {
+	text-align: right;
+	width: auto;
+	width: 9ex;
+	line-height: unset;
 }
 
 .shift-report table .money span {
@@ -56,19 +76,6 @@
 	text-align: right;
 }
 
-.shift-report h4 {
-	width: 95%;
-	height: 3em;
-	line-height: 4.5em;
-	margin-bottom: 0;
-	text-align: left;
-	border-bottom: 1px solid lightgray;
-}
-
-.shift-report > table {
-	
-}
-
 .shift-report > table td {
 	text-align: left;
 	vertical-align: bottom;
@@ -83,11 +90,52 @@
 	padding-left: 0;
 }
 
+.detail-report > div, .shift-report > div {
+	margin-top: 2em;
+}
 
-.shift-report button {
+.detail-report > div.detail-cont {
+	margin: 0;
+	overflow: auto;
+	height: 450px;
+	max-width: 100%;
+}
+
+.detail-report > div button, .shift-report > div button {
 	margin-left: 1ex;
 }
 
-.shift-report button:first-child {
+.detail-report > div button:first-child, .shift-report > div button:first-child {
 	margin-left: 0;
+}
+
+.detail-report table.detail {
+	font-size: 75%;
+	border-spacing: 0;
+}
+
+.detail-report table.detail tbody {
+	background-color: #f0f0f0;
+}
+
+.detail-report table.detail .odd {
+	background-color: rgba(0,0,0,0.1);
+}
+
+.detail-report table.detail td, .detail-report table.detail th {
+	padding-left: 0.5ex;
+	padding-right: 0.5ex;
+}
+
+.detail-report table.detail td {
+	white-space: nowrap;
+	text-align: left;
+}
+
+.detail-report table.detail td.num {
+	text-align: right;
+}
+
+.detail-report table.detail td.money {
+	text-align: right;
 }

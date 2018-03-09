@@ -147,16 +147,21 @@
 			report.filter_end.m = report.filter_section.find ('select[name="end_m"]');
 			report.filter_end.ampm = report.filter_section.find ('select[name="end_ampm"]');
 			
-			for (var i = 1; i <= 12; i++) {
-				var num = APP.Util.padZeroes (i, 2);
-				report.filter_start.h.append ($('<option value="' + i + '">' + num + '</option>'));
-				report.filter_end.h.append ($('<option value="' + i + '">' + num + '</option>'));
+			function option_append (select, val, txt) {
+				select.append ($('<option value="' + val + '">' + txt + '</option>'));
+			}
+
+			option_append (report.filter_start.h, 12, 12);
+			option_append (report.filter_end.h, 12, 12);
+			for (var i = 1; i < 12; i++) {
+				option_append (report.filter_start.h, i, i);
+				option_append (report.filter_end.h, i, i);
 			}
 
 			for (var i = 0; i < 60; i += 5) {
 				var num = APP.Util.padZeroes (i, 2);
-				report.filter_start.m.append ($('<option value="' + num + '">' + num + '</option>'));
-				report.filter_end.m.append ($('<option value="' + num + '">' + num + '</option>'));
+				option_append (report.filter_start.m, num, num);
+				option_append (report.filter_end.m, num, num);
 			}
 
 			report.filter_start.h.selectmenu ();
@@ -616,10 +621,11 @@
 		if (!date_ui.h)
 			return new Date (str);
 
-		var hour = parseInt (date_ui.h.val ());
+		var d = new Date (str + ' ' + date_ui.h.val () + ':' + date_ui.m.val ());
 		if (date_ui.ampm.val () == 'pm')
-			hour += 12;
-		return new Date (str + ' ' + hour.toString () + ':' + date_ui.m.val ());
+			// pm adds 12 hours.
+			d = new Date (d.getTime () + 1000 * 60 * 60 * 12);
+		return d;
 	}
 
 	function super_report_filter_validate_start_end (prefix) {
@@ -770,6 +776,13 @@
 		ui.report.summary.end.text (super_report_params['summary'].dates.end.toLocaleString ());
 
 		APP.mod.report.shiftSummaryReport (ui.report, 'summary', records);
+	}
+
+	function super_report_detail_do (records) {
+		ui.report.detail.start.text (super_report_params['detail'].dates.start.toLocaleString ());
+		ui.report.detail.end.text (super_report_params['detail'].dates.end.toLocaleString ());
+		
+		APP.mod.report.shiftDetailReport (ui.report, 'detail', records);
 	}
 
 	function super_report_reload (prefix) {

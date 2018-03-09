@@ -241,7 +241,7 @@
 				<div id="super-report-detail-end-d-cal" class="cal"></div>
 				<button id="super-report-detail-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span><label class="error">Fecha final menor que fecha inicial.</label></button>
 				<div class="hm"><select name="end_h"></select></div>:&nbsp;<div class="hm"><select name="end_m" class="hm"></select></div>
-				<div class="hm"><select name="end_ampm"><option value="am">am</option><option value="pm">pm</option></select></div>
+				<div class="hm"><select name="end_ampm"><option value="am">am</option><option value="pm" selected="selected">pm</option></select></div>
 			  </td>
 			</tr>
 		  </table>
@@ -269,15 +269,27 @@
 	  </div>
 	</form>
   </div>
-  <div class="section shift-report" id="super-report-detail">
+  <div class="section detail-report" id="super-report-detail">
 	<h3>
-	  Resumen de operaciones<br />
+	  Detalle de operaciones<br />
 	  <span style="font-weight: normal; line-height: 1.5em">(<span class="start"></span> - <span class="end"></span>)</span>
 	</h3>
-	<table>
-	  <tbody>
-	  </tbody>
-	</table>
+	<div class="detail-cont">
+	  <table class="detail">
+		<thead>
+		  <th>Fecha y hora</th>
+		  <th>Terminal</th>
+		  <th>Turno</th>
+		  <th>Usuario</th>
+		  <th>Evento</th>
+		  <th>Tarifa</th>
+		  <th>Cantidad</th>
+		  <th>Cambio</th>
+		</thead>
+		<tbody>
+		</tbody>
+	  </table>
+	</div>
 	<div>
 	  <button id="super-report-summary-detail" class="button-icon"><img src="img/symbolic/detail.svg" />Ver resumen</button>
 	  <button id="super-report-summary-reload" class="button-icon"><img src="img/symbolic/reload.svg" />Actualizar</button>

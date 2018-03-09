@@ -694,8 +694,13 @@
 		},
 
 		objGet: function (key, def, obj) {
+			if (key === null || key === undefined)
+				return null;
+
 			var res = obj[key];
-			return (res === null || res === undefined)? obj[def]: res;
+			if (res === null || res === undefined)
+				res = obj[def];
+			return res;
 		},
 
 		mapReplace: function (str, map) {

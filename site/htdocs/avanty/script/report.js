@@ -224,7 +224,8 @@
 			});
 		},
 
-		shiftDetailReport: function (ui, prefix, records) {
+		// options are for DataTable
+		shiftDetailReport: function (ui, prefix, records, options) {
 			APP.fetch ('rates_get', 'REPORT', [], true, function (rate_data) {
 
 				var rates = {unknown: { label_client: 'Desconocido'} };
@@ -288,6 +289,11 @@
 					table.append (tr);
 					row++;
 				}
+
+				var real_table = table.get (0);
+				if (real_table.tagName == 'TBODY')
+					real_table = real_table.parentElement;
+				$(real_table).avaDataTable (options);
 			});
 		}
 	};

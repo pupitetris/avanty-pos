@@ -1,6 +1,8 @@
 @import url('fonts.css');
 @import url('theme/jquery-ui.min.css');
 @import url('theme/custom.css');
+@import url('../script/lib/dt/datatables.min.css');
+@import url('../script/lib/dt/custom.css');
 @import url('activate.css');
 @import url('lock.css');
 @import url('super.css');
@@ -56,6 +58,11 @@ h1 {
 	pointer-events: none;
 	user-select: none;
 	-webkit-user-select: none;
+}
+
+label input {
+	cursor: auto;
+	pointer-events: all;
 }
 
 .numbers, .money {

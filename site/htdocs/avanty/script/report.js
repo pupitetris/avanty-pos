@@ -252,6 +252,13 @@
 					return $('<td' + class_str + '>' + ((val === null || val === undefined)? '': val.toString ()) + '</td>');
 				}
 
+				var shift_colors = {};
+				function get_shift_color (shift_id) {
+					if (!shift_colors[shift_id])
+						shift_colors[shift_id] = '#' + window.MD5 (shift_id.toString ()).replace (/[0-9abc]/g, '').substring (0, 3);
+					return shift_colors[shift_id];
+				}
+
 				var concept2label = {
 					deposit: 'Depósito',
 					shift_begin: 'Inicio turno',
@@ -282,10 +289,9 @@
 					tr.append (td_create (rate_label));
 					tr.append (td_create (rec.amount, 'money'));
 					tr.append (td_create (rec.change, 'money'));
-					tr.find ('td').each (function (i, ele) { if (i % 2) $(ele).addClass ('odd'); });
 
-					if (row % 2)
-						tr.addClass ('odd');
+					tr.css ('background-color', get_shift_color (rec.shift_id));
+
 					table.append (tr);
 					row++;
 				}

@@ -114,7 +114,19 @@
 	background-color: #f0f0f0;
 }
 
-.detail-report table.detail .odd {
+.detail-report table.detail.dataTable tbody tr {
+	background-color: transparent;
+}
+
+.detail-report table.detail tr:nth-child(odd) > * {
+	background-color: rgba(0,0,0,0.05);
+}
+
+.detail-report table.detail tr > *:nth-child(odd) {
+	background-color: rgba(0,0,0,0.05);
+}
+
+.detail-report table.detail tr:nth-child(odd) > *:nth-child(odd) {
 	background-color: rgba(0,0,0,0.1);
 }
 

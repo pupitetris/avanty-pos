@@ -87,9 +87,11 @@
 			if (typeof (param) == 'object' || typeof (param) == 'undefined') {
 				var default_options = {
 					language: { sProcessing: "Procesando...", sLengthMenu: "Mostrar _MENU_ registros", sZeroRecords: "No se encontraron resultados", sEmptyTable: "Ningún dato disponible en esta tabla", sInfo: "Registros del _START_ al _END_ de _TOTAL_", sInfoEmpty: "Registros del 0 al 0 de 0", sInfoFiltered: "(filtrado de _MAX_ en total)", sInfoPostFix: "", sSearch: "Filtrar: ", sUrl: "", sInfoThousands: ",", sLoadingRecords: "Cargando...", oPaginate: { sFirst: "Pri", sLast: "Últ", sNext: "Sig", sPrevious: "Ant" }, oAria: { sSortAscending: ": Activar para ordenar la columna de manera ascendente", sSortDescending: ": Activar para ordenar la columna de manera descendente" } },
-					scrollY: '400px',
+					scrollY: '300px',
 					scrollX: '100%',
-					paging: false
+					paging: false,
+					stateSave: true,
+					stateDuration: 60 * 60 * 24 * 365 * 10,
 				};
 				var options = $.extend (default_options, param);
 				return this.DataTable (options);

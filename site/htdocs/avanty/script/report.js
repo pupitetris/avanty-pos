@@ -267,6 +267,7 @@
 				};
 				var row = 0;
 				var last_shift_id = 0;
+				table.empty ();
 				for (var rec of records) {
 					switch (rec.concept) {
 					case 'deposit':
@@ -299,7 +300,7 @@
 				var real_table = table.get (0);
 				if (real_table.tagName == 'TBODY')
 					real_table = real_table.parentElement;
-				$(real_table).avaDataTable (options);
+				$(real_table).avaDataTable (options).draw ();
 			});
 		}
 	};

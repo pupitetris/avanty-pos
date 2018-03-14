@@ -92,6 +92,7 @@
 					paging: false,
 					stateSave: true,
 					stateDuration: 60 * 60 * 24 * 365 * 10,
+					retrieve: true
 				};
 				var options = $.extend (default_options, param);
 				return this.DataTable (options);

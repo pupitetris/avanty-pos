@@ -1,3 +1,7 @@
 .dataTables_info[role="status"] {
 	font-size: 50%;
 }
+
+table.dataTable .sorting {
+	cursor: pointer;
+}

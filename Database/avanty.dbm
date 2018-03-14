@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,18" last-zoom="1"
+<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,563" last-zoom="0.8"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -3328,17 +3328,35 @@ END;]]></definition>
 					NATURAL JOIN terminal
 					NATURAL JOIN account;
 
+	-- Tickets with associated movements. (entries mostly)
+	RETURN QUERY
+		SELECT cs.shift_id, terminal.name, account.login,
+			t.type::varchar, NULL::varchar, NULL::integer, NULL::integer, 
+			t.timestamp::timestamptz
+			FROM ticket AS t
+				NATURAL JOIN cashier_shift AS cs
+				NATURAL JOIN terminal
+				NATURAL JOIN account
+				JOIN movement USING (ticket_id)
+			WHERE t.type = 'entry';
+
 	-- All other operations.
 	RETURN QUERY
 		SELECT cs.shift_id, terminal.name, account.login, 
-			t.type::varchar, r.name, m.amount, m.change, m.timestamp::timestamptz
+			CASE WHEN t.type = 'entry' AND m.timestamp IS NOT NULL
+				THEN 'exit'::varchar 
+				ELSE t.type::varchar
+			END,
+			r.name, m.amount, m.change,			
+			COALESCE(m.timestamp, t.timestamp)::timestamptz
 			FROM ticket AS t 
 				NATURAL JOIN cashier_shift AS cs
 				NATURAL JOIN terminal
 				NATURAL JOIN account
 				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)
-			WHERE ((m.timestamp IS NULL AND _start <= t.timestamp) OR (_start <= m.timestamp AND m.timestamp < _end))
+			WHERE ((m.timestamp IS NULL AND _start <= t.timestamp) 
+					OR (_start <= m.timestamp AND m.timestamp < _end))
 				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts));
 END;]]></definition>
 </function>

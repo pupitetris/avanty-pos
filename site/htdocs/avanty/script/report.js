@@ -262,12 +262,20 @@
 				var concept2label = {
 					deposit: 'Depósito',
 					shift_begin: 'Inicio turno',
-					entry: 'Entrada manual',
+					entry: 'Entrada',
+					exit: 'Salida',
 					shift_end: 'Fin turno'
 				};
-				var row = 0;
-				var last_shift_id = 0;
+				var real_table = table.get (0);
+				if (real_table.tagName == 'TBODY')
+					real_table = real_table.parentElement;
+				real_table = $(real_table);
+
+				if (real_table.hasClass ('dataTable'))
+					real_table.avaDataTable ().destroy ();
 				table.empty ();
+
+				var last_shift_id = 0;
 				for (var rec of records) {
 					switch (rec.concept) {
 					case 'deposit':
@@ -294,13 +302,9 @@
 					tr.css ('background-color', get_shift_color (rec.shift_id));
 
 					table.append (tr);
-					row++;
 				}
 
-				var real_table = table.get (0);
-				if (real_table.tagName == 'TBODY')
-					real_table = real_table.parentElement;
-				$(real_table).avaDataTable (options).draw ();
+				real_table.avaDataTable (options);
 			});
 		}
 	};

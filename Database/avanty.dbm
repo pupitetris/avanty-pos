@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,563" last-zoom="0.8"
+<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,511" last-zoom="0.8"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -3405,6 +3405,40 @@ END;]]></definition>
 	</parameter>
 	<definition><![CDATA[UPDATE account SET is_first = FALSE WHERE user_id = _uid;
 ]]></definition>
+</function>
+
+<function name="all_terminals_info_get"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="VOLATILE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get basic information on the terminals in the system for supervisors.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="type">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM user_supervisor_assert (_uid);
+
+	RETURN QUERY
+		SELECT t.terminal_id, t.term_type::varchar, t.name FROM terminal AS t;
+END;]]></definition>
 </function>
 
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"

@@ -7,44 +7,47 @@
 (function () {
 	var MOD_NAME = 'report';
 
-	function render_shift_ids (shift_ids) {
-		if (shift_ids.length == 0)
+	// Render a minimal string listing an array of numbers, but using dash to abbreviate ranges.
+	// Ex: [1, 2, 5, 6, 7, 8, 9, 11, 22] -> "1, 2, 5 - 9, 11, 22"
+	// For the tickets.
+	function render_number_list (numbers) {
+		if (numbers.length == 0)
 			return '---';
 
-		var shift_str = '';
+		var str = '';
 
-		var end = shift_ids[0];
+		var end = numbers[0];
 		var count = 1;
 
-		shift_str += end;
+		str += end;
 
-		for (var i = 1, id = shift_ids[1]; id; id = shift_ids[++i]) {
+		for (var i = 1, id = numbers[1]; id; id = numbers[++i]) {
 			if (id == end + 1) {
 				end = id;
 				count ++;
 			}
-			if (id > end + 1 || i == shift_ids.length - 1) {
+			if (id > end + 1 || i == numbers.length - 1) {
 
 				var post = ' ' + id;
-				if (i == shift_ids.length - 1)
+				if (i == numbers.length - 1)
 					post = '';
 
 				switch (count) {
 				case 1:
-					shift_str += ' ' + id;
+					str += ' ' + id;
 					break;
 				case 2:
-					shift_str += ' ' + end + post;
+					str += ' ' + end + post;
 					break;
 				default:
-					shift_str += '-' + end + post;
+					str += '-' + end + post;
 				}
 				end = id;
 				count = 1;
 			}
 		}
 
-		return shift_str;
+		return str;
 	}
 
 	function find_ui (ui, prefix, key) {
@@ -162,7 +165,7 @@
 
 				}
 
-				var shift_ids_str = render_shift_ids (shift_ids);
+				var shift_ids_str = render_number_list (shift_ids);
 				if (find_ui (ui.tickets, prefix, 'shift_id'))
 					find_ui (ui.tickets, prefix, 'shift_id').text (shift_ids_str);
 				if (find_ui (ui, prefix, 'shift_id'))

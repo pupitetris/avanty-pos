@@ -61,21 +61,8 @@
 	text-align: center;
 }
 
-.report-filter .hm {
-	width: 2.5em;
-	display: inline-block;
-	padding-right: 2.5em;
-}
-
-.report-filter .hm > * {
-	width: 100%;
-}
-
 .report-filter .cal {
-	position: absolute;
 	top: 2em;
-	z-index:1;
-	display: none;
 }
 
 .report-filter .avanty-select {

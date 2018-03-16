@@ -443,3 +443,9 @@ form s:before {
 	border: 1px solid transparent;
 	padding: 4px;
 }
+
+.avanty-popup {
+	position: absolute;
+	z-index: 1;
+	display: none;
+}

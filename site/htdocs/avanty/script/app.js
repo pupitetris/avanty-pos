@@ -23,7 +23,7 @@
 		};
 
 		// Our own one-click, toggle selectors.
-		$.fn.ava_select = function () {
+		$.fn.avaSelect = function () {
 			if (!this.hasClass ('avanty-select'))
 				this.addClass ('avanty-select');
 			return this;
@@ -98,6 +98,55 @@
 				return this.DataTable (options);
 			}
 		};
+
+		function popup_window_click (evt, popup) {
+			if ($(evt.target).closest (popup).length < 1)
+				popup_toggle (popup);
+		}
+
+		function popup_show (popup) {
+			$(window).off ('click.avanty_popup_toggle');
+
+			if (!popup.is (':hidden'))
+				return;
+
+			APP.later (function () {
+				$(window).on ('click.avanty_popup_toggle',
+							  function (evt) { popup_window_click (evt, popup); });
+ 			}, 200);
+			// Only hide the other popups, not this one.
+			$('.avanty-popup').each (function (i, ele) { if (ele != popup.get (0)) { $(ele).hide (); } });
+			popup.show ('drop', { direction: 'up' }, 200);
+			return popup;
+		}
+
+		function popup_hide (popup) {
+			$(window).off ('click.avanty_popup_toggle');
+
+			if (popup.is (':hidden'))
+				return;
+
+			popup.hide ('drop', { direction: 'up' }, 200);
+			return popup;
+		}
+
+		function popup_toggle (popup) {
+			if (popup.is (':hidden'))
+				return popup_show (popup);
+			return popup_hide (popup);
+		}
+
+		$.fn.popup = function (param) {
+			if (!this.hasClass ('avanty-popup'))
+				this.addClass ('avanty-popup');
+
+			switch (param) {
+			case 'toggle': return popup_toggle (this);
+			case 'hide': return popup_hide (this);
+			}
+
+			return this;
+		}
 
 	} (jQuery));
 

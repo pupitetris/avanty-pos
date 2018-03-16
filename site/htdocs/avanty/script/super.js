@@ -74,16 +74,18 @@
 		report.filter_start.d = $('#super-report-' + prefix + '-start-d');
 		report.filter_start.d_txt = report.filter_start.d.find ('span');
 		report.filter_start.d_cal = $('#super-report-' + prefix + '-start-d-cal');
+		report.filter_start.d_cal.popup ();
 
 		report.filter_end = {};
 		report.filter_end.d = $('#super-report-' + prefix + '-end-d');
 		report.filter_end.d_txt = report.filter_end.d.find ('span');
 		report.filter_end.d_cal = $('#super-report-' + prefix + '-end-d-cal');
+		report.filter_end.d_cal.popup ();
 		report.filter_end.d_error = report.filter_end.d.find ('.error');
 		report.filter_end.d_error.hide ();
 
 		report.filter_users = $('#super-report-' + prefix + '-users');
-		report.filter_users.ava_select ();
+		report.filter_users.avaSelect ();
 		report.filter_users.on ('avanty:optionSelect',
 								function (evt, option, selected) {
 									super_report_filter_select_toggled (prefix, evt, option, selected);
@@ -94,11 +96,11 @@
 										super_report_filter_select_all_or_none (prefix, report.filter_users_all, report.filter_users);
 									});
 		report.filter_shifts = $('#super-report-' + prefix + '-shifts');
-		report.filter_shifts.ava_select ();
+		report.filter_shifts.avaSelect ();
 		report.filter_shifts.on ('avanty:optionSelect',
-										   function (evt, option, selected) {
-											   super_report_filter_select_toggled (prefix, evt, option, selected);
-										   });
+								 function (evt, option, selected) {
+									 super_report_filter_select_toggled (prefix, evt, option, selected);
+								 });
 		report.filter_shifts_all = $('#super-report-' + prefix + '-shifts-all');
 		report.filter_shifts_all.on ('click',
 									 function () {
@@ -113,10 +115,10 @@
 		report.filter_end.d_txt.text (todayStr);
 
 		report.filter_start.d.on ('click', function () {
-			super_report_filter_cal_toggle (report.filter_start.d_cal, report.filter_end.d_cal);
+			report.filter_start.d_cal.popup ('toggle');
 		})
 		report.filter_end.d.on ('click', function () {
-			super_report_filter_cal_toggle (report.filter_end.d_cal, report.filter_start.d_cal);
+			report.filter_end.d_cal.popup ('toggle');
 		})
 
 		var calopts = {
@@ -130,12 +132,12 @@
 
 		report.filter_start.d_cal.datepicker ($.extend ({
 			onSelect: function (date, inst) {
-				super_report_filter_cal_selected (prefix, date, inst, report.filter_start.d_txt); }
+				super_report_filter_cal_selected (prefix, date, inst, report.filter_start); }
 		}, calopts));
 
 		report.filter_end.d_cal.datepicker ($.extend ({
 			onSelect: function (date, inst) {
-				super_report_filter_cal_selected (prefix, date, inst, report.filter_end.d_txt); }
+				super_report_filter_cal_selected (prefix, date, inst, report.filter_end); }
 		}, calopts));
 
 		// Initialize time filter controls if they are present.
@@ -530,11 +532,6 @@
 		});
 	}
 
-	function super_report_filter_window_click (evt, cal1, cal2) {
-		if ($(evt.target).closest (cal1).length < 1)
-			super_report_filter_cal_toggle (cal1, cal2);
-	}
-
 	function super_report_filter_select_all_or_none (prefix, button, select) {
 		var state = button.data ('state');
 		if (!state || state == 'all') {
@@ -553,20 +550,6 @@
 			super_report_filter_update_shifts (prefix);
 
 		super_report_filter_validate_shifts (prefix);
-	}
-
-	function super_report_filter_cal_toggle (cal1, cal2) {
-		$(window).off ('click.super_report_toggle');
-		if (cal1.is (':hidden')) {
-			APP.later (function () {
-				$(window).on ('click.super_report_toggle',
-							  function (evt) { super_report_filter_window_click (evt, cal1, cal2); });
- 			}, 200);
-			cal1.show ('drop', { direction: 'up' }, 200);
-			cal2.hide ();
-		} else {
-			cal1.hide ('drop', { direction: 'up' }, 200);
-		}
 	}
 
 	var super_report_shifts = {};
@@ -607,10 +590,10 @@
 		}, 0);
 	}
 	
-	function super_report_filter_cal_selected (prefix, date, inst, txt) {
-		$(window).off ('click.super_report_toggle');
+	function super_report_filter_cal_selected (prefix, date, inst, filter) {
+		filter.d_cal.popup ('hide');
 
-		txt.text (date);
+		filter.d_txt.text (date);
 		inst.dpDiv.parent ().fadeOut ();
 
 		super_report_filter_refresh (prefix);

@@ -146,3 +146,8 @@
 .detail-report table.detail td.money {
 	text-align: right;
 }
+
+table.detail .data-error {
+	background-color: black;
+	font-weight: bold;
+}

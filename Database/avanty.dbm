@@ -3203,8 +3203,8 @@ END;]]></definition>
 	<parameter name="shift_id">
 		<type name="integer" length="0"/>
 	</parameter>
-	<parameter name="terminal_name">
-		<type name="varchar" length="0"/>
+	<parameter name="terminal_id">
+		<type name="smallint" length="0"/>
 	</parameter>
 	<parameter name="cashier">
 		<type name="varchar" length="0"/>
@@ -3222,6 +3222,9 @@ END;]]></definition>
 		<type name="integer" length="0"/>
 	</parameter>
 	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="ticket_timestamp">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
 	</return-type>
@@ -3274,8 +3277,8 @@ END;]]></definition>
 	<parameter name="shift_id">
 		<type name="integer" length="0"/>
 	</parameter>
-	<parameter name="terminal_name">
-		<type name="varchar" length="0"/>
+	<parameter name="terminal_id">
+		<type name="smallint" length="0"/>
 	</parameter>
 	<parameter name="cashier">
 		<type name="varchar" length="0"/>
@@ -3293,6 +3296,9 @@ END;]]></definition>
 		<type name="integer" length="0"/>
 	</parameter>
 	<parameter name="timestamp">
+		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	</parameter>
+	<parameter name="ticket_timestamp">
 		<type name="timestamp with time zone" length="0" with-timezone="true"/>
 	</parameter>
 	</return-type>
@@ -3322,36 +3328,34 @@ END;]]></definition>
 				WHERE _start <= ua.timestamp AND ua.timestamp < _end
 					AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts))
 			)
-			SELECT sop.shift_id, terminal.name, account.login,
-				sop.concept, NULL::varchar, sop.amount, 0, sop.timestamp::timestamptz
+			SELECT sop.shift_id, sop.terminal_id, account.login,
+				sop.concept, NULL::varchar, sop.amount, 0, 
+				sop.timestamp::timestamptz, NULL::timestamptz
 				FROM sop 
-					NATURAL JOIN terminal
 					NATURAL JOIN account;
 
 	-- Tickets with associated movements. (entries mostly)
 	RETURN QUERY
-		SELECT cs.shift_id, terminal.name, account.login,
+		SELECT cs.shift_id, cs.terminal_id, account.login,
 			t.type::varchar, NULL::varchar, NULL::integer, NULL::integer, 
-			t.timestamp::timestamptz
+			t.timestamp::timestamptz, t.timestamp::timestamptz
 			FROM ticket AS t
 				NATURAL JOIN cashier_shift AS cs
-				NATURAL JOIN terminal
 				NATURAL JOIN account
 				JOIN movement USING (ticket_id)
 			WHERE t.type = 'entry';
 
 	-- All other operations.
 	RETURN QUERY
-		SELECT cs.shift_id, terminal.name, account.login, 
+		SELECT cs.shift_id, cs.terminal_id, account.login, 
 			CASE WHEN t.type = 'entry' AND m.timestamp IS NOT NULL
 				THEN 'exit'::varchar 
 				ELSE t.type::varchar
 			END,
 			r.name, m.amount, m.change,			
-			COALESCE(m.timestamp, t.timestamp)::timestamptz
+			COALESCE(m.timestamp, t.timestamp)::timestamptz, t.timestamp::timestamptz
 			FROM ticket AS t 
 				NATURAL JOIN cashier_shift AS cs
-				NATURAL JOIN terminal
 				NATURAL JOIN account
 				LEFT JOIN movement AS m USING (ticket_id)
 				LEFT JOIN rate AS r USING (rate_id)

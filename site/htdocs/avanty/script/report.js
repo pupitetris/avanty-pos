@@ -107,18 +107,26 @@
 			real_table.avaDataTable ().destroy ();
 		table.empty ();
 
-		var last_shift_id = 0;
+		var shift_balance = {};
 		for (var rec of records) {
 			switch (rec.concept) {
-			case 'deposit':
-				if (rec.shift_id != last_shift_id)
-					continue;
-				break;
 			case 'shift_begin':
+				shift_balance[rec.shift_id] = rec.amount;
 				last_shift_id = rec.shift_id;
-			case 'shift_end':
 				rec.change = null;
 				break;
+			case 'shift_end':
+				rec.amount = shift_balance[rec.shift_id];
+				delete shift_balance[rec.shift_id];
+				rec.change = null;
+				break;
+			case 'deposit':
+				// deposits for unaccounted-for shifts are initial deposits. Skip.
+				if (shift_balance[rec.shift_id] === undefined)
+					continue;
+			default:
+				if (rec.amount)
+					shift_balance[rec.shift_id] += rec.amount;
 			}
 
 			var rate = APP.Util.objGet (rec.rate, 'unknown', rates);
@@ -184,9 +192,8 @@
 				var printed_tickets = 0;
 				var pre = '';
 				var shift_begin_ts = '';
-				var shift_ids = [];
-				var last_shift_id = 0;
-
+				var shift_ids = {};
+				
 				var table = find_ui (ui, prefix, 'table');
 				table.empty ();
 
@@ -213,9 +220,8 @@
 					case 'shift_begin':
 						num_deposits ++;
 						deposit += rec.amount;
-						last_shift_id = (rec.shift_id)? rec.shift_id: rec.change;
-						shift_ids.push (last_shift_id);
-						if (shift_ids.length == 1) {
+						shift_ids[(rec.shift_id)? rec.shift_id: rec.change] = true;
+						if (Object.keys (shift_ids).length == 1) {
 							shift_begin_ts = rec.timestamp.toLocaleString ();
 							if (find_ui (ui.tickets, prefix, 'begin_time'))
 								find_ui (ui.tickets, prefix, 'begin_time').text (shift_begin_ts);
@@ -227,9 +233,10 @@
 							find_ui (ui.tickets, prefix, 'num').text (rec.amount);
 						if (find_ui (ui.tickets, prefix, 'time'))
 							find_ui (ui.tickets, prefix, 'time').text (rec.timestamp.toLocaleString ());
+						delete shift_ids[(rec.shift_id)? rec.shift_id: rec.change];
 						break;
 					case 'deposit':
-						if (rec.shift_id && rec.shift_id != last_shift_id) // New shift record coming, this is the initial deposit.
+						if (rec.shift_id && !shift_ids[rec.shift_id]) // New shift record coming, this is the initial deposit.
 							break;
 						num_deposits ++;
 						deposit += rec.amount;
@@ -251,7 +258,7 @@
 
 				}
 
-				var shift_ids_str = render_number_list (shift_ids);
+				var shift_ids_str = render_number_list (Object.keys (shift_ids));
 				if (find_ui (ui.tickets, prefix, 'shift_id'))
 					find_ui (ui.tickets, prefix, 'shift_id').text (shift_ids_str);
 				if (find_ui (ui, prefix, 'shift_id'))

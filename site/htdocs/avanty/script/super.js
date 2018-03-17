@@ -660,10 +660,7 @@
 		report.filter_end.d_error.hide ();
 
 		// Range is start <= x < end
-		if (report.filter_end.h) {
-			// if we are requesting time, add a second.
-			end = new Date (end.getTime () + 1000);
-		} else {
+		if (!report.filter_end.h) {
 			// if we are only requesting date, add one whole day.
 			end.setDate (end.getDate () + 1);
 		}

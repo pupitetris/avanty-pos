@@ -88,6 +88,10 @@
 			if (typeof (param) == 'object' || typeof (param) == 'undefined') {
 				var default_options = {
 					language: { sProcessing: "Procesando...", sLengthMenu: "Mostrar _MENU_ registros", sZeroRecords: "No se encontraron resultados", sEmptyTable: "Ningún dato disponible en esta tabla", sInfo: "Registros del _START_ al _END_ de _TOTAL_", sInfoEmpty: "Registros del 0 al 0 de 0", sInfoFiltered: "(filtrado de _MAX_ en total)", sInfoPostFix: "", sSearch: "Filtrar: ", sUrl: "", sInfoThousands: ",", sLoadingRecords: "Cargando...", oPaginate: { sFirst: "Pri", sLast: "Últ", sNext: "Sig", sPrevious: "Ant" }, oAria: { sSortAscending: ": Activar para ordenar la columna de manera ascendente", sSortDescending: ": Activar para ordenar la columna de manera descendente" } },
+					dom: '<"fg-toolbar ui-toolbar ui-widget-header ui-helper-clearfix ui-corner-tl ui-corner-tr"Blfr>'+
+						't'+
+						'<"fg-toolbar ui-toolbar ui-widget-header ui-helper-clearfix ui-corner-bl ui-corner-br"ip>',
+					buttons: [],
 					scrollY: '300px',
 					scrollX: '100%',
 					paging: false,
@@ -96,7 +100,12 @@
 					retrieve: true
 				};
 				var options = $.extend (default_options, param);
-				return this.DataTable (options);
+				var toolbar = this.parent ().find ('.toolbar');
+				var datatable = this.DataTable (options);
+				var button_cont = datatable.buttons ().container ();
+				button_cont.find ('button').button ();
+				if (toolbar.length > 0)
+					toolbar.prependTo (button_cont);
 			}
 		};
 

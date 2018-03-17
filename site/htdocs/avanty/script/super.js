@@ -71,39 +71,54 @@
 		filter.m = filter.section.find ('button[name="' + name + '_m"]');
 		filter.m_txt = filter.m.find ('span');
 
+		function handle_select (option, sel, txt) {
+			sel.find ('.avanty-option').avaOption ('selected', false);
+			option.avaOption ('selected', true);
+			sel.popup ('hide');
+			txt.text (option.text ());
+			filter.m.button ('enable');
+		}
+
 		filter.h_sel.popup ();
 		filter.h_sel.avaSelect ();
 		filter.h_sel.on ('avanty:optionSelect',
 						 function (evt, option, selected) {
-							 filter.h_sel.popup ('hide');
-							 filter.h_txt.text (option.text ());
+							 handle_select (option, filter.h_sel, filter.h_txt);
 						 });
-
 		filter.h.on ('click', function (evt) { filter.h_sel.popup ('toggle'); })
 
 		filter.m_sel.popup ();
 		filter.m_sel.avaSelect ();
 		filter.m_sel.on ('avanty:optionSelect',
 						 function (evt, option, selected) {
-							 filter.m_sel.popup ('hide');
-							 filter.m_txt.text (option.text ());
+							 handle_select (option, filter.m_sel, filter.m_txt);
 						 });
-
 		filter.m.on ('click', function (evt) { filter.m_sel.popup ('toggle'); })
 
-		function option_append (select, txt, opt) {
-			return select.append ($('<div>' + txt + '</div>').avaOption (opt));
+		function option_append (select, txt, opts) {
+			var option = $('<div>' + txt + '</div>').avaOption (opts);
+			select.append (option);
+			return option;
 		}
 
+		var m_opt_0 = option_append (filter.m_sel, '00', { selected: true });
 		option_append (filter.h_sel, '00', { selected: name == 'start' });
 		for (var i = 1; i < 24; i++)
 			option_append (filter.h_sel, APP.Util.padZeroes (i, 2));
+
 		if (name == 'end') {
 			filter.h_txt.text ('24');
-			option_append (filter.h_sel, '24', { selected: true });
+			var opt = option_append (filter.h_sel, '24', { selected: true });
+			filter.m.button ('disable');
+			opt.on ('avanty:select',
+					function (evt) {
+						APP.later (function () {
+							handle_select (m_opt_0, filter.m_sel, filter.m_txt);
+							filter.m.button ('disable');
+						}, 100);
+					});
 		}
 
-		option_append (filter.m_sel, '00', { selected: true });
 		for (var i = 1; i < 60; i ++)
 			option_append (filter.m_sel, APP.Util.padZeroes (i, 2));
 	}

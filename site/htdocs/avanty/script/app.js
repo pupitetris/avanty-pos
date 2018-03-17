@@ -58,7 +58,7 @@
 				return option.data ('value', arg);
 			}
 
-			console.warn ('ava_option: unrecognized param ' + param);
+			console.warn ('avaOption: unrecognized param ' + param);
 			return option;
 		}
 
@@ -69,17 +69,18 @@
 			option.parent ().trigger ('avanty:optionSelect', [option, selected]);
 		}
 
-		$.fn.ava_option = function (param, arg) {
+		$.fn.avaOption = function (param, arg) {
 			if (!this.hasClass ('avanty-option')) {
 				this.addClass ('avanty-option');
 				this.on ('click.avanty_option', option_clicked);
 			}
 
-			if (typeof param != 'object')
+			if (typeof param != 'object' && param !== undefined)
 				return option_apply_param (this, param, arg);
 
 			for (var p in param)
 				option_apply_param (this, p, param[p]);
+
 			return this;
 		};
 
@@ -137,8 +138,10 @@
 		}
 
 		$.fn.popup = function (param) {
-			if (!this.hasClass ('avanty-popup'))
+			if (!this.hasClass ('avanty-popup')) {
 				this.addClass ('avanty-popup');
+				this.hide ();
+			}
 
 			switch (param) {
 			case 'toggle': return popup_toggle (this);

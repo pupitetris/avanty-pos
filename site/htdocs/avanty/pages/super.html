@@ -132,22 +132,11 @@
 			  <td>
 				<div id="super-report-summary-start-d-cal" class="cal"></div>
 				<button id="super-report-summary-start-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
-<!--
-				<div class="hm"><select name="start_h"></select></div>:&nbsp;<div class="hm"><select name="start_m" class="hm"></select></div>
--->
 			  </td>
-<!--
-			</tr>
-			<tr>
--->
 			  <th><label for="super-report-summary-end-d">Fin:</label></th>
 			  <td>
 				<div id="super-report-summary-end-d-cal" class="cal"></div>
 				<button id="super-report-summary-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span><label class="error">Fecha final menor que fecha inicial.</label></button>
-				
-<!--
-				<div class="hm"><select name="end_h"></select></div>:&nbsp;<div class="hm"><select name="end_m" class="hm"></select></div>
--->
 			  </td>
 			</tr>
 		  </table>
@@ -159,14 +148,14 @@
 		  <div>
 			<button id="super-report-summary-users-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
 		  </div>
-		  <div id="super-report-summary-users"></div>
+		  <div id="super-report-summary-users" class="user-shift-select"></div>
 		</div>
 		<div>
 		  <h4>Turnos</h4>
 		  <div>
 			<button id="super-report-summary-shifts-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
 		  </div>
-		  <div id="super-report-summary-shifts"></div>
+		  <div id="super-report-summary-shifts" class="user-shift-select"></div>
 		</div>
 	  </div>
 	  <div class="button-bar-h">
@@ -229,7 +218,15 @@
 			  <td>
 				<div id="super-report-detail-start-d-cal" class="cal"></div>
 				<button id="super-report-detail-start-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span></button>
-				<button name="start_h" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>&nbsp;:&nbsp;<button name="start_m" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
+				<div class="hm-container">
+				  <div id="super-report-detail-start-h-sel" class="hm-select"></div>
+				</div>
+				<button name="start_h" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
+				:
+				<div class="hm-container">
+				  <div id="super-report-detail-start-m-sel" class="hm-select"></div>
+				</div>
+				<button name="start_m" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
 			  </td>
 			</tr>
 			<tr>
@@ -237,7 +234,15 @@
 			  <td>
 				<div id="super-report-detail-end-d-cal" class="cal"></div>
 				<button id="super-report-detail-end-d" type="button" class="button-icon"><img src="img/symbolic/calendar.svg" /><span>YYYY/MM/DD</span><label class="error">Fecha final menor que fecha inicial.</label></button>
-				<button name="end_h" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>&nbsp;:&nbsp;<button name="end_m" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
+				<div class="hm-container">
+				  <div id="super-report-detail-end-h-sel" class="hm-select"></div>
+				</div>
+				<button name="end_h" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
+				:
+				<div class="hm-container">
+				  <div id="super-report-detail-end-m-sel" class="hm-select"></div>
+				</div>
+				<button name="end_m" type="button" class="button-icon-r"><span>00</span><img src="img/symbolic/popup.svg" /></button>
 			  </td>
 			</tr>
 		  </table>
@@ -249,14 +254,14 @@
 		  <div>
 			<button id="super-report-detail-users-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
 		  </div>
-		  <div id="super-report-detail-users"></div>
+		  <div id="super-report-detail-users" class="user-shift-select"></div>
 		</div>
 		<div>
 		  <h4>Turnos</h4>
 		  <div>
 			<button id="super-report-detail-shifts-all" type="button" class="button-icon" disabled="disabled"><img src="img/symbolic/all.svg" /><span style="width: 220px">Seleccionar todos</span></button>
 		  </div>
-		  <div id="super-report-detail-shifts"></div>
+		  <div id="super-report-detail-shifts" class="user-shift-select"></div>
 		</div>
 	  </div>
 	  <div class="button-bar-h">

@@ -59,6 +59,55 @@
 		form.validate (validator_options);
 	}
 
+	function report_filter_time_layout_init (prefix, name, filter) {
+		var name_prefix = prefix + '-' + name;
+		if ($('#super-report-' + name_prefix + '-h-sel').length == 0)
+			return;
+
+		filter.h_sel = $('#super-report-' + name_prefix + '-h-sel');
+		filter.h = filter.section.find ('button[name="' + name + '_h"]');
+		filter.h_txt = filter.h.find ('span');
+		filter.m_sel = $('#super-report-' + name_prefix + '-m-sel');
+		filter.m = filter.section.find ('button[name="' + name + '_m"]');
+		filter.m_txt = filter.m.find ('span');
+
+		filter.h_sel.popup ();
+		filter.h_sel.avaSelect ();
+		filter.h_sel.on ('avanty:optionSelect',
+						 function (evt, option, selected) {
+							 filter.h_sel.popup ('hide');
+							 filter.h_txt.text (option.text ());
+						 });
+
+		filter.h.on ('click', function (evt) { filter.h_sel.popup ('toggle'); })
+
+		filter.m_sel.popup ();
+		filter.m_sel.avaSelect ();
+		filter.m_sel.on ('avanty:optionSelect',
+						 function (evt, option, selected) {
+							 filter.m_sel.popup ('hide');
+							 filter.m_txt.text (option.text ());
+						 });
+
+		filter.m.on ('click', function (evt) { filter.m_sel.popup ('toggle'); })
+
+		function option_append (select, txt, opt) {
+			return select.append ($('<div>' + txt + '</div>').avaOption (opt));
+		}
+
+		option_append (filter.h_sel, '00', { selected: name == 'start' });
+		for (var i = 1; i < 24; i++)
+			option_append (filter.h_sel, APP.Util.padZeroes (i, 2));
+		if (name == 'end') {
+			filter.h_txt.text ('24');
+			option_append (filter.h_sel, '24', { selected: true });
+		}
+
+		option_append (filter.m_sel, '00', { selected: true });
+		for (var i = 1; i < 60; i ++)
+			option_append (filter.m_sel, APP.Util.padZeroes (i, 2));
+	}
+
 	function report_layout_init (prefix) {
 		var report = {};
 
@@ -70,17 +119,18 @@
 		report.filter_error = report.filter_submit.find ('.error');
 		report.filter_error.hide ();
 
-		report.filter_start = {};
+		report.filter_start = { section: report.filter_section };
 		report.filter_start.d = $('#super-report-' + prefix + '-start-d');
 		report.filter_start.d_txt = report.filter_start.d.find ('span');
 		report.filter_start.d_cal = $('#super-report-' + prefix + '-start-d-cal');
 		report.filter_start.d_cal.popup ();
 
-		report.filter_end = {};
+		report.filter_end = { section: report.filter_section };
 		report.filter_end.d = $('#super-report-' + prefix + '-end-d');
 		report.filter_end.d_txt = report.filter_end.d.find ('span');
 		report.filter_end.d_cal = $('#super-report-' + prefix + '-end-d-cal');
 		report.filter_end.d_cal.popup ();
+
 		report.filter_end.d_error = report.filter_end.d.find ('.error');
 		report.filter_end.d_error.hide ();
 
@@ -141,38 +191,8 @@
 		}, calopts));
 
 		// Initialize time filter controls if they are present.
-		if (report.filter_section.find ('.hm').length > 0) {
-			report.filter_start.h = report.filter_section.find ('select[name="start_h"]');
-			report.filter_start.m = report.filter_section.find ('select[name="start_m"]');
-			report.filter_start.ampm = report.filter_section.find ('select[name="start_ampm"]');
-			report.filter_end.h = report.filter_section.find ('select[name="end_h"]');
-			report.filter_end.m = report.filter_section.find ('select[name="end_m"]');
-			report.filter_end.ampm = report.filter_section.find ('select[name="end_ampm"]');
-			
-			function option_append (select, val, txt) {
-				select.append ($('<option value="' + val + '">' + txt + '</option>'));
-			}
-
-			option_append (report.filter_start.h, 12, 12);
-			option_append (report.filter_end.h, 12, 12);
-			for (var i = 1; i < 12; i++) {
-				option_append (report.filter_start.h, i, i);
-				option_append (report.filter_end.h, i, i);
-			}
-
-			for (var i = 0; i < 60; i += 5) {
-				var num = APP.Util.padZeroes (i, 2);
-				option_append (report.filter_start.m, num, num);
-				option_append (report.filter_end.m, num, num);
-			}
-
-			report.filter_start.h.selectmenu ();
-			report.filter_start.m.selectmenu ();
-			report.filter_start.ampm.selectmenu ();
-			report.filter_end.h.selectmenu ();
-			report.filter_end.m.selectmenu ();
-			report.filter_end.ampm.selectmenu ();
-		}
+		report_filter_time_layout_init (prefix, 'start', report.filter_start);
+		report_filter_time_layout_init (prefix, 'end', report.filter_end);
 
 		report.filter_cancel = $('#super-report-' + prefix + '-filter-cancel');
 		report.filter_cancel.on ('click', function () { super_report_close (prefix); });
@@ -538,12 +558,12 @@
 			button.data ('state', 'none');
 			button.find ('span').text ('Seleccionar ninguno');
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'none.svg'));
-			select.find ('div').each (function (i, opt) { $(opt).ava_option ('selected', true); });
+			select.find ('div').each (function (i, opt) { $(opt).avaOption ('selected', true); });
 		} else {
 			button.data ('state', 'all');
 			button.find ('span').text ('Seleccionar todos');
 			button.find ('img').prop ('src', button.find ('img').prop ('src').replace (/[^/.]+\.svg$/, 'all.svg'));
-			select.find ('div').each (function (i, opt) { $(opt).ava_option ('selected', false); });
+			select.find ('div').each (function (i, opt) { $(opt).avaOption ('selected', false); });
 		}
 
 		if (button.prop ('id') == 'super-report-' + prefix + '-users-all')
@@ -559,12 +579,12 @@
 
 		ui.report[prefix].filter_users.find ('.avanty-option').each (
 			function (i, opt) {
-				cashiers[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') }
+				cashiers[$(opt).avaOption ('value')] = { selected: $(opt).avaOption ('selected') }
 			});
 
 		ui.report[prefix].filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
-				$(opt).ava_option ('selected', cashiers[shifts.byId[$(opt).ava_option ('value')].cashier].selected);
+				$(opt).avaOption ('selected', cashiers[shifts.byId[$(opt).avaOption ('value')].cashier].selected);
 			});
 	}
 
@@ -601,13 +621,10 @@
 
 	function super_report_filter_get_date (date_ui) {
 		var str = date_ui.d_txt.text ();
-		if (!date_ui.h)
+		if (!date_ui.h_txt)
 			return new Date (str);
 
-		var d = new Date (str + ' ' + date_ui.h.val () + ':' + date_ui.m.val ());
-		if (date_ui.ampm.val () == 'pm')
-			// pm adds 12 hours.
-			d = new Date (d.getTime () + 1000 * 60 * 60 * 12);
+		var d = new Date (str + ' ' + date_ui.h_txt.text () + ':' + date_ui.m_txt.text ());
 		return d;
 	}
 
@@ -654,7 +671,7 @@
 
 		select.find ('.avanty-option').each (
 			function (i, opt) {
-				opts[$(opt).ava_option ('value')] = { selected: $(opt).ava_option ('selected') };
+				opts[$(opt).avaOption ('value')] = { selected: $(opt).avaOption ('selected') };
 			});
 		for (var shift of shifts) {
 			if (opts[shift[key]])
@@ -667,7 +684,7 @@
 		select.data ('opts', opts);
 		for (var val of Object.keys (opts).sort ())
 			if (opts[val].found) {
-				var option = $('<div>' + val + '</div>').ava_option ({ value: val, selected: opts[val].selected });
+				var option = $('<div>' + val + '</div>').avaOption ({ value: val, selected: opts[val].selected });
 				select.append (option);
 			}
 	}
@@ -713,8 +730,8 @@
 		ui.report[prefix].filter_shifts.find ('.avanty-option').each (
 			function (i, opt) {
 				var opt = $(opt);
-				if (opt.ava_option ('selected'))
-					shifts.push (parseInt (opt.ava_option ('value')));
+				if (opt.avaOption ('selected'))
+					shifts.push (parseInt (opt.avaOption ('value')));
 			});
 		if (shifts.length == 0)
 			shifts = null;

@@ -65,7 +65,43 @@
 	top: 2em;
 }
 
-.report-filter .avanty-select {
+.report-filter .hm-container {
+	position: relative;
+	display: inline-block;
+}
+
+.report-filter .hm-select {
+	top: 0.75em;
+	display: inline-flex;
+	flex-direction: column;
+	flex-wrap: wrap;
+}
+
+#super-report-detail-start-h-sel, #super-report-detail-end-h-sel {
+	left: 0.25em;
+	height: 17em;
+}
+
+#super-report-detail-start-h-sel {
+	width: 5em;
+}
+
+#super-report-detail-end-h-sel {
+	width: 9em;
+}
+
+#super-report-detail-start-m-sel, #super-report-detail-end-m-sel {
+	left: -1.5em;
+	width: 15em;
+	height: 14.5em;
+}
+
+.report-filter .hm-select div {
+	width: 2em;
+	text-align: center;
+}
+
+.report-filter .user-shift-select {
 	margin-top: 0.5em;
 	height: 8em;
 }

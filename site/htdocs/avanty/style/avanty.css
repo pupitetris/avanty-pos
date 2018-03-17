@@ -447,5 +447,5 @@ form s:before {
 .avanty-popup {
 	position: absolute;
 	z-index: 1;
-	display: none;
+	display: inline-block;
 }

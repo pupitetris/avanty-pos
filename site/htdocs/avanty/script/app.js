@@ -126,8 +126,11 @@
 		};
 
 		function popup_window_click (evt, popup) {
-			if ($(evt.target).closest (popup).length < 1)
-				popup_toggle (popup);
+			if ($(evt.target).closest (popup).length < 1) {
+				// if the target is detached from the document, we don't hide:
+				if ($(evt.target).parents ().last ().get (0).tagName == 'HTML')
+					popup_hide (popup);
+			}
 		}
 
 		function popup_show (popup) {

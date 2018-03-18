@@ -99,13 +99,29 @@
 					stateDuration: 60 * 60 * 24 * 365 * 10,
 					retrieve: true
 				};
-				var options = $.extend (default_options, param);
+
 				var toolbar = this.parent ().find ('.toolbar');
+				toolbar.data ('old-parent', this.parent ());
+
+				var options = $.extend (default_options, param);
 				var datatable = this.DataTable (options);
+
 				var button_cont = datatable.buttons ().container ();
 				button_cont.find ('button').button ();
+
 				if (toolbar.length > 0)
 					toolbar.prependTo (button_cont);
+
+				return datatable;
+			}
+
+			if (param == 'destroy') {
+				var datatable = this.DataTable ({ retrieve: true });
+				var toolbar = datatable.buttons ().container ().find ('.toolbar');
+				if (toolbar.length > 0)
+					toolbar.prependTo (toolbar.data ('old-parent'));
+				datatable.destroy ();
+				return this;
 			}
 		};
 

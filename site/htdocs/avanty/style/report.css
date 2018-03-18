@@ -1,3 +1,17 @@
+.detail-report.fullscreen {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 100vw;
+	height: 100vh;
+	background-color: white;
+	z-index: 10001;
+}
+
+.detail-report.fullscreen > div {
+	margin-top: 0;
+}
+
 .detail-report h4, .shift-report h4 {
 	width: 95%;
 	height: 3em;
@@ -102,7 +116,7 @@
 	background-color: rgba(255,255,255,0.85);
 }
 
-.detail-cont .toolbar {
+.detail-report .toolbar {
 	display: inline-block;
 }
 
@@ -116,6 +130,7 @@
 
 .detail-report table.detail {
 	font-size: 60%;
+	width: 100%;
 }
 
 .detail-report table.detail tbody {

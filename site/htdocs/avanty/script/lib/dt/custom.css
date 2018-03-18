@@ -5,3 +5,15 @@
 table.dataTable .sorting {
 	cursor: pointer;
 }
+
+.dt-buttons .ui-button {
+	box-shadow: none;
+}
+
+.fullscreen table.dataTable {
+	margin: 0;
+}
+
+.fullscreen .dataTables_scrollBody {
+	height: calc(100vh - 137px) !important;
+}

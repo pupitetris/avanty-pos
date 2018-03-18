@@ -27,7 +27,7 @@
      borderlayer="false"
      borderopacity="1"
      inkscape:current-layer="layer15"
-     inkscape:cx="4.7905882"
+     inkscape:cx="1.5811764"
      inkscape:cy="8"
      gridtolerance="10"
      inkscape:guide-bbox="true"
@@ -36,8 +36,8 @@
      inkscape:object-nodes="true"
      inkscape:object-paths="true"
      objecttolerance="10"
-     pagecolor="#f7f7f7"
-     inkscape:pageopacity="1"
+     pagecolor="#ffffff"
+     inkscape:pageopacity="0"
      inkscape:pageshadow="2"
      showborder="true"
      showgrid="false"
@@ -62,7 +62,8 @@
      inkscape:window-width="1920"
      inkscape:window-x="-8"
      inkscape:window-y="-8"
-     inkscape:zoom="53.125">
+     inkscape:zoom="53.125"
+     inkscape:pagecheckerboard="false">
     <inkscape:grid
        color="#000000"
        dotted="false"

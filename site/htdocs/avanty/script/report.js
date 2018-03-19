@@ -100,6 +100,7 @@
 			unknown: '-ERROR-',
 			deposit: 'Depósito',
 			shift_begin: 'Inicio turno',
+			lost: 'Perdido',
 			entry: 'Entrada',
 			exit: 'Salida',
 			shift_end: 'Fin turno'
@@ -137,7 +138,7 @@
 
 			var rate = APP.Util.objGet (rec.rate, 'unknown', rates);
 			var rate_label = (rate)? rate.label_client: null;
-			var ticket = (rec.ticket_timestamp)?
+			var ticket = (rec.ticket_timestamp && rec.concept != 'lost')?
 				APP.mod.barcode.generate ({ terminalId: rec.terminal_id, entryDate: rec.ticket_timestamp }): null;
 
 			var tr = $('<tr />');

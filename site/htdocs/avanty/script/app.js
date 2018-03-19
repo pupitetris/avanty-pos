@@ -109,6 +109,9 @@
 				var button_cont = datatable.buttons ().container ();
 				button_cont.find ('button').button ();
 
+				// Theme the filter input:
+				button_cont.parent ().find ('input[type="search"]').input ().prop ('size', 10);
+
 				if (toolbar.length > 0)
 					toolbar.prependTo (button_cont);
 

@@ -660,8 +660,14 @@
 		if (!date_ui.h_txt)
 			return new Date (str);
 
-		var d = new Date (str + ' ' + date_ui.h_txt.text () + ':' + date_ui.m_txt.text ());
-		return d;
+		var h_txt = date_ui.h_txt.text ();
+		if (h_txt == '24')
+			h_txt = '00';
+		var date = new Date (str + ' ' + h_txt + ':' + date_ui.m_txt.text ());
+		if (date_ui.h_txt.text () == '24')
+			// Add a whole day.
+			date.setTime (date.getTime () + 1000 * 60 * 60 * 24);
+		return date;
 	}
 
 	function super_report_filter_validate_start_end (prefix) {

@@ -164,6 +164,7 @@
 
 .detail-report table.detail td.money {
 	text-align: right;
+	line-height: 0;
 }
 
 table.detail .data-error {

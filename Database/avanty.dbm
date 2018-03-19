@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,511" last-zoom="0.8"
+<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,509" last-zoom="0.8"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -3343,7 +3343,9 @@ END;]]></definition>
 				NATURAL JOIN cashier_shift AS cs
 				NATURAL JOIN account
 				JOIN movement USING (ticket_id)
-			WHERE t.type = 'entry';
+			WHERE t.type = 'entry'
+				AND (_start <= t.timestamp AND t.timestamp < _end)
+				AND (_shifts IS NULL OR cs.shift_id = ANY (_shifts));
 
 	-- All other operations.
 	RETURN QUERY

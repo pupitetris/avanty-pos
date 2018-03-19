@@ -167,6 +167,6 @@
 }
 
 table.detail .data-error {
-	background-color: black;
 	font-weight: bold;
+	background-color: #f66 !important;
 }

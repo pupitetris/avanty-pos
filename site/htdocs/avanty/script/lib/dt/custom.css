@@ -1,5 +1,10 @@
-.dataTables_info[role="status"] {
+.avanty .dataTables_info[role="status"] {
 	font-size: 50%;
+}
+
+/* Don't highlight hovered buttons */
+.avanty div.dt-buttons .dt-button:hover>span {
+	background-color: initial;
 }
 
 table.dataTable .sorting {
@@ -16,12 +21,4 @@ table.dataTable .sorting {
 
 .fullscreen .dataTables_scrollBody {
 	height: calc(100vh - 143px) !important;
-}
-
-.fullscreen.dataTables_wrapper {
-	background-color: black !important;
-}
-
-.fullscreen .dataTables_scroll {
-	background-color: white;
 }

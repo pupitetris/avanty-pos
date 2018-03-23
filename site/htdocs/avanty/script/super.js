@@ -301,25 +301,6 @@
 		ui.report.tickets.summary.items = ui.report.tickets.summary.section.find ('.items');
 
 		ui.report.detail.cont = ui.report.detail.section.find ('.detail-cont');
-		ui.report.detail.fullscreen = $('#super-report-detail-fullscreen');
-		ui.report.detail.fullscreen.on ('click',
-										function (evt) {
-											var wrapper = $('#super-report-detail-table_wrapper');
-											var button = $(this);
-											if (wrapper.hasClass ('fullscreen')) {
-												wrapper.removeClass ('fullscreen');
-												wrapper.removeClass ('detail-report');
-												wrapper.appendTo (ui.report.detail.cont);
-												button.find ('span').text ('Ampliar');
-												button.find ('img').prop ('src', 'img/symbolic/fullscreen.svg');
-											} else {
-												wrapper.addClass ('fullscreen');
-												wrapper.addClass ('detail-report');
-												wrapper.appendTo ($('body'));
-												button.find ('span').text ('Reducir');
-												button.find ('img').prop ('src', 'img/symbolic/restore.svg');
-											}
-										});
 
 		mod.loaded = true;
 		mod.onLoad ();

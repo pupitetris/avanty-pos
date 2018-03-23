@@ -84,6 +84,24 @@
 			return this;
 		};
 
+		function datatable_fullscreen (evt, datatable, button, config) {
+			var wrapper = $(datatable.table ().container ());
+			if (wrapper.hasClass ('fullscreen')) {
+				wrapper.removeClass ('fullscreen');
+				wrapper.removeClass ('detail-report');
+				wrapper.appendTo (wrapper.data ('parent'));
+				button.find ('.ui-button-text span').text ('Ampliar');
+				button.find ('img').prop ('src', 'img/symbolic/fullscreen.svg');
+			} else {
+				wrapper.data ('parent', wrapper.parent ());
+				wrapper.addClass ('fullscreen');
+				wrapper.addClass ('detail-report');
+				wrapper.appendTo ($('body'));
+				button.find ('.ui-button-text span').text ('Reducir');
+				button.find ('img').prop ('src', 'img/symbolic/restore.svg');
+			}
+		}
+
 		$.fn.avaDataTable = function (param) {
 			if (typeof (param) == 'undefined')
 				param = {};
@@ -96,6 +114,13 @@
 						'<"fg-toolbar ui-toolbar ui-widget-header ui-helper-clearfix ui-corner-bl ui-corner-br"ip>',
 					buttons: [
 						{
+							name: 'ava-fullscreen',
+							className: 'button-icon',
+							text: '<img src="img/symbolic/fullscreen.svg" /><span class="txt">Ampliar</span>',
+							action: datatable_fullscreen
+						},
+						{
+							name: 'ava-csv',
 							extend: 'csv',
 							className: 'shell-tool button-icon',
 							text: '<img src="img/icons/csv.svg" />',
@@ -109,9 +134,6 @@
 					retrieve: true
 				};
 
-				var toolbar = this.parent ().find ('.toolbar');
-				toolbar.data ('old-parent', this.parent ());
-
 				var options = $.extend (default_options, param);
 				var datatable = this.DataTable (options);
 
@@ -121,17 +143,11 @@
 				// Theme the filter input:
 				button_cont.parent ().find ('input[type="search"]').input ().prop ('size', 10);
 
-				if (toolbar.length > 0)
-					toolbar.prependTo (button_cont);
-
 				return datatable;
 			}
 
 			if (param == 'destroy') {
 				var datatable = this.DataTable ({ retrieve: true });
-				var toolbar = datatable.buttons ().container ().find ('.toolbar');
-				if (toolbar.length > 0)
-					toolbar.prependTo (toolbar.data ('old-parent'));
 				datatable.destroy ();
 				return this;
 			}

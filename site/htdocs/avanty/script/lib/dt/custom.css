@@ -12,7 +12,7 @@ table.dataTable .sorting {
 }
 
 .dt-buttons {
-	width: calc(100% - 340px);
+	width: calc(100% - 390px);
 }
 
 .dt-buttons .ui-button {

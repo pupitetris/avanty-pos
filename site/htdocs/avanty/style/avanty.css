@@ -312,27 +312,7 @@ form button label.error {
 	box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
 }
 
-.shell-menu .ui-tabs-panel > div {
-	margin-top: 2em;
-}
-
-.shell-menu .ui-tabs-panel > div > div {
-	margin-top: 1em;
-}
-
-.shell-menu .ui-tabs-panel div:first-child {
-	margin-top: 0;
-}
-
-.shell-menu button {
-	margin-left: 1ex;
-}
-
-.shell-menu button:first-child {
-	margin-left: 0;
-}
-
-button.shell-tool {
+.shell button.shell-tool {
 	position: absolute;
 }
 
@@ -418,14 +398,21 @@ form s:before {
 	margin-top: 1em;
 	display: flex;
 	flex-direction: row;
-	justify-content: space-between;
+	justify-content: center;
+	width: 100%;
 }
 
 .button-bar-h button {
+	margin-left: 0.5ex;
+	margin-right: 0.5ex;
 }
 
 .button-bar-h button:first-child {
 	margin-left: 0;
+}
+
+.button-bar-h button:last-child {
+	margin-right: 0;
 }
 
 .avanty-select {

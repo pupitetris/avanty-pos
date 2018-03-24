@@ -89,7 +89,7 @@
 			if (wrapper.hasClass ('fullscreen')) {
 				wrapper.removeClass ('fullscreen');
 				wrapper.removeClass ('detail-report');
-				wrapper.appendTo (wrapper.data ('parent'));
+				wrapper.prependTo (wrapper.data ('parent'));
 				button.find ('.ui-button-text span').text ('Ampliar');
 				button.find ('img').prop ('src', 'img/symbolic/fullscreen.svg');
 			} else {

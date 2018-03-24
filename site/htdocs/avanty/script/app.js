@@ -223,6 +223,20 @@
 							className: 'shell-tool button-icon buttons-csv buttons-html5',
 							text: '<img src="img/icons/csv.svg" />',
 							init: button_export_init
+						},
+						{
+							extend: 'excel',
+							name: 'ava-excel',
+							className: 'shell-tool button-icon buttons-csv buttons-html5',
+							text: '<img src="img/icons/excel.svg" />',
+							init: button_export_init
+						},
+						{
+							extend: 'pdf',
+							name: 'ava-pdf',
+							className: 'shell-tool button-icon buttons-csv buttons-html5',
+							text: '<img src="img/icons/pdf.svg" />',
+							init: button_export_init
 						}
 					],
 					scrollY: '300px',

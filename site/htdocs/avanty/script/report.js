@@ -157,7 +157,16 @@
 			table.append (tr);
 		}
 
-		return real_table.avaDataTable ();
+		function date_fname_format (date) {
+			return date.getFullYear () +
+				APP.Util.padZeroes (date.getMonth () + 1, 2) +
+				APP.Util.padZeroes (date.getDate (), 2) + '_' +
+				APP.Util.padZeroes (date.getHours (), 2) +
+				APP.Util.padZeroes (date.getMinutes (), 2) +
+				APP.Util.padZeroes (date.getSeconds (), 2);
+		}
+
+		return real_table.avaDataTable ({ filename: 'Avanty-detalleop-' + date_fname_format (new Date ()) });
 	}
 
 	var mod = {

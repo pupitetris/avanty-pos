@@ -84,7 +84,7 @@
 			return this;
 		};
 
-		function datatable_fullscreen (evt, datatable, button, config) {
+		function datatable_fullscreen_action (evt, datatable, button, config) {
 			var wrapper = $(datatable.table ().container ());
 			if (wrapper.hasClass ('fullscreen')) {
 				wrapper.removeClass ('fullscreen');
@@ -102,11 +102,109 @@
 			}
 		}
 
+		function datatable_save_continue (dest) {
+			var dialog = APP.msgDialog ({
+				icon: 'pendrive',
+				title: 'Escritura en progreso',
+				desc: 'Guardando. No retires el dispositivo...',
+				msg: 'Nombre del archivo: ' + dest,
+				opts: {
+					width: '75%',
+					buttons: null
+				}
+			});
+
+			dialog.find ('.icon').effect ('pulsate', {times: 100}, 60000);
+
+			APP.charp.request ('supervisor_save_file_to_usb', [dest],
+							   {
+								   success: function () {
+									   dialog.dialog ('close');
+									   APP.msgDialog ({
+										   icon: 'yes',
+										   title: 'Escritura exitosa',
+										   desc: 'El archivo se guardó con éxito.',
+										   msg: 'Nombre del archivo: ' + dest,
+										   sev: 'Ya puedes retirar el USB.',
+										   opts: {
+											   width: '75%',
+										   }
+									   });
+								   },
+								   error: function (err) {
+									   dialog.dialog ('close');
+									   if (err.key != 'CGI:CMDERR')
+										   return true; // call default handler.
+									   var status2desc = {
+										   EXIT_1:  'Error elevando permisos.',
+										   EXIT_33: 'No se detectó ningún dispositivo de almacenamiento USB conectado.',
+										   EXIT_34: 'No se pudo acceder al sistema de archivos del dispositivo de almacenamiento USB.',
+										   EXIT_35: 'La copia del archivo falló.',
+										   EXIT_36: 'No se pudo expulsar la unidad de almacenamiento USB.',
+										   256: 'Error al ejecutar el script de copia de archivos.'
+									   };
+									   status2desc['-1'] = status2desc[256];
+									   if (!status2desc[err.parms[0]])
+										   return true;
+									   APP.msgDialog ({
+										   icon: 'no',
+										   title: 'Fallo al guardar el archivo.',
+										   desc: status2desc[err.parms[0]],
+										   msg: 'Nombre del archivo: ' + dest,
+										   opts: {
+											   width: '75%',
+										   }
+									   });
+									   return;
+								   }
+							   });
+		}
+
+		function datatable_save_action (evt, datatable, button, config, original_action) {
+			// Save data to disk in the background while we prompt the user.
+			APP.later (function () {
+				original_action (evt, datatable, button, config);
+			});
+
+			var dest = config.filename + config.extension;
+
+			APP.msgDialog ({
+				icon: 'pendrive',
+				title: 'Salvar archivo',
+				desc: 'Inserta un dispositivo de almacenamiento USB.',
+				msg: 'Nombre del archivo: ' + dest,
+				opts: {
+					buttons: [{ text: 'Continuar', click: function () { datatable_save_continue (dest); } },
+							  { text: 'Cancelar', click: null }],
+					width: '75%',
+					open: function() { $(this).siblings('.ui-dialog-buttonpane').find('button:eq(0)').focus(); }
+				}
+			});
+		}
+
+		function datatable_button_action_override (_button, func) {
+			var _action = _button.action ();
+			_button.action (function (evt, datatable, button, config) {
+				func (evt, datatable, button, config,
+					  function (e, d, b, c) {
+						  return _action.call (_button, e, d, b, c);
+					  });
+			});
+		}
+
 		$.fn.avaDataTable = function (param) {
 			if (typeof (param) == 'undefined')
 				param = {};
 
 			if (typeof (param) == 'object') {
+				var filename = param.filename;
+				delete param.filename;
+				function button_export_init (datatable, node, config) {
+					datatable_button_action_override (this, datatable_save_action);
+					if (filename)
+						config.filename = filename;
+				}
+
 				var default_options = {
 					language: { sProcessing: "Procesando...", sLengthMenu: "Mostrar _MENU_ registros", sZeroRecords: "No se encontraron resultados", sEmptyTable: "Ningún dato disponible en esta tabla", sInfo: "Registros del _START_ al _END_ de _TOTAL_", sInfoEmpty: "Registros del 0 al 0 de 0", sInfoFiltered: "(filtrado de _MAX_ en total)", sInfoPostFix: "", sSearch: "Filtrar: ", sUrl: "", sInfoThousands: ",", sLoadingRecords: "Cargando...", oPaginate: { sFirst: "Pri", sLast: "Últ", sNext: "Sig", sPrevious: "Ant" }, oAria: { sSortAscending: ": Activar para ordenar la columna de manera ascendente", sSortDescending: ": Activar para ordenar la columna de manera descendente" } },
 					dom: '<"fg-toolbar ui-toolbar ui-widget-header ui-helper-clearfix ui-corner-tl ui-corner-tr"Blfr>'+
@@ -117,13 +215,14 @@
 							name: 'ava-fullscreen',
 							className: 'button-icon',
 							text: '<img src="img/symbolic/fullscreen.svg" /><span class="txt">Ampliar</span>',
-							action: datatable_fullscreen
+							action: datatable_fullscreen_action
 						},
 						{
-							name: 'ava-csv',
 							extend: 'csv',
-							className: 'shell-tool button-icon',
+							name: 'ava-csv',
+							className: 'shell-tool button-icon buttons-csv buttons-html5',
 							text: '<img src="img/icons/csv.svg" />',
+							init: button_export_init
 						}
 					],
 					scrollY: '300px',
@@ -215,10 +314,10 @@
 
 			APP.msgDialog ({
 				icon: 'error',
+				title: 'Falla en configuración',
 				desc: 'Falla interna al configurar.',
 				msg: error_msg,
 				sev: CHARP.ERROR_SEV['INTERNAL'],
-				title: 'Falla en configuración',
 				opts: { width: '75%' }
 			});
 		}
@@ -1097,7 +1196,7 @@
 				appendTo: $('#dialogs')
 			}, opts.opts);
 
-			if (!dialogOpts.buttons)
+			if (dialogOpts.buttons === undefined)
 				dialogOpts.buttons = { 'Cerrar': null };
 
 			function getButton (evt) {

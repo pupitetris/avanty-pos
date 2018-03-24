@@ -25,8 +25,11 @@ $::SIG{'__WARN__'} = \&warn_handler;
 sub cmderr {
     my $cmd = shift;
     my $msg = shift;
+    my $parms = shift;
     $msg =~ s/$FILE_DIR/FILE_DIR/g;
-    return { 'err' => 'CGI:CMDERR', 'msg' => "$cmd: $msg" };
+    my $err = { 'key' => 'CGI:CMDERR', 'msg' => "$cmd: $msg" };
+    $err->{'parms'} = $parms if defined $parms;
+    return $err;
 }
 
 # find a file relative to FILE_DIR, handle error conditions by returning an error hashref.

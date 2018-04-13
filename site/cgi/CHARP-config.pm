@@ -40,15 +40,15 @@ $CHARP_LANG = 'es';
 # http://search.cpan.org/~timb/DBI-1.637/DBI.pm#TRACING
 
 # No tracing (production):
-#$DB_TRACE = '0';
+$DB_TRACE = '0';
 
 # Trace top-level DBI method calls returning with results or errors and SQL statements executed:
-$DB_TRACE = '0|SQL';
-$DB_TRACE_FNAME = 'c:/opt/Apache24/logs/DBI.log';
+#$DB_TRACE = '0|SQL';
+#$DB_TRACE_FNAME = '/var/log/apache2/avanty-DBI.log';
 #$DB_TRACE_FNAME = *STDERR;
 
 # Send errors to stderr? (Effectively showing on the web server's error.log)
-# $DB_PRINT_ERROR = 0; # Production
-$DB_PRINT_ERROR = 1;
+$DB_PRINT_ERROR = 0; # Production
+#$DB_PRINT_ERROR = 1;
 
 1;

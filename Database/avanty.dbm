@@ -36,7 +36,9 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	<role name="postgres"/>
 	<comment><![CDATA[Special type for user id's to be automatically recognized by the rpc system.]]></comment>
 		<type name="smallint" length="0"/>
-	<expression><![CDATA[VALUE >= 1 AND VALUE < 32768]]></expression>
+	<constraint name="uid_limits" type="check">
+	  <expression><![CDATA[VALUE >= 1 AND VALUE < 32768]]></expression>
+	</constraint>
 </domain>
 
 <domain name="ts" not-null="false">

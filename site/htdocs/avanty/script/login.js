@@ -66,9 +66,9 @@
 			mod.chpass_solution = solution;
 		}
 
-		var mod_super = APP.mod['super'];
+		var mod_super = APP.mod['super_users'];
 		if (!mod_super)
-			APP.loadModule ('super', super_set_chpass);
+			APP.loadModule ('super_users', super_set_chpass);
 		else {
 			super_set_chpass (mod_super);
 			mod_super.reset ();

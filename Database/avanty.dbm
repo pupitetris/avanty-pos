@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta" author="Arturo Espinosa" last-position="0,508" last-zoom="0.8"
+<dbmodel pgmodeler-ver="0.9.1-beta1" author="Arturo Espinosa" last-position="406,765" last-zoom="0.8"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -14,7 +14,7 @@ CAUTION: Do not modify this file unless you know what you are doing.
 	<prepended-sql><![CDATA[DROP ROLE IF EXISTS avanty;]]></prepended-sql>
 </role>
 
-<database name="avanty" encoding="UTF8" template="template0" append-at-eod="true">
+<database name="avanty" encoding="UTF8" template="template0" is-template="false" allow-conns="true" append-at-eod="true">
 	<comment><![CDATA[ver. 1.0.2]]></comment>
 	<appended-sql><![CDATA[ALTER DATABASE avanty SET search_path TO av,public;
 
@@ -31,13 +31,13 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	<role name="avanty"/>
 </schema>
 
-<domain name="uid" constraint="uid_check" not-null="false">
+<domain name="uid" not-null="false">
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[Special type for user id's to be automatically recognized by the rpc system.]]></comment>
-		<type name="smallint" length="0"/>
+	<type name="smallint" length="0"/>
 	<constraint name="uid_limits" type="check">
-	  <expression><![CDATA[VALUE >= 1 AND VALUE < 32768]]></expression>
+		<expression><![CDATA[VALUE >= 1 AND VALUE < 32768]]></expression>
 	</constraint>
 </domain>
 
@@ -45,7 +45,7 @@ GRANT USAGE ON SEQUENCE av.cashier_shift_shift_id_seq TO avanty;
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[just a short name for " timestamp with time zone"]]></comment>
-		<type name="timestamp with time zone" length="0" with-timezone="true"/>
+	<type name="timestamp with time zone" length="0" with-timezone="true"/>
 </domain>
 
 <schema name="pgcrypto" rect-visible="true" fill-color="#e1e1e1">
@@ -1811,7 +1811,7 @@ END;]]></definition>
 	<schema name="av"/>
 	<role name="postgres"/>
 	<comment><![CDATA[Used as parameter to RPs, maps at CHARP level to the address of the web client.]]></comment>
-		<type name="inet" length="0"/>
+	<type name="inet" length="0"/>
 </domain>
 
 <function name="anon_supervisor_created"
@@ -3476,6 +3476,39 @@ END;]]></definition>
 END;]]></definition>
 </function>
 
+<function name="supervisor_get_users"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="CALLED ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get a login/id list of the available users on the system.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="login">
+		<type name="varchar" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM user_supervisor_assert(_uid);
+
+	RETURN QUERY
+		SELECT a.user_id, a.login 
+			FROM account AS a 
+			WHERE status = 'active' AND a.user_id > 1;
+END;]]></definition>
+</function>
+
 <constraint name="account_creator_fk" type="fk-constr" comparison-type="MATCH FULL"
 	 upd-action="NO ACTION" del-action="NO ACTION" ref-table="av.account" table="av.account">
 	<columns names="creator_user_id" ref-type="src-columns"/>
@@ -3484,10 +3517,10 @@ END;]]></definition>
 
 <relationship name="rel_account_account" type="relfk"
 	 src-table="av.account"
-	 dst-table="av.account"
+	 dst-table="av.account" reference-fk="account_creator_fk"
 	 src-required="false" dst-required="false">
 	<line>
-		<position x="429.716" y="1239.82"/>
+		<position x="429.716" y="1229.85"/>
 	<position x="429.716" y="1169"/>
 	<position x="292.477" y="1169"/>
 	</line>

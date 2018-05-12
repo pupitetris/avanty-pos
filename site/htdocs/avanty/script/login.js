@@ -103,7 +103,7 @@
 	}
 
 	function set_credentials (charp, login, pass, salt) {
-		pass = mod.passwordHash (pass, salt);
+		pass = charp.passwordHash (pass, salt);
 		charp.credentialsSet (login, pass, salt);
 	}
 
@@ -174,12 +174,6 @@
 		userTypes: {},
 		isFirst: false,
 		isLoggedIn: false,
-
-		passwordHash: function (pass, salt) {
-			if (pass.indexOf (salt) == 0)
-				return pass;
-			return dcodeIO.bcrypt.hashSync (pass, salt);
-		},
 
 		loginTry: function (charp, login, clear_pass, success_cb, error_cb) {
 			function auth_try (salt) {

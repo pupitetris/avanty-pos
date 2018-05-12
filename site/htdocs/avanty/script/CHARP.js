@@ -157,7 +157,10 @@ CHARP.ERRORS = {
 			case 'success':
 				return;
 			case 'error':
-				err = CHARP.extendObj ({ msg: 'Error HTTP: ' + req.statusText + ' (' + req.status + ').' }, CHARP.ERRORS['HTTP:SRVERR']);
+				if (req.status == 0 && req.responseText == '')
+					err = CHARP.ERRORS['HTTP:CONNECT'];
+				else
+					err = CHARP.extendObj ({ msg: 'Error HTTP: ' + req.statusText + ' (' + req.status + ').' }, CHARP.ERRORS['HTTP:SRVERR']);
 				break;
 			case 'parsererror':
 				err = CHARP.ERRORS['AJAX:JSON'];
@@ -225,13 +228,13 @@ CHARP.ERRORS = {
 			if (ctx.asAnon)
 				return this.replySuccess (data, status, req, ctx);
 
-			if (req.status == 0 && req.responseText == '')
-				this.handleError (CHARP.ERRORS['HTTP:CONNECT'], ctx);
 			if (status == 'success') {
-				if (data.error)
-					return this.handleError (data.error, ctx);
-				if (data && data.chal)
-					this.reply (data.chal, ctx);
+				if (data) {
+					if (data.error)
+						return this.handleError (data.error, ctx);
+					if (data.chal)
+						this.reply (data.chal, ctx);
+				}
 			}
 		},
 		
@@ -318,6 +321,12 @@ CHARP.ERRORS = {
 			localStorage.removeItem ('charp_login');
 			localStorage.removeItem ('charp_passwd');
 			localStorage.removeItem ('charp_salt');
+		},
+
+		passwordHash: function (pass, salt) {
+			if (pass.indexOf (salt) == 0)
+				return pass;
+			return dcodeIO.bcrypt.hashSync (pass, salt);
 		},
 		
 		setBusyCB: function (cb) {

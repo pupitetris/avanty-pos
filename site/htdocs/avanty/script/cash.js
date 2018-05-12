@@ -410,7 +410,7 @@
 		var cred = APP.charp.credentialsGet ();
 
 		var orig_pass = ui.chpass_orig_pass.val ();
-		if (cred.passwd != APP.mod.login.passwordHash (orig_pass, cred.salt)) {
+		if (cred.passwd != APP.charp.passwordHash (orig_pass, cred.salt)) {
 			// Wrong original password.
 			APP.msgDialog ({
 				icon: 'no',
@@ -428,7 +428,7 @@
 		APP.charp.request ('this_user_password_change', [passwd],
 						   {
 							   success: function (salt) {
-								   cred.passwd = APP.mod.login.passwordHash (passwd, salt);
+								   cred.passwd = APP.charp.passwordHash (passwd, salt);
 								   cred.salt = salt;
 								   APP.charp.credentialsSet (cred);
 								   cash_chpass_success ();

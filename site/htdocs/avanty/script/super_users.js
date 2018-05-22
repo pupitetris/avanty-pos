@@ -31,12 +31,12 @@
 
 		ui[name + '_submit'] = section.find ('button[type="submit"]');
 
-		var stype = ui.section_newuser.find ('select[name="newuser-type"]');
+		var stype = section.find ('select[name="' + name + '-type"]');
 		if (stype.length > 0) {
 			ui[name + '_type'] = stype;
 			stype.selectmenu (
 				{
-					appendTo: ui.section_newuser,
+					appendTo: section,
 					change: function () {
 						form.validate ().element (this);
 						if (val.length > 0)
@@ -58,7 +58,7 @@
 
 		if (!ctx) {
 			ctx = {
-				modify_passwd: yes
+				modify_passwd: true
 			};
 		}
 		ctx.other_pass = pass;

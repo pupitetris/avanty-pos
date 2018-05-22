@@ -16,9 +16,9 @@
 		</div>
 	  </div>
 	  <div id="super-tab-user">
-		<div>
+		<div class="button-bar-h">
 		  <button id="super-tab-user-create">Crear</button>
-<!--		  <button id="super-tab-user-search">Buscar</button>-->
+		  <button id="super-tab-user-modify">Modificar</button>
 		</div>
 	  </div>
 	</div>
@@ -76,6 +76,56 @@
 		  <label for="newuser-type">Tipo de usuario:</label>
 		  <div style="position: relative">
 			<select name="newuser-type">
+			  <option value="" disabled="1" selected="1">Seleccionar</option>
+			  <option value="cashier">Cajero</option>
+			  <option value="supervisor">Supervisor</option>
+<!--			  <option value="maintenance">Mantenimiento</option>-->
+			</select>
+		  </div>
+		</div>
+	  </div>
+	  <div class="button-bar-h">
+		<button class="button-icon" type="button"><img src="img/symbolic/close.svg" />Cancelar</button>
+		<button class="button-icon" type="submit"><img src="img/symbolic/yes.svg" />Crear cuenta</button>
+	  </div>
+	</form>
+  </div>
+  <div class="section section-small" id="super-moduser">
+	<form>
+	  <h2>Modificación de usuarios</h2>
+	  <div id="super-usermod-select"></div>
+	  <div class="button-bar-h">
+		<button type="button" name="remove">Borrar</button>
+		<button type="button" name="edit">Editar</button>
+		<button type="button" name="cancel">Cancelar</button>
+	  </div>
+	</form>
+  </div>
+  <div class="section section-small" id="super-edituser">
+	<form>
+	  <h2>Alta de usuario</h2>
+	  <div class="form-hor">
+		<table>
+		  <tbody>
+			<tr>
+			  <th><label for="edituser-login">Usuario:</label></th>
+			  <td><input name="edituser-login" type="text" size="10" /></td>
+			</tr>
+			<tr>
+			  <th><label for="edituser-pass">Contraseña:</label></th>
+			  <td><input name="edituser-pass" type="password" size="10" /></td>
+			</tr>
+			<tr>
+			  <th><label for="edituser-pass2">Contraseña:</label><br/>
+				<i class="label">(confirmar)</i></th>
+			  <td><input name="edituser-pass2" type="password" size="10" /></td>
+			</tr>
+		  </tbody>
+		</table>
+		<div class="form-ver">
+		  <label for="edituser-type">Tipo de usuario:</label>
+		  <div style="position: relative">
+			<select name="edituser-type">
 			  <option value="" disabled="1" selected="1">Seleccionar</option>
 			  <option value="cashier">Cajero</option>
 			  <option value="supervisor">Supervisor</option>

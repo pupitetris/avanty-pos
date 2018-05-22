@@ -187,6 +187,10 @@
 		// Note: APP.mod.super_users does not exist during init, hence the anonymous function:
 		shell.ui.user_create.on ('click', function () { APP.mod.super_users.createUser (); });
 
+		shell.ui.user_modify = $('#super-tab-user-modify');
+		// Note: APP.mod.super_users does not exist during init, hence the anonymous function:
+		shell.ui.user_modify.on ('click', function () { APP.mod.super_users.modifyUsers (); });
+
 		shell.ui.report_summary = $('#super-tab-report-summary');
 		shell.ui.report_summary.on ('click', function () { super_report_filter ('summary'); });
 

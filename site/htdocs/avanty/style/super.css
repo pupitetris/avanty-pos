@@ -105,3 +105,13 @@
 	margin-top: 0.5em;
 	height: 8em;
 }
+
+#super-usermod-select {
+	width: 50%;
+	height: 8em;
+}
+
+#super-usermod-select div {
+	height: 1.25em;
+}
+

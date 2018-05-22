@@ -11,12 +11,14 @@
 	var ui = {};
 	var shell;
 
-	function newuser_layout_init (name, validator_options) {
+	function newuser_layout_init (name, validator_options, ctx) {
 		shell = APP.mod['super'].shell;
 
 		var section = ui['section_' + name] = $('#super-' + name);
 		
 		section.find ('button').button ();
+
+		var form = ui[name + '_form'] = section.find ('form');
 
 		var login = ui[name + '_login'] = section.find ('input[name="' + name + '-login"]');
 		login.input ();
@@ -29,14 +31,37 @@
 
 		ui[name + '_submit'] = section.find ('button[type="submit"]');
 
+		var stype = ui.section_newuser.find ('select[name="newuser-type"]');
+		if (stype.length > 0) {
+			ui[name + '_type'] = stype;
+			stype.selectmenu (
+				{
+					appendTo: ui.section_newuser,
+					change: function () {
+						form.validate ().element (this);
+						if (val.length > 0)
+							$(this).next ().next ().removeClass ('error');
+						else
+							$(this).next ().next ().addClass ('error');
+					}
+				});
+			ui[name + '_type_combo'] = stype.next ();
+		}
+
 		var cancel = section.find ('button[type="button"]');
 		if (cancel.length > 0) {
 			ui[name + '_cancel'] = cancel;
 			cancel.on ('click', function () { shell.backGo (); });
 		}
 
-		var form = ui[name + '_form'] = section.find ('form');
 		form.attr ('autocomplete', 'off');
+
+		if (!ctx) {
+			ctx = {
+				modify_passwd: yes
+			};
+		}
+		ctx.other_pass = pass;
 
 		var rules = {};
 
@@ -47,12 +72,15 @@
 		};
 		rules[name + '-pass'] = {
 			required: true,
-			passwd: true,
+			passwd: ctx,
 			minlength: 8,
 			maxlength: 255
 		};
 		rules[name + '-pass2'] = {
-			'pass-confirm': pass
+			'pass-confirm': ctx
+		};
+		rules[name + '_type'] = {
+			required: true
 		};
 
 		validator_options.rules = rules;
@@ -63,6 +91,7 @@
 
 	function layout_init () {
 		newuser_layout_init ('newsuper', { submitHandler: super_create_super_submit });
+
 		newuser_layout_init ('newuser', {
 			submitHandler: super_create_user_submit,
 			invalidHandler:
@@ -76,26 +105,33 @@
 				}
 		});
 
-		ui.newuser_type = ui.section_newuser.find ('select[name="newuser-type"]');
-		ui.newuser_type.rules ('add', { required: true });	
-		ui.newuser_type.selectmenu (
-			{
-				appendTo: ui.section_newuser,
-				change: function () {
-					var val = $(this).val ();
-					ui.newuser_form.validate ().element (this);
-					if (val.length > 0)
-						$(this).next ().next ().removeClass ('error');
-					else
-						$(this).next ().next ().addClass ('error');
-				}
-			});
-		ui.newuser_type_combo = ui.newuser_type.next ();
-
 		newuser_layout_init ('super_chpass', { submitHandler: super_chpass_submit });
 		ui.super_chpass_cancel = ui.section_super_chpass.find ('button[type="button"]');
 		ui.super_chpass_cancel.button ();
 		ui.super_chpass_cancel.on ('click', super_chpass_finish);
+
+		ui.section_moduser = $('#super-moduser');
+		ui.moduser = {};
+		ui.moduser.form = ui.section_moduser.find ('form');
+		ui.moduser.remove = ui.moduser.form.find ('button[name="remove"]');
+		ui.moduser.remove.on ('click', super_modify_users_remove);
+		ui.moduser.edit = ui.moduser.form.find ('button[name="edit"]');
+		ui.moduser.edit.on ('click', super_modify_users_edit);
+		ui.moduser.cancel = ui.moduser.form.find ('button[name="cancel"]');
+		ui.moduser.form.find ('button').button ();
+
+		ui.moduser.select = $('#super-usermod-select');
+		ui.moduser.select.avaSelect ();
+		ui.moduser.select.on ('avanty:optionSelect',
+							  function (evt, option, selected) {
+								  var num_selected = $(this).find ('.selected').length;
+								  if (num_selected > 1)
+									  ui.moduser.edit.button ('disable');
+								  else
+									  ui.moduser.edit.button ('enable');
+							  });
+
+		newuser_layout_init ('edituser', { submitHandler: super_edit_user });
 
 		mod.loaded = true;
 		mod.onLoad ();
@@ -136,6 +172,76 @@
 	function super_create_super_success (login) {
 		APP.toast ('Usuario <i> ' + login + ' </i> creado con éxito.');
 		APP.loadModule ('login');
+	}
+
+	function super_modify_users_populate () {
+		APP.charp.request ('supervisor_get_users', [],
+						   {
+							   success: function (users) {
+								   ui.moduser.select.empty ();
+								   for (var user of users) {
+									   var option = $('<div>' + user.login + '</div>').avaOption ({ value: user.id });
+									   ui.moduser.select.append (option);
+								   }
+							   }
+						   });
+	}
+
+	function super_modify_users_remove_confirm (selected) {
+		var user_ids = [];
+		selected.each (function (i, ele) { user_ids.push ($(ele).avaOption ('value')); });
+		APP.charp.request ('supervisor_delete_users', [user_ids], super_modify_users_populate);
+	}
+
+	function super_modify_users_remove () {
+		var selected = ui.moduser.select.find ('.selected');
+		if (selected.length == 0)
+			return;
+		
+		desc = (selected.length == 1)?
+			'<>Se va a eliminar un usuario.':
+			'<>Se van a eliminar ' + selected.length + ' usuarios.';
+		desc += '<br />¿Estás seguro que quieres proceder?';
+
+		APP.msgDialog ({
+			icon: 'question',
+			desc: desc,
+			title: '¿Eliminar usuarios?',
+			opts: {
+				buttons: {
+					'Sí, eliminar': function () { super_modify_users_remove_confirm (selected); },
+					'Cancelar': null
+				},
+				width: '75%'
+			}
+		});
+	}
+
+	function super_modify_users () {
+		APP.history.go ('super', ui.section_moduser, 'super-mod-user');
+		shell.navShow ();
+		shell.menuCollapse ();
+
+		super_modify_users_populate ();
+	}
+
+	function super_modify_users_edit () {
+	}
+
+	function super_edit_user () {
+		var selected = ui.moduser.select.find ('.selected');
+		if (selected.length != 1)
+			return;
+		
+		var user_id = selected.avaOption ('value');
+		APP.charp.request ('supervisor_get_user_info', [user_id],
+						   {
+							   asObject: true,
+							   success: function (user) {
+								   APP.history.go ('super', ui.section_moduser, 'super-mod-user');
+								   shell.navShow ();
+							   }
+						   });
 	}
 
 	function super_create_user () {
@@ -338,6 +444,10 @@
 
 		checkSupervisorCreated: function () {
 			return super_supervisor_check_created ();
+		},
+
+		modifyUsers: function () {
+			super_modify_users ();
 		}
 	};
 

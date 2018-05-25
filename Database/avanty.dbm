@@ -3,7 +3,7 @@
 CAUTION: Do not modify this file unless you know what you are doing.
          Unexpected results may occur if the code is changed deliberately.
 -->
-<dbmodel pgmodeler-ver="0.9.1-beta1" author="Arturo Espinosa" last-position="406,765" last-zoom="0.8"
+<dbmodel pgmodeler-ver="0.9.1-beta1" author="Arturo Espinosa" last-position="1429,1298" last-zoom="1.1"
 	 default-schema="av" default-owner="postgres">
 <role name="avanty"
       login="true"
@@ -3506,6 +3506,67 @@ END;]]></definition>
 		SELECT a.user_id, a.login 
 			FROM account AS a 
 			WHERE status = 'active' AND a.user_id > 1;
+END;]]></definition>
+</function>
+
+<function name="rate_edit_get_rates"
+		window-func="false"
+		returns-setof="false"
+		behavior-type="RETURNS NULL ON NULL INPUT"
+		function-type="STABLE"
+		security-type="SECURITY INVOKER"
+		execution-cost="1"
+		row-amount="0">
+	<schema name="rp"/>
+	<role name="postgres"/>
+	<comment><![CDATA[Get all rates but system and fragment typed, for editing. can_edit is true for those rates that have not been used yet.]]></comment>
+	<language name="plpgsql" sql-disabled="true"/>
+	<return-type>
+	<parameter name="rate_id">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="name">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="type">
+		<type name="av.rate_type" length="0"/>
+	</parameter>
+	<parameter name="is_active">
+		<type name="boolean" length="0"/>
+	</parameter>
+	<parameter name="script">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="description">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="position">
+		<type name="smallint" length="0"/>
+	</parameter>
+	<parameter name="label">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="label_client">
+		<type name="varchar" length="0"/>
+	</parameter>
+	<parameter name="can_edit">
+		<type name="boolean" length="0"/>
+	</parameter>
+	</return-type>
+	<parameter name="_uid">
+		<type name="av.uid" length="0"/>
+	</parameter>
+	<definition><![CDATA[BEGIN
+	PERFORM user_supervisor_assert(_uid);
+
+	RETURN QUERY
+		SELECT r.*, NOT EXISTS (
+			SELECT NULL 
+				FROM movement AS m
+				WHERE r.rate_id = m.rate_id
+			) 
+			FROM rate AS r
+			WHERE r.type = 'regular' OR r.type = 'lost' OR r.type = 'rent';
 END;]]></definition>
 </function>
 

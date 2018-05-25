@@ -1049,10 +1049,10 @@
 			childClass.prototype.__proto__ = superClass.prototype;
 		},
 
-		loadModule: function (name, cb, errCb) {
+		loadModule: function (name, cb, errCb, initCb) {
 			if (APP.mod[name]) {
 				if (!APP.mod[name].initialized && APP.mod[name].init)
-					APP.mod[name].init ();
+					APP.mod[name].init (initCb);
 
 				if (APP.mod[name].onLoad)
 					APP.mod[name].onLoad ();
@@ -1068,7 +1068,7 @@
 						  url: 'script/' + name + '.js' + add, 
 						  success: function () {
 							  if (APP.mod[name] && APP.mod[name].init)
-								  APP.mod[name].init ();
+								  APP.mod[name].init (initCb);
 							  if (cb)
 								  cb (APP.mod[name]);
 						  },

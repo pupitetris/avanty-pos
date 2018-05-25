@@ -1315,6 +1315,11 @@
 				window.onbeforeunload = function () { return 'Por favor confirme que desea cerrar la aplicación.' };
 			}
 
+			var uint_re = new RegExp ('^[0-9]+$');
+			$.validator.addMethod ('amount', function (val, ele) {
+				return uint_re.exec (val);
+			}, 'Número entero positivo.');
+
 			var money_re = new RegExp ('^[0-9]+(\.[0-9][05])?$');
 			$.validator.addMethod ('money', function (val, ele) {
 				return money_re.exec (val);

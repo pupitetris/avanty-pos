@@ -89,6 +89,71 @@ zozCzYdSCBfnRztD8A==
 	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY1', '0.0.0.0', 0, 0, NULL, NULL );
 	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY2', '0.0.0.0', 0, 0, NULL, NULL );
 	INSERT INTO terminal VALUES ( DEFAULT, 'boom_entry', 'ENTRY3', '0.0.0.0', 0, 0, NULL, NULL );
+    INSERT INTO terminal VALUES (DEFAULT, 'user_pos', 'POS2', '192.168.56.102', 0, 0,
+'-----BEGIN RSA PRIVATE KEY-----
+MIIEpgIBAAKCAQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQX
+bTSkWyhZF5y48kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPil
+Y0wvbWFEVqSprrN6pxP61h8CLzo4BXkBCbayuUnM1HlhshOzf+Vo2I/lDa7NxcRk
+2N38lHlwIyo1NZ6Kypb19fbraE+LnwJvYbF4mdDp10/xtAntMpmXMQdy0q1KMyvn
+/v3Gj5tymSbmVsDbe1mJevfkI0SquY4b1nvH5GTHOidjA7+1ID0otVjWCuDjEu1g
+Zzcrj9s0DnwBGRmzisu3I/mqyd7g3EIZLlCKPQIDAQABAoIBAQC7VOJEBPyy5ntz
+cQPWjrQ0uoPViKdb6yruvrFQGI4oS4D9TO4gFHRSrYq6andP+b/MkhBLPUgSapYj
+AFc5fIZW4ymhPMBLqpquzzqSyZMmujfSDToiox/NviY/2FecF5H05nR8vTLQWFOu
+7gdWO57GfLZ7JWcRQBjNDFq1clZ8zmDSK5/ZXkUtDQDkqEOuJrecat+GEKRsy/Ew
+QQWg7nB4u289y+Vun1rgQAKSzkitEWr9xU1Gz4GZT9khYmWwSZf6FX8b+CqJJ7yR
+/mpPMdL3d1BC178s0I7cmONItGr++el6FFPL71toM5LDgQZIYqkgymiiQaqa3dNj
+Hfg7HF45AoGBAPtjDuyyJWHwGA9kHwLMaLC/8sfmHVorWr4/eodzi9v0Wb7Jtfgv
+5PBLxDEBgZt/P2Prfmon9MOwxxSA9YpVDq2nVbS82DrWbjsHzapwJ+XoY0G1Rdzz
+QGsQGssOQBOdctakMeTNAa+tpUE/SKP9w6xpOnyyBD1nFRyjA+IvgLivAoGBAMRG
+3Rqyw/WgS+BuHPvGh3QoAH7rcgdfsdiqaVBoTp2jaox51ey1rdf8LcPM1GXbaBRv
+4dq97fpe/Q/TARRMKYqMB4YPwHM1JhXSxo8BRje2NiORd+OfqW738vmEkSUOJxRy
+RyJhXCxRZT1hhiGQbcYbQmcTvKTWYT+P1IbW/U7TAoGBAIReo8Q1BgQtFa49DSs/
+ET1IxYFHBVuuioi1CkL6r8FxSDRzKFN4fLefXb5kSafkeC+YGCezxGmq0xlT0nc1
+1JXSEAosijtpIAALWtuNVST1mhZGanQuzlPR1hnn9gueE5M8QF13KZUk/Wh+9zQK
+8pb9jeONJThj6DT9DZVzZ/dXAoGBAKVTEzZD0W95n6/g0CT66mlasGA3rYqsfj8D
++0UxNtbtKPg+P4Ts2wuMbHf6dgV9s8NTIih/xo4XqIzFrKkOJgd/P28aoX3pDLVh
+HsKhziVrI1r+Ur+2Yp8H1u95TFCsBRrhzy0UWPEzdlUnajWnU++EUoBETaeCs9M4
+MUmKmT7lAoGBAJzwWdqAvuPtMjucKk5fe+w5grOPUC2PYeShrTfrGql6KXZOVO+y
+4hgRRuEqF8p8woXTMskoOOmy6aU7VtOYKFLse/SgGRhOVm7eMn5MxYgZeO6nLbk1
+iwxRWT0UqyggORJJjW5UAA1t2XDAGGvR0ZigdIwSXzjRpLZes24qUcfm
+-----END RSA PRIVATE KEY-----
+',
+'-----BEGIN CERTIFICATE-----
+MIIGCTCCA/GgAwIBAgICEAAwDQYJKoZIhvcNAQELBQAwgaIxCzAJBgNVBAYTAk1Y
+MQ8wDQYDVQQIDAZNZXhpY28xHzAdBgNVBAoMFk1pY3Jvc2FmZSBTLkEuIGRlIEMu
+Vi4xETAPBgNVBAsMCEZpcm13YXJlMSIwIAYDVQQDDBlNaWNyb3NhZmUgSW50ZXJt
+ZWRpYXRlIENBMSowKAYJKoZIhvcNAQkBFhtwcm9ibGVzZ2lsQG1pY3Jvc2FmZS5j
+b20ubXgwHhcNMTcxMDMwMDMwOTI0WhcNMjMwNDIyMDMwOTI0WjCBqjELMAkGA1UE
+BhMCTVgxDzANBgNVBAgMBk1leGljbzEVMBMGA1UEBwwMVGxhbG5lcGFudGxhMRww
+GgYDVQQKDBNBdmFudHkgVGVjaG5vbG9naWVzMRQwEgYDVQQLDAtEZXZlbG9wbWVu
+dDEZMBcGA1UEAwwQd3d3LmF2YW50eS5sb2NhbDEkMCIGCSqGSIb3DQEJARYVYXJ0
+dXJvZWFAYXZhbnR5LmxvY2FsMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKC
+AQEAwL1togiafREfSIcx8Bx3IsqChSRoSVDpyGZvg2trfqDP3TQXbTSkWyhZF5y4
+8kyyb23j1yAb15iR9YdLmqQFcoW8tUPOXAOHsadpWFyOdyjmMPilY0wvbWFEVqSp
+rrN6pxP61h8CLzo4BXkBCbayuUnM1HlhshOzf+Vo2I/lDa7NxcRk2N38lHlwIyo1
+NZ6Kypb19fbraE+LnwJvYbF4mdDp10/xtAntMpmXMQdy0q1KMyvn/v3Gj5tymSbm
+VsDbe1mJevfkI0SquY4b1nvH5GTHOidjA7+1ID0otVjWCuDjEu1gZzcrj9s0DnwB
+GRmzisu3I/mqyd7g3EIZLlCKPQIDAQABo4IBPTCCATkwCQYDVR0TBAIwADARBglg
+hkgBhvhCAQEEBAMCBkAwDwYJYIZIAYb4QgENBAIWADAdBgNVHQ4EFgQUYnQDuHGn
+CecW54+B5o9Ndi4rJN8wgcMGA1UdIwSBuzCBuIAUFYA71zyeFQx8kvUHk5JU+GRL
+UW6hgZukgZgwgZUxCzAJBgNVBAYTAk1YMQ8wDQYDVQQIDAZNZXhpY28xFTATBgNV
+BAcMDFRsYWxuZXBhbnRsYTEfMB0GA1UECgwWTWljcm9zYWZlIFMuQS4gZGUgQy5W
+LjERMA8GA1UECwwIRmlybXdhcmUxKjAoBgkqhkiG9w0BCQEWG3Byb2JsZXNnaWxA
+bWljcm9zYWZlLmNvbS5teIICEAAwDgYDVR0PAQH/BAQDAgWgMBMGA1UdJQQMMAoG
+CCsGAQUFBwMBMA0GCSqGSIb3DQEBCwUAA4ICAQCldYBKE9PX1T2gV6iFLfGo4pq5
+5M8iuK6EuPvVsFFQoKWz4DMdgntCSrSI0EfXC39QJFo3i3gLbe7fCAdKJRgVxGSX
+6UdbvMe42oGdFSdscNsHf3516TtS8/gbHe/z834q+S2doytxsW437AacWl3vgUoN
+AmA8bOQo4Lvzv5JEK/tvkjK6+8W98r6+oCzKA/qj2lCoLpTUwXM+Z+kParMAM1ac
+7lDqVtnb96x75YH2DAOX1YoJWXZG7XGK8j2lLQwlVaLudxk+ereYeK4aPvZu29e3
+ODvgNMKxDS0YFdK9680R7vXvnJb+RANW4KYe0zFEuOq9vq7d+pDXcQAuNVHiXSRg
+OcZCwq56+UULDwjYKaL4YCKCZvovIoTL/BMi2ALt1ajFJpdpfjtCJVlwFCcjkCB4
+03q0fuPdKHc0AxWW0rKbo7flXZSjIjnmwjzBcmNm/IfysjnpjAyrz774DOi7lvdp
+U2bqk506bOY9dAE8UMd0wJriwP1WHE+LJhTSMZsqVbaDm2ZObgKvKb8WPAIG0nch
+ShBRsnQFT3fQbfwBB48Rjh+nx/RXt17WZyGqxQlMcgMtX/39yZB2slAUL/CRq9Lh
+qyggkrzF8BoHCRCvSRMUDmipczEsLDh93H+p8R/K8Ob7qtct0sZthwWBU2ZJXvhX
+zozCzYdSCBfnRztD8A==
+-----END CERTIFICATE-----
+');
 
     DELETE FROM tender;
     ALTER SEQUENCE tender_tender_id_seq RESTART;
@@ -111,7 +176,7 @@ zozCzYdSCBfnRztD8A==
     
 	DELETE FROM rate;
     ALTER SEQUENCE rate_rate_id_seq RESTART;
-	INSERT INTO rate VALUES (DEFAULT, 'standard', 'system', TRUE, '
+	INSERT INTO rate VALUES (DEFAULT, '_standard', 'system', TRUE, '
 : \ #10 parse 2drop ; immediate \ Single line comments
 
 : binary #2 base ! ;
@@ -399,8 +464,8 @@ create pad 1000 cells allot
 
 : [THEN] ( -- ) ; immediate
 ', '', 0, NULL, NULL);
-	INSERT INTO rate VALUES (DEFAULT, 'avanty', 'system', TRUE, '
-incluir standard
+	INSERT INTO rate VALUES (DEFAULT, '_avanty', 'system', TRUE, '
+incluir _standard
 
 \ Some definitions to make Forth more pallatable:
 : // #10 parse 2drop ; immediate            // C-style single line comments
@@ -421,6 +486,8 @@ incluir standard
 : verdadero -1 ;
 : falso 0 ;
 : es = ;
+: ó or ;
+: y and ;
 
 // Some convenience numbers to ease readability.
   60 constant 1min // A minute in seconds.
@@ -436,15 +503,109 @@ define minuto 1min * ;
 define horas 1hr * ;
 define hora 1hr * ;
 
+// Call the truncDate method
+define truncar_fecha js /APP.Util.truncDate{2} ;
+
+// For JSON rendering
+define lf 10 emit ;
+define quot 34 emit ;
+define colon 58 emit ;
+define comma 44 emit ;
+define lbrack 91 emit ;
+define rbrack 93 emit ;
+define lbrace 123 emit ;
+define verbar 124 emit ;
+define rbrace 125 emit ;
+define value 1- type ;
+define str quot value quot ;
+define key str colon ;
+
 // Report an account item 
-define registra type " | " type . " | " type . #10 emit ;
+define registra value verbar . verbar . lf ;
 
 // Cancel all previous items
 define _desc_cancel " __CANCEL__ " ;
 define cancela_anteriores 0 0 _desc_cancel registra ;
+', '', 0, NULL, NULL);
+	INSERT INTO rate VALUES (DEFAULT, '_calc', 'system', TRUE, '
+// simple_calc
 
-// Call the truncDate method
-define truncar_fecha js /APP.Util.truncDate{2} ;
+variable límite_fracciones // número máximo de fracciones que se calculan para el período
+variable costo_fracción // en de cada fracción, en centavos
+variable duración_fracción // en segundos
+variable desc_fracción_size // texto que se va al ticket
+variable desc_fracción_addr // texto que se va al ticket
+variable tiempo_restante // asignado inicialmente a tiempo_registrado, usado para pasar el tiempo registrado de una invocación a otra.
+
+variable duración // duración total del periodo.
+variable restante   // Será el tiempo registrado menos la primer hora.
+variable fracciones // Número de fracciones de tiempo por cobrar.
+
+define simple_calc
+
+    // paso de parámetros
+    desc_fracción_size guarda
+    desc_fracción_addr guarda
+    duración_fracción guarda
+    costo_fracción guarda
+    límite_fracciones guarda
+    tiempo_restante guarda
+    
+    límite_fracciones valor duración_fracción valor * duración guarda
+    
+    si duración valor 0 = tiempo_restante valor duración valor < ó entonces
+        0 restante guarda
+    si_no
+        tiempo_restante valor duración valor - restante guarda
+        duración valor tiempo_restante guarda
+    fin
+    
+    tiempo_restante valor duración_fracción valor / fracciones guarda
+    si tiempo_restante valor duración_fracción valor residuo 0 > entonces
+        fracciones incrementa
+    fin
+    fracciones valor costo_fracción valor desc_fracción_addr valor desc_fracción_size valor registra
+    
+    // Regresar el tiempo restante para la siguiente invocación
+    restante valor
+    
+;
+', '', 0, NULL, NULL);
+	INSERT INTO rate VALUES (DEFAULT, '_json', 'system', TRUE, '
+define simple_calc
+    lbrace
+        " func " key " simple_calc " str comma
+        " label " key " Fracción simple " str comma
+        " desc " key str comma // str will consume the description string from the stack
+        " params " key
+            lbrack
+                lbrace
+                    " label " key " Fracción " str comma
+                    " type " key " time " str comma
+                    " rules " key lbrace " required " key " true " value rbrace comma
+                    " value " key .
+                rbrace comma
+                lbrace
+                    " label " key " Costo " str comma
+                    " type " key " text " str comma
+                    " rules " key lbrace " required " key " true " value comma " money " key " true " value rbrace comma
+                    " value " key .
+                rbrace comma
+                lbrace
+                    " label " key " Límite " str comma
+                    " type " key " text " str comma
+                    " attributes " key lbrace " maxlength " key " 4 " value rbrace comma
+                    " rules " key lbrace " required " key " true " value comma " amount " key " true " value rbrace comma
+                    " value " key .
+                rbrace
+            rbrack
+    rbrace comma lf
+;
+', '', 0, NULL, NULL);
+	INSERT INTO rate VALUES (DEFAULT, '_json_proto', 'system', TRUE, '
+// Invocar todas las funciones de alto nivel para obtener el JSON de cada una, para altas.
+define desc " " ;
+0 0 0 desc simple_calc
 ', '', 0, NULL, NULL);
 
 COMMIT TRANSACTION;

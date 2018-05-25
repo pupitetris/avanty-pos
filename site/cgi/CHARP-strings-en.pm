@@ -3,7 +3,7 @@ package CHARP;
 
 use utf8;
 
-%ERROR_DESCS = (
+our %ERROR_DESCS = (
     'DBI:CONNECT'	=> 'Database could not be contacted.',
     'DBI:PREPARE'	=> 'SQL sentence preparation failed.',
     'DBI:EXECUTE'	=> 'SQL sentence execution failed.',
@@ -32,7 +32,7 @@ use utf8;
     'SQL:SUCCESS'	=> 'Request successful.'
 );
 
-%STRS = (
+our %STRS = (
     'CGI:FILESEND:MISSING:MSG' => '%s: Missing `filename` parameter.',
     'CGI:FILESEND:OPENFAIL:MSG' => '%s: Error opening `%s` (%s).',
     'CGI:FILESEND:NOTFOUND:MSG' => '%s: File `%s` not found.',

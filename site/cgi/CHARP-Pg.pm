@@ -13,7 +13,7 @@ package CHARP;
 use strict;
 use DBD::Pg qw(:pg_types);
 
-%CHARP::pg_errcodes = ();
+our %PG_ERRCODES = ();
 open (my $efd, 'Pg-errcodes.txt') || die "Can't open errcodes.txt file.";
 while (my $l = <$efd>) {
 	chomp $l;
@@ -22,7 +22,7 @@ while (my $l = <$efd>) {
 	next if $l =~ /^$/;
 	next if $l =~ /^Section/;
 	if ($l =~ /(^[0-9A-Z]{5})\s+([EWS])\s+(\w+)\s+(\w+)/) {
-		$CHARP::pg_errcodes{$1} = $4;
+		$PG_ERRCODES{$1} = $4;
 	}
 }
 
@@ -110,7 +110,7 @@ sub db_state_str {
 	my $sth = shift;
 	my $dbh = shift;
 
-	return $CHARP::pg_errcodes{$sth->state};
+	return $PG_ERRCODES{$sth->state};
 }
 
 sub call_procedure_query {

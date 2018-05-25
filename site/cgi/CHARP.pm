@@ -23,7 +23,7 @@ require "CHARP-config.pm";
 require "CHARP-strings-$CHARP::CHARP_LANG.pm";
 require "CHARP-$CHARP::DB_DRIVER.pm";
 
-%CHARP::ERROR_LEVELS = (
+our %ERROR_LEVELS = (
 	'DATA' => 1,
 	'SQL'  => 2,
 	'DBI'  => 3,
@@ -31,53 +31,53 @@ require "CHARP-$CHARP::DB_DRIVER.pm";
 	'HTTP' => 5
 );
 
-$CHARP::ERROR_SEV_INTERNAL	= 1;
-$CHARP::ERROR_SEV_PERM		= 2;
-$CHARP::ERROR_SEV_RETRY		= 3;
-$CHARP::ERROR_SEV_USER		= 4;
-$CHARP::ERROR_SEV_EXIT		= 5;
+our $ERROR_SEV_INTERNAL	= 1;
+our $ERROR_SEV_PERM		= 2;
+our $ERROR_SEV_RETRY		= 3;
+our $ERROR_SEV_USER		= 4;
+our $ERROR_SEV_EXIT		= 5;
 
 # Last error code is 25.
-%CHARP::ERRORS = (
-	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $CHARP::ERROR_SEV_RETRY	   },
-	'DBI:PREPARE'		=> { 'code' =>  2, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'DBI:EXECUTE'		=> { 'code' =>  3, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:REQPARM'		=> { 'code' =>  4, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:NOTPOST'		=> { 'code' =>  7, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:PATHUNK'		=> { 'code' =>  8, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:BADPARAM'	    => { 'code' => 11, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:NUMPARAM'	    => { 'code' => 12, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:BINDPARAM'	    => { 'code' => 16, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:FILESEND'	    => { 'code' => 19, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:CMDUNK'		=> { 'code' => 22, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_USER	   },
-	'SQL:USERDIS'		=> { 'code' =>  5, 'sev' => $CHARP::ERROR_SEV_PERM	   },
-	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $CHARP::ERROR_SEV_USER	   },
-	'SQL:ASSERT'		=> { 'code' => 13, 'sev' => $CHARP::ERROR_SEV_INTERNAL },
-	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $CHARP::ERROR_SEV_PERM	   },
-	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $CHARP::ERROR_SEV_PERM	   },
-	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $CHARP::ERROR_SEV_USER	   },
-	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $CHARP::ERROR_SEV_USER	   },
-	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $CHARP::ERROR_SEV_USER	   },
-	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $CHARP::ERROR_SEV_EXIT	   },
-	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $CHARP::ERROR_SEV_EXIT	   }
+our %ERRORS = (
+	'DBI:CONNECT'		=> { 'code' =>  1, 'sev' => $ERROR_SEV_RETRY	   },
+	'DBI:PREPARE'		=> { 'code' =>  2, 'sev' => $ERROR_SEV_INTERNAL },
+	'DBI:EXECUTE'		=> { 'code' =>  3, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:REQPARM'		=> { 'code' =>  4, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:NOTPOST'		=> { 'code' =>  7, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:PATHUNK'		=> { 'code' =>  8, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:BADPARAM'	    => { 'code' => 11, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:NUMPARAM'	    => { 'code' => 12, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:BINDPARAM'	    => { 'code' => 16, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:FILESEND'	    => { 'code' => 19, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:CMDUNK'		=> { 'code' => 22, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:CMDNUMPARAM'	=> { 'code' => 23, 'sev' => $ERROR_SEV_INTERNAL },
+	'CGI:CMDERR'		=> { 'code' => 24, 'sev' => $ERROR_SEV_INTERNAL },
+	'SQL:USERUNK'		=> { 'code' =>  5, 'sev' => $ERROR_SEV_USER	   },
+	'SQL:USERDIS'		=> { 'code' =>  5, 'sev' => $ERROR_SEV_PERM	   },
+	'SQL:PROCUNK'		=> { 'code' =>  6, 'sev' => $ERROR_SEV_INTERNAL },
+	'SQL:REQUNK'		=> { 'code' =>  9, 'sev' => $ERROR_SEV_INTERNAL },
+	'SQL:REPFAIL'		=> { 'code' => 10, 'sev' => $ERROR_SEV_USER	   },
+	'SQL:ASSERT'		=> { 'code' => 13, 'sev' => $ERROR_SEV_INTERNAL },
+	'SQL:USERPARAMPERM' => { 'code' => 14, 'sev' => $ERROR_SEV_PERM	   },
+	'SQL:USERPERM'	    => { 'code' => 15, 'sev' => $ERROR_SEV_PERM	   },
+	'SQL:MAILFAIL'	    => { 'code' => 17, 'sev' => $ERROR_SEV_USER	   },
+	'SQL:DATADUP'		=> { 'code' => 20, 'sev' => $ERROR_SEV_USER	   },
+	'SQL:NOTFOUND'	    => { 'code' => 21, 'sev' => $ERROR_SEV_USER	   },
+	'SQL:EXIT'		    => { 'code' => 18, 'sev' => $ERROR_SEV_EXIT	   },
+	'SQL:SUCCESS'		=> { 'code' => 25, 'sev' => $ERROR_SEV_EXIT	   }
 );
 
-foreach my $key (keys %CHARP::ERRORS) {
+foreach my $key (keys %ERRORS) {
 	my $lvl = (split (':', $key))[0];
-	my $err = $CHARP::ERRORS{$key};
+	my $err = $ERRORS{$key};
 	$err->{'type'} = substr ($key, index ($key, ':') + 1);
 	$err->{'desc'} = $CHARP::ERROR_DESCS{$key};
-	$err->{'level'} = $CHARP::ERROR_LEVELS{$lvl};
+	$err->{'level'} = $ERROR_LEVELS{$lvl};
 	$err->{'key'} = $key;
 }
 
-%CHARP::STATESTR_TO_TYPE = (
-	'unique_violation' => $CHARP::ERRORS{'SQL:DATADUP'}
+our %STATESTR_TO_TYPE = (
+	'unique_violation' => $ERRORS{'SQL:DATADUP'}
 	);
 
 sub init {
@@ -140,7 +140,7 @@ sub init {
 }
 
 # For testing, add ->pretty.
-$CHARP::JSON = JSON::XS->new;
+our $JSON = JSON::XS->new;
 
 sub json_print_headers {
 	my $fcgi = shift;
@@ -152,11 +152,11 @@ sub json_print_headers {
 }
 
 sub json_encode {
-	return encode ('UTF-8', $CHARP::JSON->encode (shift));
+	return encode ('UTF-8', $JSON->encode (shift));
 }
 
 sub json_decode {
-	return $CHARP::JSON->decode (shift);
+	return $JSON->decode (shift);
 }
 
 sub json_send {
@@ -180,7 +180,7 @@ sub error_send {
 
 	$parms = undef if defined $parms && scalar (@$parms) < 0;
 
-	my %err = %{$CHARP::ERRORS{$err_key}};
+	my %err = %{$ERRORS{$err_key}};
 	if (defined $parms) {
 		$err{'parms'} = $parms;
 		$err{'desc'} = sprintf ($err{'desc'}, @$parms);
@@ -239,7 +239,7 @@ sub raise_parse {
 		$err->{'parms'} = [];
 	} else {
 		$err->{'parms_str'} = $parms_str;
-		$err->{'parms'} = $CHARP::JSON->decode ($parms_str);
+		$err->{'parms'} = $JSON->decode ($parms_str);
 	}
 
 	$err->{'key'} = 'SQL:' . $err->{'type'};
@@ -267,8 +267,8 @@ sub error_get {
 	my %err_hash;
 
 	my $statestr = db_state_str ($sth, $dbh);
-	if (exists $CHARP::STATESTR_TO_TYPE{$statestr}) {
-		%err_hash = %{$CHARP::STATESTR_TO_TYPE{$statestr}};
+	if (exists $STATESTR_TO_TYPE{$statestr}) {
+		%err_hash = %{$STATESTR_TO_TYPE{$statestr}};
 	} else {
 		%err_hash = (
 			'type' => 'EXECUTE',

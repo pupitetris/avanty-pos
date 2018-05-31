@@ -594,7 +594,10 @@ define simple_calc
                 lbrace
                     " label " key " Límite " str comma
                     " type " key " text " str comma
-                    " attributes " key lbrace " maxlength " key " 4 " value rbrace comma
+                    " attributes " key lbrace
+                        " maxlength " key " 4 " value comma
+                        " class " key " rate-edit-sc-limit " value
+                    rbrace comma
                     " rules " key lbrace " required " key " true " value comma " amount " key " true " value rbrace comma
                     " value " key .
                 rbrace

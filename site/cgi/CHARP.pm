@@ -156,7 +156,7 @@ sub json_encode {
 }
 
 sub json_decode {
-	return $JSON->decode (shift);
+	return $JSON->decode (decode ('UTF-8', shift));
 }
 
 sub json_send {
@@ -239,7 +239,7 @@ sub raise_parse {
 		$err->{'parms'} = [];
 	} else {
 		$err->{'parms_str'} = $parms_str;
-		$err->{'parms'} = $JSON->decode ($parms_str);
+		$err->{'parms'} = json_decode ($parms_str);
 	}
 
 	$err->{'key'} = 'SQL:' . $err->{'type'};
